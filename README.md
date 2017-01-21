@@ -24,7 +24,6 @@ There are not any automatic functions to submit updated sitemap to google or bin
 That is because I discovered search engines prefer submission by their webmaster tools.<br>
 In fact, submitting sitemap by their own link, they never update the last submission time inside webmaster tools.<br>
 There is not any maximum limit of URLs number to scan and to add to sitemap.<br><br>
-Be sure that using this script you will disover lots of bugs into your website.<br>
 You will be able to fix them giving a better surfing experience to your clients.<br><br>
 Instructions<br>
 1 - all links of your website must be setted to absolute links ( including always http:// or https:// ).<br>
