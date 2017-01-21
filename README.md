@@ -10,10 +10,13 @@
 * **link**        https://www.redracingparts.com
 * **source**      https://github.com/johnbe4/getSeoSitemap
 
+The script requires PHP 5.4 and a SQL database.<br>
+
 This script creates a full sitemap.xml plus a full sitemap.xml.gz.<br>
 It includes change frequency, last modification date and priority all setted following your own rules.<br>
 Change frequency will be automatically selected between daily, weekly, monthly and yearly.<br>
 URLs with http response code different from 200 or with size = 0 will not be included into sitemap.<br>
+It checks all internal and external links.<br>
 If failed (http response code different from 200 or with size = 0), external URLs from the domain will be included into failed URLs list.<br>
 Mailto URLs with will not be included into sitemap.<br>
 URLs inside pdf files will not be scanned and will not be included into sitemap.<br>
