@@ -2,7 +2,7 @@
 *Php library to scan a whole website creating the sitemap*
 
 [![donate via paypal](https://img.shields.io/badge/donate-paypal-87ceeb.svg)](https://www.paypal.me/johnbe4)
-*Please support this project by making a donation via [PayPal](https://www.paypal.me/johnbe4) or with bitcoin to the address 1HRpDx1Tg24ThVT1axJESnoakiRMqq2ENz*<br><br>
+*Please support this project by making a donation via [PayPal](https://www.paypal.me/johnbe4) or with bitcoin to the address 1HRpDx1Tg24ThVT1axJESnoakiRMqq2ENz*<br>
 
 * **category**    Library
 * **author**      Giovanni Bertone <red@redracingparts.com>
