@@ -35,6 +35,11 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+###################################################################################################
+# Please support this project by making a donation via PayPal to https://www.paypal.me/johnbe4 or #
+# with bitcoin to the address 1HRpDx1Tg24ThVT1axJESnoakiRMqq2ENz                                  #
+###################################################################################################
+
 ##### start of user constants
 const DOMAINURL = "https://www.example.com"; // domain url (value must be absolute ex. : https://www.example.com ) - every URL must contain this value at the beginning
 const STARTURL = "https://www.example.com"; // starting url to scan (value must be absolute ex. : https://www.example.com )
