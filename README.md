@@ -34,7 +34,7 @@ Instructions<br>
 Notice<br>
 To execute getSeoSitemp faster, using a script like geoplugin.class you should exclude geoSeoSitemap user-agent from that.<br><br>
 Field url into dbase must setted varbinary type to set sensitive queries.<br>
-That is very important when it search for url uppercase and lowercase.<br><br>
+That is very important when it search for url uppercase and lowercase.<br><br><br>
 query 1<br><br>
 CREATE TABLE `getSeoSitemapExec` (<br>
  `id` int(1) NOT NULL AUTO_INCREMENT,<br>
