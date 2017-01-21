@@ -1,5 +1,10 @@
 getSeoSitemap v. 1.0 README
 
+###################################################################################################
+# Please support this project by making a donation via PayPal to https://www.paypal.me/johnbe4 or #
+# with bitcoin to the address 1HRpDx1Tg24ThVT1axJESnoakiRMqq2ENz                                  #
+###################################################################################################
+
 This script creates a full sitemap.xml plus a full sitemap.xml.gz.
 It includes change frequency, last modification date and priority all setted following your own rules.
 Change frequency will be automatically selected between daily, weekly, monthly and yearly.
