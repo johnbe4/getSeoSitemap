@@ -1,5 +1,7 @@
 getSeoSitemap v. 1.0 README
 
+Php library to scan a whole website creating the sitemap checking all internal and external links
+
 ###################################################################################################
 # Please support this project by making a donation via PayPal to https://www.paypal.me/johnbe4 or #
 # with bitcoin to the address 1HRpDx1Tg24ThVT1axJESnoakiRMqq2ENz                                  #
