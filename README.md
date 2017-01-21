@@ -5,7 +5,7 @@
 *Please support this project by making a donation via [PayPal](https://www.paypal.me/johnbe4)*
 
 
-[![donate bitcoin](https://img.shields.io/badge/donate-bitcoin-brightgreen.svg)](https://www.paypal.me/johnbe4)
+[![donate bitcoin](bitcoin:1HRpDx1Tg24ThVT1axJESnoakiRMqq2ENz)
 *Please support this project by making a bitcoin donation to the address [1HRpDx1Tg24ThVT1axJESnoakiRMqq2ENz](bitcoin:1HRpDx1Tg24ThVT1axJESnoakiRMqq2ENz)*
 
 
