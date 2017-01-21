@@ -1,11 +1,12 @@
 # getSeoSitemap
 *Php library to scan a whole website creating the sitemap*
 
-[![Donate via PayPal](https://img.shields.io/badge/donate-paypal-87ceeb.svg)](https://www.paypal.me/johnbe4)
-*Please consider supporting this project by making a donation via [PayPal](https://www.paypal.me/johnbe4)*
+[![donate via paypal](https://img.shields.io/badge/donate-paypal-87ceeb.svg)](https://www.paypal.me/johnbe4)
+*Please support this project by making a donation via [PayPal](https://www.paypal.me/johnbe4)*
 
 
-
+[![donate bitcoin](https://img.shields.io/badge/donate-bitcoin-brightgreen.svg)](https://www.paypal.me/johnbe4)
+*Please support this project by making a donation via [PayPal](https://www.paypal.me/johnbe4)*
 
 
 getSeoSitemap v. 1.0 README<br><br>
