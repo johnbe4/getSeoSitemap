@@ -30,3 +30,8 @@ LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
 ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+###################################################################################################
+# Please support this project by making a donation via PayPal to https://www.paypal.me/johnbe4 or #
+# with bitcoin to the address 1HRpDx1Tg24ThVT1axJESnoakiRMqq2ENz                                  #
+###################################################################################################
