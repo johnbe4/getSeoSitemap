@@ -7,10 +7,13 @@ Php library to scan a whole website creating the sitemap checking all internal a
 # with bitcoin to the address 1HRpDx1Tg24ThVT1axJESnoakiRMqq2ENz                                  #
 ###################################################################################################
 
+The script requires PHP 5.4 and a SQL database.
+
 This script creates a full sitemap.xml plus a full sitemap.xml.gz.
 It includes change frequency, last modification date and priority all setted following your own rules.
 Change frequency will be automatically selected between daily, weekly, monthly and yearly.
 URLs with http response code different from 200 or with size = 0 will not be included into sitemap.
+It checks all internal and external links.
 If failed (http response code different from 200 or with size = 0), external URLs from the domain will be included into failed URLs list.
 Mailto URLs with will not be included into sitemap.
 URLs inside pdf files will not be scanned and will not be included into sitemap.
