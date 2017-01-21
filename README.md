@@ -1,3 +1,13 @@
+# getSeoSitemap
+*Php library to scan a whole website creating the sitemap*
+
+[![Donate via PayPal](https://img.shields.io/badge/donate-paypal-87ceeb.svg)](https://www.paypal.me/johnbe4)
+*Please consider supporting this project by making a donation via [PayPal](https://www.paypal.me/johnbe4)*
+
+
+
+
+
 getSeoSitemap v. 1.0 README<br><br>
 This script creates a full sitemap.xml plus a full sitemap.xml.gz.<br>
 It includes change frequency, last modification date and priority all setted following your own rules.<br>
