@@ -8,6 +8,7 @@
 *Please support this project by making a bitcoin donation to the address 1HRpDx1Tg24ThVT1axJESnoakiRMqq2ENz*
 
 
+
 This script creates a full sitemap.xml plus a full sitemap.xml.gz.<br>
 It includes change frequency, last modification date and priority all setted following your own rules.<br>
 Change frequency will be automatically selected between daily, weekly, monthly and yearly.<br>
@@ -52,7 +53,7 @@ CREATE TABLE `getSeoSitemapExec` (<br>
 ) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT='execution of getSeoSitemap functions'<br>
 <br><br>
 query 2<br><br>
-INSERT INTO getSeoSitemapExec (func, mDate, exec, newData) VALUES ('getSeoSitemap', 0, 'n', 'n')<br><br>
+INSERT INTO getSeoSitemapExec (func, mDate, exec, newData) VALUES ('getSeoSitemap', 0, 'n', 'n')<br><br><br>
 query 3<br><br>
 CREATE TABLE `getSeoSitemap` (<br>
  `id` smallint(6) NOT NULL AUTO_INCREMENT,<br>
