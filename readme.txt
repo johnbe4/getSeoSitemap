@@ -20,7 +20,6 @@ That is because I discovered search engines prefer submission by their webmaster
 In fact, submitting sitemap by their own link, they never update the last submission time inside webmaster tools.
 There is not any maximum limit of URLs number to scan and to add to sitemap.
 
-Be sure that using this script you will disover lots of bugs into your website.
 You will be able to fix them giving a better surfing experience to your clients.
 
 Instructions
