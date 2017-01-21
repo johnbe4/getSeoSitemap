@@ -1,16 +1,14 @@
 # getSeoSitemap
 *Php library to scan a whole website creating the sitemap*
 
-
 [![donate via paypal](https://img.shields.io/badge/donate-paypal-87ceeb.svg)](https://www.paypal.me/johnbe4)
 *Please support this project by making a donation via [PayPal](https://www.paypal.me/johnbe4) or with bitcoin to the address 1HRpDx1Tg24ThVT1axJESnoakiRMqq2ENz*<br><br>
-
 
 * **category**    Library
 * **author**      Giovanni Bertone <red@redracingparts.com>
 * **copyright**   2016-2017 Giovanni Bertone - RED Racing Parts
 * **link**        https://www.redracingparts.com
-* **source**      https://github.com
+* **source**      https://github.com/johnbe4/getSeoSitemap
 
 This script creates a full sitemap.xml plus a full sitemap.xml.gz.<br>
 It includes change frequency, last modification date and priority all setted following your own rules.<br>
