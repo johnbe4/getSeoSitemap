@@ -6,8 +6,7 @@
 
 
 [![donate bitcoin](bitcoin:1HRpDx1Tg24ThVT1axJESnoakiRMqq2ENz)
-*Please support this project by making a bitcoin donation to the address [1HRpDx1Tg24ThVT1axJESnoakiRMqq2ENz](bitcoin:1HRpDx1Tg24ThVT1axJESnoakiRMqq2ENz)*
-
+*Please support this project by making a bitcoin donation to the address <a href="bitcoin:1HRpDx1Tg24ThVT1axJESnoakiRMqq2ENz">1HRpDx1Tg24ThVT1axJESnoakiRMqq2ENz</a>*
 
 getSeoSitemap v. 1.0 README<br><br>
 This script creates a full sitemap.xml plus a full sitemap.xml.gz.<br>
