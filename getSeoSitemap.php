@@ -41,30 +41,31 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ###################################################################################################
 
 ##### start of user constants
-const DOMAINURL = "https://www.example.com"; // domain url (value must be absolute ex. : https://www.example.com ) - every URL must contain this value at the beginning
-const STARTURL = "https://www.example.com"; // starting url to scan (value must be absolute ex. : https://www.example.com )
+const DOMAINURL = "https://www.example.com"; // domain url (value must be absolute) - every URL must contain this value at the beginning
+const STARTURL = "https://www.example.com"; // starting url to crawl (value must be absolute)
 const DEFAULTPRIORITY = "0.5"; // default priority for URLs not included in $fullUrlPriority and $partialUrlPriority
-const DBHOST = "hostexample"; // database host
-const DBUSER = "userexample"; // database user
-const DBPASS = "passexample"; // database pass
-const DBNAME = "nameexample"; // database name
-const GETSITEMAPPATH = "/path/sites/host/var/web/secure/getSeoSitemap/"; // getSeoSitemap path inside server (ex. /path/sites/host/var/web/secure/getSeoSitemap/getSeoSitemap.php )
-const SITEMAPPATH = "/path/sites/host/var/web/secure/web/"; // sitemap.xml plus sitemap.xml.gz path inside server (ex. /path/sites/host/var/web/ )
-const SITEMAPURL = "https://www.example.com/sitemap.xml.gz"; // sitemap url (value must be absolute ex. : https://www.example.com.sitemap.xml.gz )
+const DBHOST = "exampleHost"; // database host
+const DBUSER = "exampleUser"; // database user
+const DBPASS = "examplePass"; // database pass
+const DBNAME = "exampleName"; // database name
+const GETSITEMAPPATH = "/home/websites/clients/client1/web5/example/example/getSeoSitemap/"; // getSeoSitemap path inside server
+const SITEMAPPATH = "/home/websites/clients/client1/example/example/"; // sitemap.xml plus sitemap.xml.gz path inside server
+const SITEMAPURL = "https://www.example.com/sitemap.xml.gz"; // sitemap url (value must be absolute) 
 const PRINTINTSKIPURLS = false; // set to false if you do not want the list of internal skipped URLs in your log file
-const PRINTCONTAINEROFSKIPPED = false; // set to true to get a list of container URLs of skipped URLs. This param is very useful when you need to fix wrong URLs.
-const PRINTCONTAINEROFFAILED = false; // set to true to get a list of container URLs of failed URLs. This param is very useful when you need to fix wrong URLs.
-const LASTMODCHANGE = "size"; // set to size or md5. set to size to change lastmod when file size changes following percentage of SIZEDIFF; set to md5 to change lastmod when md5 of file changes.
+const PRINTCONTAINEROFSKIPPED = false; // set to true to get a list of container URLs of skipped URLs. It is useful to fix wrong URLs.
+const PRINTCONTAINEROFFAILED = false; // set to true to get a list of container URLs of failed URLs. It is very useful to fix wrong URLs.
+const LASTMODCHANGE = "size"; // set to size to change lastmod when file size changes following percentage of SIZEDIFF; 
+// set to md5 to change lastmod when md5 of file changes.
 const SIZEDIFF = 0.02; // % of size difference to update lastmod when LASTMODCHANGE is size
 ##### end of user constants
 
 class getSeoSitemap {
 
-##### start of user parameters: change them as you need
+##### start of user parameters
 private $skipUrl = [ // skip all urls that start or are equal with these values (values must be absolute)
 "https://www.example.com/shop/",
-"https://www.example.com/en/moto/products/intro/google_site_search.php",
-"https://www.example.com/it/moto/prodotti/intro/google_site_search.php",
+"https://www.example.com/english/motorbikesmotorcycles/productsandcomponents/general/intro/google_site_search.php",
+"https://www.example.com/italiano/motocicli/prodottiecomponenti/generale/intro/google_site_search.php",
 "https://www.example.com/php_library/currency.php",
 ];
 private $fileToAdd = [ // follow and add only these file types
@@ -77,18 +78,18 @@ private $fullUrlPriority = [ // set priority for specific urls that are equal of
 "https://www.example.com"
 ],
 "0.9" => [
-"https://www.example.com/en/moto/products/intro/hotproducts.php",
-"https://www.example.com/it/moto/prodotti/intro/hotproducts.php"
+"https://www.example.com/english/motorbikesmotorcycles/introducingpages/11/22/hotproducts.php",
+"https://www.example.com/italiano/motocicli/pagineintroduttive/11/22/hotproducts.php"
 ],
 ];
 private $partialUrlPriority = [ // set priority for specific urls that start with these values (values must be absolute)
 "0.8" => [
-"https://www.example.com/en/moto/products/intro/",
-"https://www.example.com/it/moto/prodotti/intro/",
+"https://www.example.com/english/motorbikesmotorcycles/introducingpages/11/22/",
+"https://www.example.com/italiano/motocicli/pagineintroduttive/11/22/",
 ],
 "0.7" => [
-"https://www.example.com/it/moto/prodotti/intro/prodotti/",
-"https://www.example.com/en/moto/products/intro/products/",
+"https://www.example.com/italiano/motocicli/prodottiecomponenti/generale/intro/",
+"https://www.example.com/english/motorbikesmotorcycles/productsandcomponents/general/intro/",
 ],
 ];
 private $printChangefreqList = false; // set to true to print URLs list following changefreq
