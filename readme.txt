@@ -28,13 +28,14 @@ There is not any maximum limit of URLs number to scan and to add to sitemap.
 You will be able to fix all internal an external wrong links giving a better surfing experience to your clients.
 
 Instructions
-1 - all links of your website must be setted to absolute links ( including always http:// or https:// ).
+1 - copy the getSeoSitemap folder ina protected zone of your server.
+2 - all links of your website must be setted to absolute links ( including always http:// or https:// ).
     That is very important because search engines do not like relative links and that prevent negative issues.
     Only using absolute link you are 100% sure how the link will be treat by search engines, browsers etc.
-2 - create tables getSeoSitemapExec and getSeoSitemap running in order query 1, query 2 and query 3 in your phpMyAdmin.
+3 - create tables getSeoSitemapExec and getSeoSitemap running in order query 1, query 2 and query 3 in your phpMyAdmin.
     Do that only the first time and only once.
-3 - set all user constants and parameters.
-3 - on your server cronotab schedule the script once each day prefereble when your server is not too much busy.
+4 - set all user constants and parameters.
+5 - on your server cronotab schedule the script once each day prefereble when your server is not too much busy.
     A command line example to schedule the script every day at 7:45:00 AM is:
     45 7  *    *    *    php /path/sites/host/var/web/secure/getSeoSitemap/getSeoSitemap.php
 
