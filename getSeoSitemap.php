@@ -105,7 +105,8 @@ private $size = null; // size of file in bytes
 private $md5 = null; // md5 of string (hexadecimal)
 private $changefreq = null; // change frequency of file (values: always, hourly, daily, weekly, monthly, yearly, never)
 private $lastmod = null; // timestamp of last modified date of URL
-private $state = null; // state of URL (values: old = URL of previous scan, new = new URL to scan, scan = new URL already scanned, skip = new skipped URL)
+private $state = null; // state of URL (values: old = URL of previous scan, new = new URL to scan, 
+// scan = new URL already scanned, skip = new skipped URL)
 private $insUrl = null;
 private $mysqli = null; // mysqli connection
 private $ch = null; // curl connection
@@ -192,9 +193,7 @@ $this->execQuery();
 while ($rowNum === 1);
 
 $this->closeCurlConn();
-
 $this->writeLog("## Scan end");
-
 $this->end();
 
 }
@@ -489,8 +488,7 @@ $this->writeLog("Total execution time ".$execTime);
 $this->writeLog("##### Execution end");
 
 // update last execution time and set exec to n (that means a full scan has been successfully done)
-$this->query = "UPDATE getSeoSitemapExec "
-. "SET mDate = '".$endTime."', exec = 'n' WHERE func = 'getSeoSitemap' LIMIT 1";
+$this->query = "UPDATE getSeoSitemapExec SET mDate = '".$endTime."', exec = 'n' WHERE func = 'getSeoSitemap' LIMIT 1";
 $this->execQuery();
 
 $this->closeMysqliConn();
@@ -537,11 +535,8 @@ exit();
 
 $txt = <<<EOD
 <?xml version='1.0' encoding='UTF-8'?>
-<!-- Created with getSeoSitemap v. 1.0 by John -->
-<urlset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 
-http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd" 
-xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<!-- Created with $this->userAgent -->
+<urlset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd" xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
 EOD;
 
@@ -668,7 +663,8 @@ $this->execQuery();
 $this->writeLog("Included ".$this->count." ".$value." URLs into sitemap");
 }
 
-$this->query = "SELECT COUNT(*) AS count FROM getSeoSitemap WHERE httpCode = '200' AND size != 0 AND state = 'scan'";
+$this->query = "SELECT COUNT(*) AS count FROM getSeoSitemap "
+. "WHERE httpCode = '200' AND size != 0 AND state = 'scan'";
 $this->execQuery();
 $this->writeLog("Included ".$this->count." URLs into sitemap\r\n");
 
@@ -706,8 +702,7 @@ $this->execQuery();
 ################################################################################
 private function getIntUrls() {
 
-$this->query = "SELECT url FROM getSeoSitemap "
-. "WHERE state = 'skip' AND url LIKE '".DOMAINURL."%'";
+$this->query = "SELECT url FROM getSeoSitemap WHERE state = 'skip' AND url LIKE '".DOMAINURL."%'";
 $this->execQuery();
 
 // print list of internal skipped URLs if PRINTINTSKIPURLS === true
@@ -715,7 +710,6 @@ if (PRINTINTSKIPURLS === true){
 $this->writeLog("##### Internal skipped URLs");
 
 if ($this->rowNum > 0){
-// sort ascending
 asort($this->row);
 
 foreach ($this->row as $value) {$this->writeLog($value["url"]);}
@@ -731,8 +725,7 @@ $this->writeLog($this->rowNum." internal skipped URLs");
 ################################################################################
 private function getExtUrls() {
 
-$this->query = "SELECT url FROM getSeoSitemap "
-. "WHERE state = 'skip' AND url NOT LIKE '".DOMAINURL."%'";
+$this->query = "SELECT url FROM getSeoSitemap WHERE state = 'skip' AND url NOT LIKE '".DOMAINURL."%'";
 $this->execQuery();
 
 // print list of external skipped URLs
@@ -753,8 +746,7 @@ $this->writeLog($this->rowNum." external skipped URLs");
 ################################################################################
 private function testExtUrls() {
 
-$this->query = "SELECT url FROM getSeoSitemap "
-. "WHERE state = 'skip' AND url NOT LIKE '".DOMAINURL."%' AND url NOT LIKE 'mailto:%'";
+$this->query = "SELECT url FROM getSeoSitemap WHERE state = 'skip' AND url NOT LIKE '".DOMAINURL."%' AND url NOT LIKE 'mailto:%'";
 $this->execQuery();
 
 if ($this->rowNum > 0){
@@ -802,13 +794,10 @@ foreach ($this->pageLinks as $url){$this->insNewUrl($url);}
 private function scan($url){
 
 $this->resetVars2();
-
 $this->getPage($url);
 
 // into log, print URL of the page that includes failed URL
-if (PRINTCONTAINEROFFAILED === true && $this->httpCode !== 200){
-$this->writeLog("Into ".$this->url." failed ".$url);
-}
+if (PRINTCONTAINEROFFAILED === true && $this->httpCode !== 200){$this->writeLog("Into ".$this->url." failed ".$url);}
 
 $this->pageTest($url);
 
@@ -867,13 +856,11 @@ $this->execQuery();
 private function getChangefreqList(){
 
 foreach ($this->changefreqArr as $value) {
-$this->query = "SELECT url FROM getSeoSitemap "
-. "WHERE changefreq = '$value' AND state != 'skip' AND httpCode = '200' AND size != 0";
+$this->query = "SELECT url FROM getSeoSitemap WHERE changefreq = '$value' AND state != 'skip' AND httpCode = '200' AND size != 0";
 $this->execQuery();
 $this->writeLog("##### URLs with $value change frequency into sitemap");
 
 if ($this->rowNum > 0){
-// sort ascending
 asort($this->row);
 foreach ($this->row as $v) {$this->writeLog($v["url"]);}
 }
@@ -887,13 +874,11 @@ $this->writeLog("##########\r\n");
 private function getPriorityList(){
 
 foreach ($this->priorityArr as $value) {
-$this->query = "SELECT url FROM getSeoSitemap "
-. "WHERE priority = '".$value."' AND state != 'skip' AND httpCode = '200' AND size != 0";
+$this->query = "SELECT url FROM getSeoSitemap WHERE priority = '".$value."' AND state != 'skip' AND httpCode = '200' AND size != 0";
 $this->execQuery();
 $this->writeLog("##### URLs with $value priority into sitemap");
 
 if ($this->rowNum > 0){
-// sort ascending
 asort($this->row);
 foreach ($this->row as $v) {$this->writeLog($v["url"]);}
 }
@@ -918,14 +903,12 @@ $this->writeLog("##########\r\n");
 }
 
 foreach ($this->fileToAdd as $value){
-$this->query = "SELECT url FROM getSeoSitemap "
-. "WHERE httpCode = '200' AND size != 0 AND url LIKE '%".$value."' AND state = 'scan'";
+$this->query = "SELECT url FROM getSeoSitemap WHERE httpCode = '200' AND size != 0 AND url LIKE '%".$value."' AND state = 'scan'";
 $this->execQuery();
 
 $this->writeLog("##### $value URLs into sitemap");
 
 if ($this->rowNum > 0){
-// sort ascending
 asort($this->row);
 foreach ($this->row as $v) {$this->writeLog($v["url"]);}
 }
