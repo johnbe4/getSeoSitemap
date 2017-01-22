@@ -28,7 +28,7 @@ There is not any maximum limit of URLs number to scan and to add to sitemap.
 You will be able to fix all internal an external wrong links giving a better surfing experience to your clients.
 
 Instructions
-1 - copy the getSeoSitemap folder ina protected zone of your server.
+1 - copy getSeoSitemap folder in a protected zone of your server.
 2 - all links of your website must be setted to absolute links ( including always http:// or https:// ).
     That is very important because search engines do not like relative links and that prevent negative issues.
     Only using absolute link you are 100% sure how the link will be treat by search engines, browsers etc.
