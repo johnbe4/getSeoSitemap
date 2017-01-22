@@ -44,10 +44,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 const DOMAINURL = "https://www.example.com"; // domain url (value must be absolute ex. : https://www.example.com ) - every URL must contain this value at the beginning
 const STARTURL = "https://www.example.com"; // starting url to scan (value must be absolute ex. : https://www.example.com )
 const DEFAULTPRIORITY = "0.5"; // default priority for URLs not included in $fullUrlPriority and $partialUrlPriority
-const DBHOST = DATABASE_HOST_I; // database host
-const DBUSER = DATABASE_USER_I; // database user
-const DBPASS = DATABASE_PASSWORD_I; // database pass
-const DBNAME = DATABASE_NAME_I; // database name
+const DBHOST = "hostexample"; // database host
+const DBUSER = "userexample"; // database user
+const DBPASS = "passexample"; // database pass
+const DBNAME = "nameexample"; // database name
 const GETSITEMAPPATH = "/path/sites/host/var/web/secure/getSeoSitemap/"; // getSeoSitemap path inside server (ex. /path/sites/host/var/web/secure/getSeoSitemap/getSeoSitemap.php )
 const SITEMAPPATH = "/path/sites/host/var/web/secure/web/"; // sitemap.xml plus sitemap.xml.gz path inside server (ex. /path/sites/host/var/web/ )
 const SITEMAPURL = "https://www.example.com/sitemap.xml.gz"; // sitemap url (value must be absolute ex. : https://www.example.com.sitemap.xml.gz )
