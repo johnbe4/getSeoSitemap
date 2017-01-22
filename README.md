@@ -29,7 +29,7 @@ In fact, submitting sitemap by their own link, they never update the last submis
 There is not any maximum limit of URLs number to scan and to add to sitemap.<br><br>
 You will be able to fix all internal an external wrong links giving a better surfing experience to your clients.<br><br>
 Instructions<br>
-1 - after download the repository, remeber to rename the folder fron getSeoSitemap-master to getSeoSitemap.<br>
+1 - after downloaded the repository, rename the folder from getSeoSitemap-master to getSeoSitemap.<br>
 2 - copy the getSeoSitemap folder ina protected zone of your server.<br>
 3 - all links of your website must be setted to absolute links ( including always http:// or https:// ).<br>
     That is very important because search engines do not like relative links and that prevent negative issues.<br>
