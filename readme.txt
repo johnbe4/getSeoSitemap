@@ -1,6 +1,7 @@
-getSeoSitemap v. 1.0 README
+getSeoSitemap v1.0 README
 
-Php library to get the sitemap. It crawls a whole website checking all internal and external links.
+Php library to get the sitemap.
+It crawls a whole website checking all internal and external links.
 
 ###################################################################################################
 # Please support this project by making a donation via PayPal to https://www.paypal.me/johnbe4 or #
