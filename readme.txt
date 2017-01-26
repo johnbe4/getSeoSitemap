@@ -8,7 +8,7 @@ It crawls a whole website checking all internal and external links.
 # with bitcoin to the address 1HRpDx1Tg24ThVT1axJESnoakiRMqq2ENz                                  #
 ###################################################################################################
 
-The script requires PHP 5.4 and a SQL database.
+The script requires PHP 5.4 and MySQL 5.5.
 
 This script creates a full sitemap.xml plus a full sitemap.xml.gz.
 It includes change frequency, last modification date and priority all setted following your own rules.
