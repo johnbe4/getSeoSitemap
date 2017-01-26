@@ -11,7 +11,7 @@ It crawls a whole website checking all internal and external links.*
 * **link**        https://www.redracingparts.com
 * **source**      https://github.com/johnbe4/getSeoSitemap
 
-The script requires PHP 5.4 and a SQL database.<br>
+The script requires PHP 5.4 and MySQL 5.5.<br>
 
 This script creates a full sitemap.xml plus a full sitemap.xml.gz.<br>
 It includes change frequency, last modification date and priority all setted following your own rules.<br>
