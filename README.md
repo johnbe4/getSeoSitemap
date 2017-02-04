@@ -8,7 +8,7 @@ It crawls a whole website checking all internal and external links.*
 * **category**    Library
 * **author**      Giovanni Bertone <red@redracingparts.com>
 * **copyright**   2016-2017 Giovanni Bertone - RED Racing Parts
-* **link**        https://www.redracingparts.com
+* **link**        https://www.redracingparts.com/def.php
 * **source**      https://github.com/johnbe4/getSeoSitemap
 
 The script requires PHP 5.4 and MySQL 5.5.<br>
