@@ -1,4 +1,0 @@
-getSeoSitemap CHANGELOG
-
-1.0 (2017-01-22)
-- First stable release.
