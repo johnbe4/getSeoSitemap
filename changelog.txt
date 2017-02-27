@@ -8,7 +8,8 @@ getSeoSitemap CHANGELOG
 - Removed wrong section that printed caller URL of failed URLs.
 - Updated date format of log.
 - Updated userAgent.
-- Updated error messages.
+- Updated error messages
+- Fixed errors in printing lists.
 
 1.0 (2017-01-22)
 - First stable release.
