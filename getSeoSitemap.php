@@ -949,7 +949,7 @@ private function getChangefreqList(){
 foreach ($this->changefreqArr as $value) {
 $this->query = "SELECT url FROM getSeoSitemap WHERE changefreq = '$value' AND state != 'skip' AND httpCode = '200' AND size != 0";
 $this->execQuery();
-$this->writeLog('##### URLs with $value change frequency into sitemap');
+$this->writeLog('##### URLs with '.$value.' chang frequency into sitemap');
 
 if ($this->rowNum > 0){
 asort($this->row);
@@ -967,7 +967,7 @@ private function getPriorityList(){
 foreach ($this->priorityArr as $value) {
 $this->query = "SELECT url FROM getSeoSitemap WHERE priority = '".$value."' AND state != 'skip' AND httpCode = '200' AND size != 0";
 $this->execQuery();
-$this->writeLog('##### URLs with $value priority into sitemap');
+$this->writeLog('##### URLs with '.$value.' priority into sitemap');
 
 if ($this->rowNum > 0){
 asort($this->row);
@@ -997,7 +997,7 @@ foreach ($this->fileToAdd as $value){
 $this->query = "SELECT url FROM getSeoSitemap WHERE httpCode = '200' AND size != 0 AND url LIKE '%".$value."' AND state = 'scan'";
 $this->execQuery();
 
-$this->writeLog('##### $value URLs into sitemap');
+$this->writeLog('##### '.$value.' URLs into sitemap');
 
 if ($this->rowNum > 0){
 asort($this->row);
