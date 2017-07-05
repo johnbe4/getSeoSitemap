@@ -3,7 +3,7 @@
 It crawls a whole website checking all internal and external links.*<br>
 
 [![donate via paypal](https://img.shields.io/badge/donate-paypal-87ceeb.svg)](https://www.paypal.me/johnbe4)<br>
-[![donate via bitcoing](https://img.shields.io/badge/donate-bitcoin-orange.svg)])<br>
+[![donate via bitcoin](https://img.shields.io/badge/donate-bitcoin-orange.svg)]<br>
 *Please support this project by making a donation via [PayPal](https://www.paypal.me/johnbe4) or with bitcoin to the address 1HRpDx1Tg24ThVT1axJESnoakiRMqq2ENz*<br>
 
 * **category**    Library
