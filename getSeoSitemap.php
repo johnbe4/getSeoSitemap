@@ -37,7 +37,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ###################################################################################################
 # Please support this project by making a donation via PayPal to https://www.paypal.me/johnbe4 or #
-# with bitcoin to the address 1HRpDx1Tg24ThVT1axJESnoakiRMqq2ENz                                  #
+# with bitcoin to the address 1K3RZfknbgwaJH8Ut4cfu9zBUzoxanrmhN                                  #
 ###################################################################################################
 
 ##### start of user constants
