@@ -5,7 +5,7 @@ It crawls a whole website checking all internal and external links.
 
 ###################################################################################################
 # Please support this project by making a donation via PayPal to https://www.paypal.me/johnbe4 or #
-# with bitcoin to the address 1K3RZfknbgwaJH8Ut4cfu9zBUzoxanrmhN                                  #
+# with bitcoin to the address 19928gKpqdyN6CHUh4Tae1GW9NAMT6SfQH                                  #
 ###################################################################################################
 
 The script requires PHP 5.4 and MySQL 5.5.
