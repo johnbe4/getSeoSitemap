@@ -1,5 +1,14 @@
 getSeoSitemap CHANGELOG
 
+2.0 (2018-01-09)
+- Added list of URLs with size > 125.00 Kb (bing SEO).
+- Added function to set execution equal n on error.
+- Added function to count errors preventing stop.
+- Added function to write cURL errors.
+- Added functions to check page title (bing SEO and google SEO).
+- Removed LASTMODCHANGE and SIZEDIFF constants.
+- Updated userAgent.
+
 1.1 (2017-02-25)
 - Added checkTables function to auto-create the tables into dBase (getSeoSitemap and getSeoSitemapExec).
 - Added prepared statements to increase security and speed.
