@@ -1,8 +1,8 @@
-getSeoSitemap v1.1 LICENSE
+getSeoSitemap v2.0 LICENSE
 
-getSeoSitemap v1.1 is distributed under the following BSD-style license: 
+getSeoSitemap v2.0 is distributed under the following BSD-style license: 
 
-Copyright (c) 2016-2017, 
+Copyright (c) 2016-2018, 
 Giovanni Bertone (RED Racing Parts) - https://www.redracingparts.com
 All rights reserved.
 
