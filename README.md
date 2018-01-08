@@ -8,7 +8,7 @@ It crawls a whole website checking all internal and external links.*<br>
 
 * **category**    Library
 * **author**      Giovanni Bertone <red@redracingparts.com>
-* **copyright**   2016-2017 Giovanni Bertone - RED Racing Parts
+* **copyright**   2016-2018 Giovanni Bertone - RED Racing Parts
 * **link**        https://www.redracingparts.com
 * **source**      https://github.com/johnbe4/getSeoSitemap
 
@@ -28,9 +28,10 @@ Those two copies will be named sitemap.back.xml and sitemap.back.xml.gz.<br>
 There are not any automatic functions to submit updated sitemap to google or bing.<br>
 That is because I discovered search engines prefer submission by their webmaster tools.<br>
 In fact, submitting sitemap by their own link, they never update the last submission time inside webmaster tools.<br>
+It checks page title amd page size to improve SEO.<br>
 There is not any maximum limit of URLs number to scan and to add to sitemap.<br>
 
-You will be able to fix all internal an external wrong links giving a better surfing experience to your clients.<br>
+Using getSeoSitemap, you will be able to give a better surfing experience to your clients.<br>
 
 Instructions<br>
 1 - copy getSeoSitemap folder in a protected zone of your server.<br>
@@ -41,6 +42,7 @@ Instructions<br>
 4 - on your server cronotab schedule the script once each day prefereble when your server is not too much busy.<br>
     A command line example to schedule the script every day at 7:45:00 AM is:<br>
     45 7  *    *    *    php /example/websites/clients/client1/web5/example/example/getSeoSitemap/getSeoSitemap.php<br>
+5 - before moving from releases 1.0 or 1.1 to 2.0, you must delete the getSeoSitemap table inside your dBase.<br>
 
 Notice<br>
-To execute getSeoSitemp faster, using a script like geoplugin.class you should exclude geoSeoSitemap user-agent from that.
+To run getSeoSitemp faster, using a script like geoplugin.class you should exclude geoSeoSitemap user-agent from that.
