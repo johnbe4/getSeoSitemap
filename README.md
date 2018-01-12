@@ -1,6 +1,7 @@
 # getSeoSitemap
 *Php library to get sitemap.<br>
-It crawls a whole website checking all internal and external links.*<br>
+It crawls a whole website checking all internal and external links.<br>
+It makes a Search Engine Optimization.*<br>
 
 [![donate via paypal](https://img.shields.io/badge/donate-paypal-87ceeb.svg)](https://www.paypal.me/johnbe4)<br>
 ![donate via bitcoin](https://img.shields.io/badge/donate-bitcoin-orange.svg)<br>
