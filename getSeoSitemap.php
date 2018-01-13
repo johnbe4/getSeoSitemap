@@ -59,7 +59,7 @@ const BINGMAXSIZE = '125.00'; // bing max file size in Kb. this param is only fo
 class getSeoSitemap {
 
 ##### start of user parameters
-private $skipUrl = [ // skip all urls that start or are equal with these values (values must be absolute)
+private $skipUrl = [ // skip all urls that start or are equal these values (values must be absolute)
 'https://www.example.com/shop/',
 'https://www.example.com/english/motorbikesmotorcycles/productsandcomponents/general/intro/google_site_search.php',
 'https://www.example.com/italiano/motocicli/prodottiecomponenti/generale/intro/google_site_search.php',
@@ -70,7 +70,7 @@ private $fileToAdd = [ // follow and add only these file types
 '.pdf',
 ];
 // priority values must be 1.0, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2 and 0.1. other values are not accepted.
-private $fullUrlPriority = [ // set priority for specific urls that are equal of these values (values must be absolute)
+private $fullUrlPriority = [ // set priority for specific urls that are equal these values (values must be absolute)
 '1.0' => [
 'https://www.example.com'
 ],
