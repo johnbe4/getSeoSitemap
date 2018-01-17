@@ -1,11 +1,12 @@
-getSeoSitemap v2.0 README
+getSeoSitemap v2.1 README (2018-01-18)
 
 Php library to get sitemap.
 It crawls a whole website checking all internal and external links.
+It makes a Search Engine Optimization.
 
 ###################################################################################################
 # Please support this project by making a donation via PayPal to https://www.paypal.me/johnbe4 or #
-# with bitcoin to the address 19928gKpqdyN6CHUh4Tae1GW9NAMT6SfQH                                  #
+# with BTC bitcoin to the address 19928gKpqdyN6CHUh4Tae1GW9NAMT6SfQH                              #
 ###################################################################################################
 
 The script requires PHP 5.4 and MySQL 5.5.
@@ -18,13 +19,13 @@ It checks all internal and external links.
 If failed (http response code different from 200 or with size = 0), external URLs from the domain will be included into failed URLs list.
 Mailto URLs with will not be included into sitemap.
 URLs inside pdf files will not be scanned and will not be included into sitemap.
-You have to use only absolute URLs inside the site.
+It checks page title and page size to improve SEO.
+You must use only absolute URLs inside the site.
 Before saving the new sitemap.xml and sitemap.xml.gz, this script creates two backup copies of the previous ones if they already exist.
 Those two copies will be named sitemap.back.xml and sitemap.back.xml.gz.
 There are not any automatic functions to submit updated sitemap to google or bing. 
 That is because I discovered search engines prefer submission by their webmaster tools.
 In fact, submitting sitemap by their own link, they never update the last submission time inside webmaster tools.
-It checks page title amd page size to improve SEO.
 There is not any maximum limit of URLs number to scan and to add to sitemap.
 
 Using getSeoSitemap, you will be able to give a better surfing experience to your clients.
@@ -38,7 +39,7 @@ Instructions
 4 - on your server cronotab schedule the script once each day prefereble when your server is not too much busy.
     A command line example to schedule the script every day at 7:45:00 AM is:
     45 7  *    *    *    php /example/websites/clients/client1/web5/example/example/getSeoSitemap/getSeoSitemap.php
-5 - before moving from releases 1.0 or 1.1 to 2.0, you must delete the getSeoSitemap table into your dBase.
+5 - before moving from releases 1.0 or 1.1 to 2.0 or higher, you must delete the getSeoSitemap table into your dBase.
 
 Notice
 To run getSeoSitemp faster, using a script like geoplugin.class you should exclude geoSeoSitemap user-agent from that.
