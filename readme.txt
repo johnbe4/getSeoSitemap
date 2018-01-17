@@ -33,7 +33,7 @@ Instructions
 1 - copy getSeoSitemap folder in a protected zone of your server.
 2 - all links of your website must be setted to absolute links ( including always http:// or https:// ).
     That is very important because search engines do not like relative links and that prevent negative issues.
-    Only using absolute link you are 100% sure how the link will be treat by search engines, browsers etc.
+    Only using absolute link you are 100% sure how the link will be treated by search engines, browsers etc.
 3 - set all user constants and parameters.
 4 - on your server cronotab schedule the script once each day prefereble when your server is not too much busy.
     A command line example to schedule the script every day at 7:45:00 AM is:
