@@ -1,5 +1,10 @@
 getSeoSitemap CHANGELOG
 
+2.1 (2018-01-18)
+- Modified $fileToAdd user constant to add and follow all kind of URLs.
+- Updated pageTest function to prevent skipping URLs with GET section if the file extension is a value of $fileToAdd.
+- Added $extUrls user parameter to skip external URLs test.
+
 2.0 (2018-01-09)
 - Added list of URLs with size > 125.00 Kb (bing SEO).
 - Added function to set execution equal n on error.
@@ -7,7 +12,6 @@ getSeoSitemap CHANGELOG
 - Added function to write cURL errors.
 - Added functions to check page title (bing SEO and google SEO).
 - Removed LASTMODCHANGE and SIZEDIFF constants.
-- Updated userAgent.
 
 1.1 (2017-02-25)
 - Added checkTables function to auto-create the tables into dBase (getSeoSitemap and getSeoSitemapExec).
@@ -16,8 +20,7 @@ getSeoSitemap CHANGELOG
 - Small changes to increase script speed.
 - Removed wrong section that printed caller URL of failed URLs.
 - Updated date format of log.
-- Updated userAgent.
-- Updated error messages
+- Updated error messages.
 - Fixed errors in printing lists.
 
 1.0 (2017-01-22)
