@@ -1,9 +1,9 @@
 <?php
 
 /*
-getSeoSitemap v2.0 LICENSE
+getSeoSitemap v2.1 LICENSE (2018-01-18)
 
-getSeoSitemap v2.0 is distributed under the following BSD-style license: 
+getSeoSitemap v2.1 is distributed under the following BSD-style license: 
 
 Copyright (c) 2016-2018, 
 Giovanni Bertone (RED Racing Parts) - https://www.redracingparts.com
@@ -37,7 +37,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ###################################################################################################
 # Please support this project by making a donation via PayPal to https://www.paypal.me/johnbe4 or #
-# with bitcoin to the address 19928gKpqdyN6CHUh4Tae1GW9NAMT6SfQH                                  #
+# with BTC bitcoin to the address 19928gKpqdyN6CHUh4Tae1GW9NAMT6SfQH                              #
 ###################################################################################################
 
 ##### start of user constants
@@ -49,7 +49,7 @@ const DBUSER = DATABASE_USER_I; // database user
 const DBPASS = DATABASE_PASSWORD_I; // database password
 const DBNAME = DATABASE_NAME_I; // database name
 const GETSITEMAPPATH = '/example/example/example/example/example/example/example/getSeoSitemap/'; // getSeoSitemap path inside server
-const SITEMAPPATH = 'example/example/example/example/example/example/'; // sitemap.xml plus sitemap.xml.gz path inside server
+const SITEMAPPATH = '/example/example/example/example/example/example/'; // sitemap.xml plus sitemap.xml.gz path inside server
 const SITEMAPURL = 'https://www.example.com/sitemap.xml.gz'; // sitemap url (value must be absolute) 
 const PRINTINTSKIPURLS = false; // set to false if you do not want the list of internal skipped URLs in your log file
 const PRINTCONTAINEROFSKIPPED = false; // set to true to get a list of container URLs of skipped URLs. It is useful to fix wrong URLs.
@@ -61,13 +61,15 @@ class getSeoSitemap {
 ##### start of user parameters
 private $skipUrl = [ // skip all urls that start or are equal these values (values must be absolute)
 'https://www.example.com/shop/',
-'https://www.example.com/english/motorbikesmotorcycles/productsandcomponents/general/intro/google_site_search.php',
-'https://www.example.com/italiano/motocicli/prodottiecomponenti/generale/intro/google_site_search.php',
+'https://www.example.com/example/motorbikesmotorcycles/productsandcomponents/general/intro/google_site_search.php',
+'https://www.example.com/example/motocicli/prodottiecomponenti/generale/intro/google_site_search.php',
 'https://www.example.com/php_library/currency.php',
 ];
-private $fileToAdd = [ // follow and add only these file types
-'.php',
-'.pdf',
+// set $fileToAdd to true to follow and add all kind of URL.
+// set $fileToAdd to an array to follow and add only some kind of URLs (example: $fileToAdd = ['php','pdf',];).
+private $fileToAdd = [
+'php',
+'pdf',
 ];
 // priority values must be 1.0, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2 and 0.1. other values are not accepted.
 private $fullUrlPriority = [ // set priority for specific urls that are equal these values (values must be absolute)
@@ -75,23 +77,24 @@ private $fullUrlPriority = [ // set priority for specific urls that are equal th
 'https://www.example.com'
 ],
 '0.9' => [
-'https://www.example.com/english/motorbikesmotorcycles/introducingpages/11/22/hotproducts.php',
-'https://www.example.com/italiano/motocicli/pagineintroduttive/11/22/hotproducts.php'
+'https://www.example.com/example/motorbikesmotorcycles/introducingpages/11/22/hotproducts.php',
+'https://www.example.com/example/motocicli/pagineintroduttive/11/22/hotproducts.php'
 ],
 ];
 private $partialUrlPriority = [ // set priority for specific urls that start with these values (values must be absolute)
 '0.8' => [
-'https://www.example.com/english/motorbikesmotorcycles/introducingpages/11/22/',
-'https://www.example.com/italiano/motocicli/pagineintroduttive/11/22/',
+'https://www.example.com/example/motorbikesmotorcycles/introducingpages/11/22/',
+'https://www.example.com/example/motocicli/pagineintroduttive/11/22/',
 ],
 '0.7' => [
-'https://www.example.com/italiano/motocicli/prodottiecomponenti/generale/intro/',
-'https://www.example.com/english/motorbikesmotorcycles/productsandcomponents/general/intro/',
+'https://www.example.com/example/motocicli/prodottiecomponenti/generale/intro/',
+'https://www.example.com/example/motorbikesmotorcycles/productsandcomponents/general/intro/',
 ],
 ];
 private $printChangefreqList = false; // set to true to print URLs list following changefreq
 private $printPriorityList = false; // set to true to print URLs list following priority
-private $printTypeList = false; // set to true to print URLs list following type
+private $printTypeList = false; // set to true to print URLs list following type                                                                                                             
+private $extUrlsTest = true; // set to false to skip external URLs test (default value is true).                   
 ##### end of user parameters
 
 #################################################
@@ -124,14 +127,14 @@ private $stmt5 = null; // statement 5 for prepared query
 private $startTime = null; // start timestamp
 private $succ = null; // success of a function (value can be true or false)
 private $doNotFollowLinksIn = [ // do not follow links inside these file types
-'.pdf',
+'pdf',
 ];
 private $seoExclusion = [ // file type to exclude from seo functions
-'.pdf',
+'pdf',
 ];
 private $changefreqArr = ['daily', 'weekly', 'monthly', 'yearly']; // changefreq accepted values
 private $priorityArr = ['1.0', '0.9', '0.8', '0.7', '0.6', '0.5', '0.4', '0.3', '0.2', '0.1']; // priority accepted values
-private $userAgent = 'getSeoSitemap v2.0 by John';
+private $userAgent = 'getSeoSitemap v2.1 by John';
 private $exec = 'n'; // execution value (could be y or n)
 private $errCounter = 0; // error counter
 private $maxErr = 20; // max number of errors to stop execution
@@ -157,13 +160,13 @@ $this->query = "SELECT exec FROM getSeoSitemapExec WHERE func = 'getSeoSitemap' 
 $this->execQuery();
 
 // check if getSeoSitemp is already running and stop it to prevent double execution
-if ($this->row[0]['exec'] === 'y'){
+if ($this->row[0]['exec'] === 'y') {
 $this->writeLog('An error has occoured: execution has been stopped; '
 . 'maybe the previous scan was not ended correctly. Double-check log to fix it.');
 exit();
 }
 // check if prevous full scan was ended to start a new full scan
-elseif ($this->row[0]['exec'] === 'n'){
+elseif ($this->row[0]['exec'] === 'n') {
 $this->writeLog('## Execution start');
 }
 else {
@@ -366,14 +369,14 @@ private function pageTest($url){
 $this->insUrl = true;
 
 // if url is not into domain
-if (strpos($url, DOMAINURL) !== 0){
+if (strpos($url, DOMAINURL) !== 0) {
 $this->insSkipUrl($url);
 $this->insUrl = false;
 return;
 }
 
 // if url is mailto
-if (strpos($url, 'mailto') === 0){
+if (strpos($url, 'mailto') === 0) {
 $this->insSkipUrl($url);
 $this->insUrl = false;
 return;
@@ -381,7 +384,7 @@ return;
 
 // if url is to skip
 foreach ($this->skipUrl as $value){
-if(strpos($url, $value) === 0){
+if (strpos($url, $value) === 0) {
 $this->insSkipUrl($url);
 $this->insUrl = false;
 return;
@@ -389,12 +392,24 @@ return;
 }
 
 // if file is not to add
-if ($url !== STARTURL){ // detect if url is the starting url to prevent false skip
+if ($url !== STARTURL) { // detect if URL is the starting URL to prevent false skip
 $this->insUrl = false;
-foreach ($this->fileToAdd as $value){
-if(strpos(strrev($url), strrev($value)) === 0){$this->insUrl = true;}
+
+// skip URL for type if $fileToAdd is an array correctly valueted
+if ($this->fileToAdd !== true) {
+foreach ($this->fileToAdd as $value) {
+
+$fileExt = pathinfo(parse_url($url)['path'], PATHINFO_EXTENSION);
+if ($value === $fileExt) {
+$this->insUrl = true;
 }
-if ($this->insUrl === false){
+}
+}
+else {
+$this->insUrl = true;
+}
+
+if ($this->insUrl === false) {
 $this->insSkipUrl($url);
 return;
 }
@@ -444,10 +459,10 @@ exit();
 }
 
 // if query is select....
-if (strpos($this->query, 'SELECT') === 0){
+if (strpos($this->query, 'SELECT') === 0) {
 
 // if query is select COUNT(*) AS count
-if (strpos($this->query, 'SELECT COUNT(*) AS count') === 0){
+if (strpos($this->query, 'SELECT COUNT(*) AS count') === 0) {
 $row = $result->fetch_assoc();
 $this->count = $row['count'];
 }
@@ -455,7 +470,7 @@ else {
 
 // i choose the while below cause it is just a little bit faster than the equivalent for
 $i = 0;
-while ($row = $result->fetch_assoc()){
+while ($row = $result->fetch_assoc()) {
 $this->row[$i] = $row;
 $i++;
 }
@@ -482,21 +497,29 @@ $this->mysqli->close();
 ################################################################################
 private function update(){
 
-if ($this->row[0]['size'] > 0){ // to prevent error on empty page
+if ($this->row[0]['size'] > 0) { // to prevent error on empty page
 $sizeDiff = abs($this->size - $this->row[0]['size']);
 
 $newLastmod = $this->row[0]['lastmod'];
 
-if ($this->row[0]['md5'] !== $this->md5){$newLastmod = $this->lastmod;}
+if ($this->row[0]['md5'] !== $this->md5) {
+$newLastmod = $this->lastmod;
+}
 
 $lastmodDiff = $this->lastmod - $this->row[0]['lastmod'];
 
 // set changefreq weekly if lastmod date difference is more than 1 week
-if ($lastmodDiff > 604799 && $lastmodDiff < 2678400){$this->changefreq = 'weekly';}
+if ($lastmodDiff > 604799 && $lastmodDiff < 2678400) {
+$this->changefreq = 'weekly';
+}
 // set changefreq monthly if lastmod date difference is more than 31 days
-elseif ($lastmodDiff > 2678399 && $lastmodDiff < 31536000){$this->changefreq = 'monthly';}
+elseif ($lastmodDiff > 2678399 && $lastmodDiff < 31536000) {
+$this->changefreq = 'monthly';
+}
 // set changefreq yearly if lastmod date difference is more than 365 days
-elseif ($lastmodDiff > 31535999){$this->changefreq = 'yearly';}
+elseif ($lastmodDiff > 31535999) {
+$this->changefreq = 'yearly';
+}
 
 $this->lastmod = $newLastmod;
 }
@@ -515,33 +538,38 @@ $this->pageLinks = [];
 if (empty($html) === true){return;}
 
 // do not search links inside $doNotFollowLinksIn
-foreach ($this->doNotFollowLinksIn as $value){
-if(strpos(strrev($url), strrev($value)) === 0){return;}
+foreach ($this->doNotFollowLinksIn as $value) {
+$fileExt = pathinfo(parse_url($url)['path'], PATHINFO_EXTENSION);
+if ($value === $fileExt) {
+return;
+}
 }
 
 $dom = new DOMDocument;
 
-if (@$dom->loadHTML($html) === false){$this->writeLog('DOMDocument parse error on URL '.$url);}
+if (@$dom->loadHTML($html) === false) {
+$this->writeLog('DOMDocument parse error on URL '.$url);
+}
 
 $links = $dom->getElementsByTagName('a'); // get all links
 
 $titleArr = $dom->getElementsByTagName('title');
 $titleCount = $titleArr->length;
 
-if ($titleCount === 1){
+if ($titleCount === 1) {
 $title = $titleArr->item(0)->textContent;
 $titleLength = strlen($title);
 
-if ($titleLength > 300){
+if ($titleLength > 300) {
 $this->writeLog('Title length: '.$titleLength.' characters (title has not been registered into dBase because its lenght is more than 300 characters) - URL '.$url);
 $title = null;
 }
 }
-elseif ($titleCount > 1){
+elseif ($titleCount > 1) {
 $this->writeLog('Title No.: '.$titleCount.' (title has not been registered into dBase because is not single) - URL '.$url);
 $title = null;
 }
-elseif ($titleCount === 0){
+elseif ($titleCount === 0) {
 $this->writeLog('Title does not exist - URL '.$url);
 $title = null;
 }
@@ -569,9 +597,13 @@ $href = $link->getAttribute('href');// extract href attribute
 
 // add only link to include
 $this->pageTest($href);
-if($this->insUrl === true) {$this->pageLinks[] = $href;}
+if ($this->insUrl === true) {
+$this->pageLinks[] = $href;
+}
 // print URL of the page that includes skipped URL into log
-elseif(PRINTCONTAINEROFSKIPPED === true){$this->writeLog('Into '.$url.' skipped '.$href);}
+elseif (PRINTCONTAINEROFSKIPPED === true) {
+$this->writeLog('Into '.$url.' skipped '.$href);
+}
 }
 
 $this->pageLinks = array_unique($this->pageLinks);
@@ -589,21 +621,22 @@ $this->query = "SELECT COUNT(*) AS count FROM getSeoSitemap WHERE state != 'skip
 $this->execQuery();
 $this->writeLog($this->count.' scanned URLs (skipped URLs are not included - failed URls are included)'.PHP_EOL);
 
-// check external URLs
+if ($this->extUrlsTest === true) {
 $this->openCurlConn();
 $this->testExtUrls();
 $this->closeCurlConn();
+}
 
 $this->query = "SELECT * FROM getSeoSitemap WHERE httpCode != '200' OR size = 0 ORDER BY url";
 $this->execQuery();
 
-if ($this->rowNum > 0){
+if ($this->rowNum > 0) {
 $this->writeLog('##### Failed URLs (external URLs are included)');
 
 foreach ($this->row as $value) {
-if ($value['httpCode'] !== '200'){
+if ($value['httpCode'] !== '200') {
 
-if (array_key_exists($value['httpCode'], $this->errMsg) === true){
+if (array_key_exists($value['httpCode'], $this->errMsg) === true) {
 $logMsg = $this->errMsg[$value['httpCode']].' '.$value['httpCode'].' - URL: '.$value['url'];
 }
 
@@ -612,7 +645,9 @@ $logMsg = 'Http code '.$value['httpCode'].' - URL: '.$value['url'];
 }
 
 }
-else {$logMsg = 'Empty file: '.$value['url'];}
+else {
+$logMsg = 'Empty file: '.$value['url'];
+}
 $this->writeLog($logMsg);
 }
 
@@ -649,9 +684,11 @@ $this->writeLog('Max last modified time is '.$maxLastmodDate);
 
 // save backup copy of sitemap.xml
 $this->succ = false;
-if (file_exists(SITEMAPPATH.'sitemap.xml') === true){
+if (file_exists(SITEMAPPATH.'sitemap.xml') === true) {
 $this->copy(SITEMAPPATH.'sitemap.xml', SITEMAPPATH.'sitemap.back.xml');
-if ($this->succ === true){$this->writeLog('## Saved sitemap.back.xml');}
+if ($this->succ === true) {
+$this->writeLog('## Saved sitemap.back.xml');
+}
 }
 else {
 $this->writeLog('## Previous sitemap.xml does not exist and sitemap.back.xml has not been saved. '
@@ -661,13 +698,17 @@ $this->writeLog('## Previous sitemap.xml does not exist and sitemap.back.xml has
 // save sitemap.xml
 $this->succ = false;
 $this->save();
-if ($this->succ === true){$this->writeLog('## Saved sitemap.xml');}
+if ($this->succ === true) {
+$this->writeLog('## Saved sitemap.xml');
+}
 
 // save back copy of sitemap.xml.gz
 $this->succ = false;
-if (file_exists(SITEMAPPATH.'sitemap.xml.gz') === true){
+if (file_exists(SITEMAPPATH.'sitemap.xml.gz') === true) {
 $this->copy(SITEMAPPATH.'sitemap.xml.gz', SITEMAPPATH.'sitemap.back.xml.gz');
-if ($this->succ === true){$this->writeLog('## Saved sitemap.back.xml.gz');}
+if ($this->succ === true) {
+$this->writeLog('## Saved sitemap.back.xml.gz');
+}
 }
 else {
 $this->writeLog('## Previous sitemap.xml.gz does not exist and sitemap.back.xml.gz has not been saved. '
@@ -677,7 +718,9 @@ $this->writeLog('## Previous sitemap.xml.gz does not exist and sitemap.back.xml.
 // save sitemap.xml.gz
 $this->succ = false;
 $this->gzip();
-if ($this->succ === true){$this->writeLog('## Saved sitemap.xml.gz');}
+if ($this->succ === true) {
+$this->writeLog('## Saved sitemap.xml.gz');
+}
 
 // set new sitemap is available
 $this->newSitemapAvailable();
@@ -686,13 +729,19 @@ $this->getTotalUrls();
 $this->getExtUrls();
 
 // print type list if setted to true
-if ($this->printTypeList === true){$this->getTypeList();}
+if ($this->printTypeList === true) {
+$this->getTypeList();
+}
 
 // print changefreq list if setted to true
-if ($this->printChangefreqList === true){$this->getChangefreqList();}
+if ($this->printChangefreqList === true) {
+$this->getChangefreqList();
+}
 
 // print priority list if setted to true
-if ($this->printPriorityList === true){$this->getPriorityList();}
+if ($this->printPriorityList === true) {
+$this->getPriorityList();
+}
 
 $endTime = time();
 $execTime = gmdate('H:i:s', $endTime - $this->startTime);
@@ -820,7 +869,7 @@ exit();
 
 gzwrite($fp, $fileCont);
 
-if (gzclose($fp) !== true){
+if (gzclose($fp) !== true) {
 $this->writeLog('Execution has been stopped because gzclose cannot close sitemap.xml.gz');   
 
 $this->exec = 'n';
@@ -828,7 +877,9 @@ $this->updateExec();
 
 exit();
 }  
-else {$this->succ = true;}
+else {
+$this->succ = true;
+}
 
 }
 ################################################################################
@@ -884,19 +935,27 @@ $this->writeLog("Setted priority ".$value." to ".$this->count." URLs into sitema
 ################################################################################
 private function getTotalUrls() {
 
+// count all kind of different URLs if $fileToAdd is an array
+if ($this->fileToAdd !== true){
 // if start url has not the extension file included into $fileToAdd wrote that separately...
 $n = true;
-foreach ($this->fileToAdd as $value){
-if(strpos(strrev(STARTURL), strrev($value)) === 0){$n = false;}
+foreach ($this->fileToAdd as $value) {
+if (strpos(strrev(STARTURL), strrev($value)) === 0) {
+$n = false;
+}
 }
 
-if ($n === true){$this->writeLog('Included 1 start URL into sitemap');}
+if ($n === true) {
+$this->writeLog('Included 1 start URL into sitemap');
+}
 
-foreach ($this->fileToAdd as $value){
+foreach ($this->fileToAdd as $value) {
 $this->query = "SELECT COUNT(*) AS count FROM getSeoSitemap "
 . "WHERE httpCode = '200' AND size != 0 AND url LIKE '%".$value."' AND state = 'scan'";
 $this->execQuery();
+
 $this->writeLog('Included '.$this->count.' '.$value.' URLs into sitemap');
+}
 }
 
 $this->query = "SELECT COUNT(*) AS count FROM getSeoSitemap "
@@ -911,13 +970,15 @@ private function copy($file, $newFile){
 
 $fileName = basename($file);  
 
-if (file_exists($file) === true){
+if (file_exists($file) === true) {
 
 if (copy($file, $newFile) !== true) {
 $this->writeLog('Back copy of the previous '.$fileName.' has not been saved and execution has been stopped');
 exit();
 }
-else {$this->succ = true;}
+else {
+$this->succ = true;
+}
 
 }
 else {
@@ -942,13 +1003,15 @@ $this->query = "SELECT url FROM getSeoSitemap WHERE state = 'skip' AND url LIKE 
 $this->execQuery();
 
 // print list of internal skipped URLs if PRINTINTSKIPURLS === true
-if (PRINTINTSKIPURLS === true){
+if (PRINTINTSKIPURLS === true) {
 $this->writeLog('##### Internal skipped URLs');
 
-if ($this->rowNum > 0){
+if ($this->rowNum > 0) {
 asort($this->row);
 
-foreach ($this->row as $value) {$this->writeLog($value['url']);}
+foreach ($this->row as $value) {
+$this->writeLog($value['url']);
+}
 }
 
 $this->writeLog('##########');
@@ -967,11 +1030,13 @@ $this->execQuery();
 // print list of external skipped URLs
 $this->writeLog('##### External skipped URLs');
 
-if ($this->rowNum > 0){
+if ($this->rowNum > 0) {
 // sort ascending
 asort($this->row);
 
-foreach ($this->row as $value) {$this->writeLog($value['url']);}
+foreach ($this->row as $value) {
+$this->writeLog($value['url']);
+}
 }
 
 $this->writeLog('##########');
@@ -985,8 +1050,7 @@ private function testExtUrls() {
 $this->query = "SELECT url FROM getSeoSitemap WHERE state = 'skip' AND url NOT LIKE '".DOMAINURL."%' AND url NOT LIKE 'mailto:%'";
 $this->execQuery();
 
-if ($this->rowNum > 0){
-
+if ($this->rowNum > 0) {
 $this->stmt = $this->mysqli->prepare("UPDATE getSeoSitemap SET "
 . "size = ?, "
 . "httpCode = ? "
@@ -1033,7 +1097,9 @@ private function insNewUrl($url){
 $this->resetVars();
 $this->pageTest($url);
 
-if ($this->insUrl === true){$this->insUpdNewUrlQuery($url);}
+if ($this->insUrl === true) {
+$this->insUpdNewUrlQuery($url);
+}
 
 }
 ################################################################################
@@ -1075,7 +1141,7 @@ $this->getPage($url);
 
 $this->pageTest($url);
 
-if ($this->insUrl === true){
+if ($this->insUrl === true) {
 $this->changefreq = 'daily';
 
 $this->update();
@@ -1133,9 +1199,11 @@ $this->query = "SELECT url FROM getSeoSitemap WHERE changefreq = '$value' AND st
 $this->execQuery();
 $this->writeLog('##### URLs with '.$value.' change frequency into sitemap');
 
-if ($this->rowNum > 0){
+if ($this->rowNum > 0) {
 asort($this->row);
-foreach ($this->row as $v) {$this->writeLog($v['url']);}
+foreach ($this->row as $v) {
+$this->writeLog($v['url']);
+}
 }
 
 $this->writeLog('##########'.PHP_EOL);
@@ -1151,9 +1219,11 @@ $this->query = "SELECT url FROM getSeoSitemap WHERE priority = '".$value."' AND 
 $this->execQuery();
 $this->writeLog('##### URLs with '.$value.' priority into sitemap');
 
-if ($this->rowNum > 0){
+if ($this->rowNum > 0) {
 asort($this->row);
-foreach ($this->row as $v) {$this->writeLog($v['url']);}
+foreach ($this->row as $v) {
+$this->writeLog($v['url']);
+}
 }
 
 $this->writeLog('##########'.PHP_EOL);
@@ -1169,11 +1239,13 @@ $this->execQuery();
 $this->writeLog('##### URLs with size > '.BINGMAXSIZE.' Kb into sitemap (Bing SEO)');
 
 $i = 0;
-if ($this->rowNum > 0){
+if ($this->rowNum > 0) {
 asort($this->row);
-foreach ($this->row as $v){
-foreach ($this->seoExclusion as $value){
-if(strpos(strrev($v['url']), strrev($value)) !== 0){
+foreach ($this->row as $v) {
+foreach ($this->seoExclusion as $value) {
+$fileExt = pathinfo(parse_url($v['url'])['path'], PATHINFO_EXTENSION);
+
+if ($value !== $fileExt) {
 $this->writeLog('Size: '. $v['size'].' Kb - URL: '.$v['url']);
 $i++;
 }
@@ -1198,7 +1270,9 @@ if ($this->rowNum > 0){
 asort($this->row);
 foreach ($this->row as $v){
 foreach ($this->seoExclusion as $value){
-if(strpos(strrev($v['url']), strrev($value)) !== 0){
+$fileExt = pathinfo(parse_url($v['url'])['path'], PATHINFO_EXTENSION);
+
+if ($value !== $fileExt) {
 $this->writeLog('Title length: '. $v['titleLength'].' characters - URL: '.$v['url']);
 $i++;
 }
@@ -1223,7 +1297,9 @@ if ($this->rowNum > 0){
 asort($this->row);
 foreach ($this->row as $v){
 foreach ($this->seoExclusion as $value){
-if(strpos(strrev($v['url']), strrev($value)) !== 0){
+$fileExt = pathinfo(parse_url($v['url'])['path'], PATHINFO_EXTENSION);
+
+if ($value !== $fileExt) {
 $this->writeLog('Title length: '. $v['titleLength'].' characters - URL: '.$v['url']);
 $i++;
 }
@@ -1271,6 +1347,9 @@ $this->writeLog($i.' URLs with duplicate title into sitemap (Google SEO)'.PHP_EO
 ################################################################################
 private function getTypeList(){
 
+// print all kind of different URLs separately if $fileToAdd is an array. 
+// otherwise print all URLs that are into sitemap altogether in an alphaberic order.
+if ($this->fileToAdd !== true){
 // if start url has not the extension file included into $fileToAdd wrote that separately...
 $n = true;
 foreach ($this->fileToAdd as $value){
@@ -1282,15 +1361,33 @@ $this->writeLog(STARTURL);
 $this->writeLog('##########'.PHP_EOL);
 }
 
-foreach ($this->fileToAdd as $value){
+foreach ($this->fileToAdd as $value) {
 $this->query = "SELECT url FROM getSeoSitemap WHERE httpCode = '200' AND size != 0 AND url LIKE '%".$value."' AND state = 'scan'";
 $this->execQuery();
 
 $this->writeLog('##### '.$value.' URLs into sitemap');
 
-if ($this->rowNum > 0){
+if ($this->rowNum > 0) {
 asort($this->row);
-foreach ($this->row as $v) {$this->writeLog($v['url']);}
+foreach ($this->row as $v) {
+$this->writeLog($v['url']);
+}
+}
+
+$this->writeLog('##########'.PHP_EOL);
+}
+}
+else {
+$this->query = "SELECT url FROM getSeoSitemap WHERE httpCode = '200' AND size != 0 AND state = 'scan'";
+$this->execQuery();
+
+$this->writeLog('##### All URLs into sitemap');
+
+if ($this->rowNum > 0) {
+asort($this->row);
+foreach ($this->row as $v) {
+$this->writeLog($v['url']);
+}
 }
 
 $this->writeLog('##########'.PHP_EOL);
@@ -1331,12 +1428,11 @@ private function getErrCounter(){
 
 $this->errCounter++;
 
-if ($this->errCounter >= $this->maxErr){
+if ($this->errCounter >= $this->maxErr) {
 $this->writeLog('Execution has been stopped because of errors are more than '.$this->maxErr);  
 
 $this->exec = 'n';
 $this->updateExec();
-
 exit();
 }
 
