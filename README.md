@@ -43,7 +43,7 @@ Using getSeoSitemap, you will be able to give a better surfing experience to you
 4 - on your server cronotab schedule the script once each day prefereble when your server is not too much busy.<br>
     A command line example to schedule the script every day at 7:45:00 AM is:<br>
     45 7  *    *    *    php /example/websites/clients/client1/web5/example/example/getSeoSitemap/getSeoSitemap.php<br>
-5 - before moving from releases 1.0 or 1.1 to 2.0, you must delete the getSeoSitemap table into your dBase.<br>
 
-Notice<br>
-To run getSeoSitemp faster, using a script like geoplugin.class you should exclude geoSeoSitemap user-agent from that.
+**Notice<br>**
+To run getSeoSitemp faster, using a script like geoplugin.class you should exclude geoSeoSitemap user-agent from that.<br>
+Before moving from releases 1.0 or 1.1 to 2.0 pr higher, you must delete the getSeoSitemap table into your dBase.
