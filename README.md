@@ -34,7 +34,7 @@ There is not any maximum limit of URLs number to scan and to add to sitemap.<br>
 
 Using getSeoSitemap, you will be able to give a better surfing experience to your clients.<br>
 
-* **Instructions<br>**
+**Instructions<br>**
 1 - copy getSeoSitemap folder in a protected zone of your server.<br>
 2 - all links of your website must be setted to absolute links ( including always http:// or https:// ).<br>
     That is very important because search engines do not like relative links and that prevent negative issues.<br>
