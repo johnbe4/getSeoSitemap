@@ -23,7 +23,7 @@ It checks all internal and external links.<br>
 If failed (http response code different from 200 or with size = 0), external URLs from the domain will be included into failed URLs list.<br>
 Mailto URLs with will not be included into sitemap.<br>
 URLs inside pdf files will not be scanned and will not be included into sitemap.<br>
-**You have to use only absolute URLs inside the site.<br>**
+**You must use only absolute URLs inside the site.<br>**
 Before saving the new sitemap.xml and sitemap.xml.gz, this script creates two backup copies of the previous ones if they already exist.<br>
 Those two copies will be named sitemap.back.xml and sitemap.back.xml.gz.<br>
 There are not any automatic functions to submit updated sitemap to google or bing.<br>
