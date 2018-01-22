@@ -1,5 +1,10 @@
 getSeoSitemap CHANGELOG
 
+2.2 (2018-01-23)
+- Added entity escaping function to clean URLs before saving into sitemap.
+- Added function to delete sitemap.xml: it exists only sitemap.xml.gz from now.
+- Small changes.
+
 2.1 (2018-01-18)
 - Modified $fileToAdd user constant to add and follow all kind of URLs.
 - Updated pageTest function to prevent skipping URLs with GET section if the file extension is a value of $fileToAdd.
