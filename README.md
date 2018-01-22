@@ -1,4 +1,4 @@
-# getSeoSitemap v2.1 (2018-01-18)
+# getSeoSitemap v2.2 (2018-01-23)
 *Php library to get sitemap.<br>
 It crawls a whole website checking all internal and external links.<br>
 It makes a Search Engine Optimization.*<br>
@@ -15,7 +15,7 @@ It makes a Search Engine Optimization.*<br>
 
 The script requires PHP 5.4 and MySQL 5.5.<br>
 
-This script creates a full sitemap.xml plus a full sitemap.xml.gz.<br>
+This script creates a full sitemap.xml.gz.<br>
 It includes change frequency, last modification date and priority all setted following your own rules.<br>
 Change frequency will be automatically selected between daily, weekly, monthly and yearly.<br>
 URLs with http response code different from 200 or with size = 0 will not be included into sitemap.<br>
@@ -24,12 +24,12 @@ If failed (http response code different from 200 or with size = 0), external URL
 Mailto URLs with will not be included into sitemap.<br>
 URLs inside pdf files will not be scanned and will not be included into sitemap.<br>
 **You must use only absolute URLs inside the site.<br>**
-Before saving the new sitemap.xml and sitemap.xml.gz, this script creates two backup copies of the previous ones if they already exist.<br>
-Those two copies will be named sitemap.back.xml and sitemap.back.xml.gz.<br>
-There are not any automatic functions to submit updated sitemap to google or bing.<br>
+Before saving the new sitemap.xml.gz, this script creates a backup copy of the previous one if it already exists.<br>
+This copy will be named sitemap.back.xml.gz.<br>
+There is not any automatic function to submit updated sitemap to google or bing.<br>
 That is because I discovered search engines prefer submission by their webmaster tools.<br>
 In fact, submitting sitemap by their own link, they never update the last submission time inside webmaster tools.<br>
-It checks page title amd page size to improve SEO.<br>
+This script checks page title amd page size to improve SEO.<br>
 There is not any maximum limit of URLs number to scan and to add to sitemap.<br>
 
 Using getSeoSitemap, you will be able to give a better surfing experience to your clients.<br>
@@ -47,6 +47,7 @@ Using getSeoSitemap, you will be able to give a better surfing experience to you
 **Notice<br>**
 To run getSeoSitemp faster, using a script like geoplugin.class you should exclude geoSeoSitemap user-agent from that.<br>
 **Before moving from releases 1.0 or 1.1 to 2.0 or higher, you must delete the getSeoSitemap table into your dBase.<br>**
+**Before moving from releases 1.0, 1.1, 2.0 or 2.1 to 2.2 or higher, you must delete sitemap.xml file into your website.<br>**
 
 **Latest<br>**
-2018-01-20 - I'm developing release v2.2 to create multiple sitemaps when total URLs are more than 50000.
+2018-01-20 - I'm developing release v2.3 to create multiple sitemaps when total URLs are more than 50000.
