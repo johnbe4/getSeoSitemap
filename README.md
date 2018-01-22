@@ -47,7 +47,7 @@ Using getSeoSitemap, you will be able to give a better surfing experience to you
 **Notice<br>**
 To run getSeoSitemp faster, using a script like geoplugin.class you should exclude geoSeoSitemap user-agent from that.<br>
 **Before moving from releases 1.0 or 1.1 to 2.0 or higher, you must delete the getSeoSitemap table into your dBase.<br>**
-**Before moving from releases 1.0, 1.1, 2.0 or 2.1 to 2.2 or higher, you must delete sitemap.xml file into your website.<br>**
+**Before moving from releases 1.0, 1.1, 2.0 or 2.1 to 2.2 or higher, you must delete the sitemap.xml file into your website.<br>**
 
 **Latest<br>**
 2018-01-20 - I'm developing release v2.3 to create multiple sitemaps when total URLs are more than 50000.
