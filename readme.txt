@@ -1,4 +1,4 @@
-getSeoSitemap v2.1 README (2018-01-18)
+getSeoSitemap v2.2 README (2018-01-23)
 
 Php library to get sitemap.
 It crawls a whole website checking all internal and external links.
@@ -21,11 +21,12 @@ Mailto URLs with will not be included into sitemap.
 URLs inside pdf files will not be scanned and will not be included into sitemap.
 It checks page title and page size to improve SEO.
 You must use only absolute URLs inside the site.
-Before saving the new sitemap.xml and sitemap.xml.gz, this script creates two backup copies of the previous ones if they already exist.
-Those two copies will be named sitemap.back.xml and sitemap.back.xml.gz.
-There are not any automatic functions to submit updated sitemap to google or bing. 
+Before saving the new sitemap.xml.gz, this script creates a backup copy of the previous one if it already exists.
+This copy will be named sitemap.back.xml.gz.
+There is not any automatic function to submit updated sitemap to google or bing.
 That is because I discovered search engines prefer submission by their webmaster tools.
 In fact, submitting sitemap by their own link, they never update the last submission time inside webmaster tools.
+This script checks page title amd page size to improve SEO.
 There is not any maximum limit of URLs number to scan and to add to sitemap.
 
 Using getSeoSitemap, you will be able to give a better surfing experience to your clients.
@@ -43,3 +44,4 @@ Instructions
 Notice
 To run getSeoSitemp faster, using a script like geoplugin.class you should exclude geoSeoSitemap user-agent from that.
 Before moving from releases 1.0 or 1.1 to 2.0 or higher, you must delete the getSeoSitemap table into your dBase.
+Before moving from releases 1.0, 1.1, 2.0 or 2.1 to 2.2 or higher, you must delete the sitemap.xml file into your website.
