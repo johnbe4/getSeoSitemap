@@ -1,9 +1,9 @@
 <?php
 
 /*
-getSeoSitemap v2.1 LICENSE (2018-01-18)
+getSeoSitemap v2.2 LICENSE (2018-01-23)
 
-getSeoSitemap v2.1 is distributed under the following BSD-style license: 
+getSeoSitemap v2.2 is distributed under the following BSD-style license: 
 
 Copyright (c) 2016-2018, 
 Giovanni Bertone (RED Racing Parts) - https://www.redracingparts.com
@@ -63,7 +63,7 @@ private $skipUrl = [ // skip all urls that start or are equal these values (valu
 'https://www.example.com/shop/',
 'https://www.example.com/example/motorbikesmotorcycles/productsandcomponents/general/intro/google_site_search.php',
 'https://www.example.com/example/motocicli/prodottiecomponenti/generale/intro/google_site_search.php',
-'https://www.example.com/php_library/currency.php',
+'https://www.example.com/example/currency.php',
 ];
 // set $fileToAdd to true to follow and add all kind of URL.
 // set $fileToAdd to an array to follow and add only some kind of URLs (example: $fileToAdd = ['php','pdf',];).
@@ -134,12 +134,19 @@ private $seoExclusion = [ // file type to exclude from seo functions
 ];
 private $changefreqArr = ['daily', 'weekly', 'monthly', 'yearly']; // changefreq accepted values
 private $priorityArr = ['1.0', '0.9', '0.8', '0.7', '0.6', '0.5', '0.4', '0.3', '0.2', '0.1']; // priority accepted values
-private $userAgent = 'getSeoSitemap v2.1 by John';
+private $userAgent = 'getSeoSitemap v2.2 by John';
 private $exec = 'n'; // execution value (could be y or n)
 private $errCounter = 0; // error counter
 private $maxErr = 20; // max number of errors to stop execution
 private $errMsg = [
 'C01' => 'cURL error for multiple choices server response'
+];
+private $escapeCodeArr = [ // escape code conversions
+'&' => '&amp;',
+"'" => "&apos;",
+'"' => '&quot;',
+'>' => '&gt;',
+'<' => '&lt;',
 ];
 
 ################################################################################
@@ -682,19 +689,6 @@ $maxLastmodDate = date('Y.m.d H:i:s', $this->row[0]['maxLastmod']);
 $this->writeLog('Min last modified time is '.$minLastmodDate);
 $this->writeLog('Max last modified time is '.$maxLastmodDate);
 
-// save backup copy of sitemap.xml
-$this->succ = false;
-if (file_exists(SITEMAPPATH.'sitemap.xml') === true) {
-$this->copy(SITEMAPPATH.'sitemap.xml', SITEMAPPATH.'sitemap.back.xml');
-if ($this->succ === true) {
-$this->writeLog('## Saved sitemap.back.xml');
-}
-}
-else {
-$this->writeLog('## Previous sitemap.xml does not exist and sitemap.back.xml has not been saved. '
-. 'It might be the first time you run getSeoSitemap.');
-}
-
 // save sitemap.xml
 $this->succ = false;
 $this->save();
@@ -720,6 +714,13 @@ $this->succ = false;
 $this->gzip();
 if ($this->succ === true) {
 $this->writeLog('## Saved sitemap.xml.gz');
+}
+
+// delete sitemap.xml
+$this->succ = false;
+$this->delete();
+if ($this->succ === true) {
+$this->writeLog('## Deleted sitemap.xml');
 }
 
 // set new sitemap is available
@@ -799,9 +800,9 @@ exit();
 }
 
 $txt = <<<EOD
-<?xml version='1.0' encoding='UTF-8'?>
-<!-- Created with $this->userAgent -->
+<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd" xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<!-- Created with $this->userAgent -->
 
 EOD;
 
@@ -810,7 +811,9 @@ $dT = new DateTime();
 $dT->setTimestamp($value['lastmod']);
 $lastmod = $dT->format(DATE_W3C);
 
-$txt .= '<url><loc>'.$value['url'].'</loc><lastmod>'.$lastmod.'</lastmod>'
+$url = $this->entityEscaping($value['url']);
+
+$txt .= '<url><loc>'.$url.'</loc><lastmod>'.$lastmod.'</lastmod>'
 . '<changefreq>'.$value['changefreq'].'</changefreq><priority>'.$value['priority'].'</priority></url>
 ';
 }
@@ -1435,6 +1438,35 @@ $this->exec = 'n';
 $this->updateExec();
 exit();
 }
+
+}
+################################################################################
+################################################################################
+// delete sitemap.xml
+private function delete(){
+
+if (unlink(SITEMAPPATH.'sitemap.xml') === false){
+$this->writeLog('Execution has been stopped because unlink cannot delete sitemap.xml');    
+
+$this->exec = 'n';
+$this->updateExec();
+
+exit();
+}
+
+$this->succ = true;
+
+}
+################################################################################
+################################################################################
+// get URL entity escaping
+private function entityEscaping($url){
+
+foreach ($this->escapeCodeArr as $key => $value) {
+$url = str_replace($key, $value, $url);
+}
+
+return $url;
 
 }
 ################################################################################
