@@ -36,7 +36,7 @@ Instructions
 3 - set all user constants and parameters.
 4 - on your server cronotab schedule the script once each day prefereble when your server is not too much busy.
     A command line example to schedule the script every day at 7:45:00 AM is:
-    45 7  *    *    *    php /example/websites/clients/client1/web5/example/example/getSeoSitemap/getSeoSitemap.php.
+    45 7  *    *    *    php /example/websites/clients/client1/web5/example/example/getSeoSitemap/getSeoSitemap.php
 
 Notice
 To run getSeoSitemp faster, using a script like geoplugin.class you should exclude geoSeoSitemap user-agent from that.
