@@ -1,5 +1,11 @@
 getSeoSitemap CHANGELOG
 
+2.3 (2018-01-30)
+- Added feature to create sitemap index and multiple sitemaps when total URLs are more than 50000.
+- Fixed bug that created an infinite loop on some mysqli errors.
+- Removed constant SITEMAPURL.
+- Removed feature to save sitemap.back.xml.gz.
+
 2.2 (2018-01-23)
 - Added entity escaping function to clean URLs before saving into sitemap.
 - Added function to delete sitemap.xml: it exists only sitemap.xml.gz from now.
