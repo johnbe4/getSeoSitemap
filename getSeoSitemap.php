@@ -1,9 +1,9 @@
 <?php
 
 /*
-getSeoSitemap v2.2 LICENSE (2018-01-23)
+getSeoSitemap v2.3 LICENSE (2018-01-30)
 
-getSeoSitemap v2.2 is distributed under the following BSD-style license: 
+getSeoSitemap v2.3 is distributed under the following BSD-style license: 
 
 Copyright (c) 2016-2018, 
 Giovanni Bertone (RED Racing Parts) - https://www.redracingparts.com
@@ -49,8 +49,7 @@ const DBUSER = DATABASE_USER_I; // database user
 const DBPASS = DATABASE_PASSWORD_I; // database password
 const DBNAME = DATABASE_NAME_I; // database name
 const GETSITEMAPPATH = '/example/example/example/example/example/example/example/getSeoSitemap/'; // getSeoSitemap path inside server
-const SITEMAPPATH = '/example/example/example/example/example/example/'; // sitemap.xml plus sitemap.xml.gz path inside server
-const SITEMAPURL = 'https://www.example.com/sitemap.xml.gz'; // sitemap url (value must be absolute) 
+const SITEMAPPATH = '/example/example/examples/example/example/example/'; // sitemap path inside server
 const PRINTINTSKIPURLS = false; // set to false if you do not want the list of internal skipped URLs in your log file
 const PRINTCONTAINEROFSKIPPED = false; // set to true to get a list of container URLs of skipped URLs. It is useful to fix wrong URLs.
 const BINGMAXSIZE = '125.00'; // bing max file size in Kb. this param is only for SEO.
@@ -60,28 +59,28 @@ class getSeoSitemap {
 
 ##### start of user parameters
 private $skipUrl = [ // skip all urls that start or are equal these values (values must be absolute)
-'https://www.example.com/shop/',
+'https://www.example.com/example/',
 'https://www.example.com/example/motorbikesmotorcycles/productsandcomponents/general/intro/google_site_search.php',
 'https://www.example.com/example/motocicli/prodottiecomponenti/generale/intro/google_site_search.php',
 'https://www.example.com/example/currency.php',
 ];
-// set $fileToAdd to true to follow and add all kind of URL.
+// set $fileToAdd to true to follow and add all kind of URLs.
 // set $fileToAdd to an array to follow and add only some kind of URLs (example: $fileToAdd = ['php','pdf',];).
 private $fileToAdd = [
 'php',
 'pdf',
 ];
 // priority values must be 1.0, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2 and 0.1. other values are not accepted.
-private $fullUrlPriority = [ // set priority for specific urls that are equal these values (values must be absolute)
+private $fullUrlPriority = [ // set priority of particular URLs that are equal these values (values must be absolute)
 '1.0' => [
 'https://www.example.com'
 ],
 '0.9' => [
 'https://www.example.com/example/motorbikesmotorcycles/introducingpages/11/22/hotproducts.php',
-'https://www.example.com/example/motocicli/pagineintroduttive/11/22/hotproducts.php'
+'https://www.example.com/italiano/motocicli/pagineintroduttive/11/22/hotproducts.php'
 ],
 ];
-private $partialUrlPriority = [ // set priority for specific urls that start with these values (values must be absolute)
+private $partialUrlPriority = [ // set priority of particular URLs that start with these values (values must be absolute)
 '0.8' => [
 'https://www.example.com/example/motorbikesmotorcycles/introducingpages/11/22/',
 'https://www.example.com/example/motocicli/pagineintroduttive/11/22/',
@@ -101,7 +100,7 @@ private $extUrlsTest = true; // set to false to skip external URLs test (default
 ##### WARNING: DO NOT CHANGE ANYTHING BELOW #####
 #################################################
 
-private $url = null; // an aboslute url (ex. https://www.example.com/test/test1.php )
+private $url = null; // an aboslute URL (ex. https://www.example.com/test/test1.php )
 private $size = null; // size of file in Kb
 private $bingTitleLength = [5, 100]; // min, max bing title length
 private $md5 = null; // md5 of string (hexadecimal)
@@ -134,7 +133,7 @@ private $seoExclusion = [ // file type to exclude from seo functions
 ];
 private $changefreqArr = ['daily', 'weekly', 'monthly', 'yearly']; // changefreq accepted values
 private $priorityArr = ['1.0', '0.9', '0.8', '0.7', '0.6', '0.5', '0.4', '0.3', '0.2', '0.1']; // priority accepted values
-private $userAgent = 'getSeoSitemap v2.2 by John';
+private $userAgent = 'getSeoSitemap v2.3 by John';
 private $exec = 'n'; // execution value (could be y or n)
 private $errCounter = 0; // error counter
 private $maxErr = 20; // max number of errors to stop execution
@@ -148,6 +147,10 @@ private $escapeCodeArr = [ // escape code conversions
 '>' => '&gt;',
 '<' => '&lt;',
 ];
+private $maxUrlsInSitemap = 50000; // max number of URLs into a single sitemap
+private $sitemapNameArr = []; // includes names of all saved sitemaps at the end of the process
+// text to add on some MySQL errors
+private $txtToAddOnMysqliErr = ' - Remember to set exec to n on getSeoSitemapExec table to restart the script.'; 
 
 ################################################################################
 public function start(){
@@ -430,16 +433,13 @@ private function openMysqliConn(){
 
 $this->mysqli = new mysqli(DBHOST, DBUSER, DBPASS, DBNAME);
 if ($this->mysqli->connect_errno) {
-$this->writeLog('Execution has been stopped because of MySQL database connection error: '.$this->mysqli->connect_error);   
-
-$this->exec = 'n';
-$this->updateExec();
-
+$this->writeLog('Execution has been stopped because of MySQL database connection error: '
+.$this->mysqli->connect_error.$this->txtToAddOnMysqliErr);   
 exit();
 }
 
 if (!$this->mysqli->set_charset('utf8')) {
-$this->writeLog('Execution has been stopped because of MySQL error loading character set utf8: '.$this->mysqli->error);   
+$this->writeLog('Execution has been stopped because of MySQL error loading character set utf8: '.$this->mysqli->error);  
 
 $this->exec = 'n';
 $this->updateExec();
@@ -457,11 +457,7 @@ $this->row = [];
 
 $result = $this->mysqli->query($this->query); 
 if (!$result) {  
-$this->writeLog('Execution has been stopped because of MySQL query error: '.$this->mysqli->error.' - query: '.$this->query);  
-
-$this->exec = 'n';
-$this->updateExec();
-
+$this->writeLog('Execution has been stopped because of MySQL query error: '.$this->mysqli->error.' - query: '.$this->query);   
 exit();
 }
 
@@ -489,15 +485,58 @@ $this->rowNum = $result->num_rows;
 }
 ################################################################################
 ################################################################################
-// close mysqli connection
+// close mysqli connections
 private function closeMysqliConn(){
 
-$this->stmt->close();
-$this->stmt2->close();
-$this->stmt3->close();
-$this->stmt4->close();
-$this->stmt5->close();
-$this->mysqli->close();
+if ($this->stmt->close() !== true) {  
+$this->writeLog('Execution has been stopped because of MySQL stmt close error: '.$this->mysqli->error);   
+
+$this->exec = 'n';
+$this->updateExec();
+
+exit();
+}
+
+if ($this->stmt2->close() !== true) {  
+$this->writeLog('Execution has been stopped because of MySQL stmt2 close error: '.$this->mysqli->error);  
+
+$this->exec = 'n';
+$this->updateExec();
+
+exit();
+}
+
+if ($this->stmt3->close() !== true) {  
+$this->writeLog('Execution has been stopped because of MySQL stmt3 close error: '.$this->mysqli->error);   
+
+$this->exec = 'n';
+$this->updateExec();
+
+exit();
+}
+
+if ($this->stmt4->close() !== true) {  
+$this->writeLog('Execution has been stopped because of MySQL stmt4 close error: '.$this->mysqli->error); 
+
+$this->exec = 'n';
+$this->updateExec();
+
+exit();
+}
+
+if ($this->stmt5->close() !== true) {  
+$this->writeLog('Execution has been stopped because of MySQL stmt5 close error: '.$this->mysqli->error);   
+
+$this->exec = 'n';
+$this->updateExec();
+
+exit();
+}
+
+if ($this->mysqli->close() !== true) {  
+$this->writeLog('Execution has been stopped because of MySQL mysqli close error: '.$this->mysqli->error.$this->txtToAddOnMysqliErr);   
+exit();
+}
 
 }
 ################################################################################
@@ -542,7 +581,9 @@ $html = $this->pageBody;
 $this->pageLinks = [];
 
 // return if $html is empty to prevent error on $dom->loadHTML($html)
-if (empty($html) === true){return;}
+if (empty($html) === true) {
+return;
+}
 
 // do not search links inside $doNotFollowLinksIn
 foreach ($this->doNotFollowLinksIn as $value) {
@@ -568,7 +609,7 @@ $title = $titleArr->item(0)->textContent;
 $titleLength = strlen($title);
 
 if ($titleLength > 300) {
-$this->writeLog('Title length: '.$titleLength.' characters (title has not been registered into dBase because its lenght is more than 300 characters) - URL '.$url);
+$this->writeLog('Title length: '.$titleLength.' characters (title has not been registered into dBase because of its lenght is more than 300 characters) - URL '.$url);
 $title = null;
 }
 }
@@ -600,7 +641,7 @@ exit();
 }
 
 foreach ($links as $link){ // iterate over extracted links and display their URLs
-$href = $link->getAttribute('href');// extract href attribute
+$href = $link->getAttribute('href'); // extract href attribute
 
 // add only link to include
 $this->pageTest($href);
@@ -668,7 +709,6 @@ $this->getSizeList();
 $this->getMinTitleLengthList();
 $this->getMaxTitleLengthList();
 $this->getDuplicateTitle();
-
 $this->getIntUrls();
 $this->setPriority();
 
@@ -689,38 +729,33 @@ $maxLastmodDate = date('Y.m.d H:i:s', $this->row[0]['maxLastmod']);
 $this->writeLog('Min last modified time is '.$minLastmodDate);
 $this->writeLog('Max last modified time is '.$maxLastmodDate);
 
-// save sitemap.xml
-$this->succ = false;
+// save all sitemaps
 $this->save();
-if ($this->succ === true) {
-$this->writeLog('## Saved sitemap.xml');
+
+// gzip all sitemaps
+foreach ($this->sitemapNameArr as $key => $value) {
+$this->gzip($value);
+
+$newValue = $value.'.gz';
+$fileName = $this->getFileName($newValue);
+$this->writeLog('Saved '.$fileName);
+
+// updte filePath into array
+$this->sitemapNameArr[$key] = $newValue;
 }
 
-// save back copy of sitemap.xml.gz
-$this->succ = false;
-if (file_exists(SITEMAPPATH.'sitemap.xml.gz') === true) {
-$this->copy(SITEMAPPATH.'sitemap.xml.gz', SITEMAPPATH.'sitemap.back.xml.gz');
-if ($this->succ === true) {
-$this->writeLog('## Saved sitemap.back.xml.gz');
-}
-}
-else {
-$this->writeLog('## Previous sitemap.xml.gz does not exist and sitemap.back.xml.gz has not been saved. '
-. 'It might be the first time you run getSeoSitemap.');
-}
+// get full sitemap
+$fullSitemapNameArr = $this->getSitemapNames();
 
-// save sitemap.xml.gz
-$this->succ = false;
-$this->gzip();
-if ($this->succ === true) {
-$this->writeLog('## Saved sitemap.xml.gz');
-}
+// create an array of all sitemaps to delete
+$sitemapToDeleteArr = array_diff($fullSitemapNameArr, $this->sitemapNameArr);
 
-// delete sitemap.xml
-$this->succ = false;
-$this->delete();
-if ($this->succ === true) {
-$this->writeLog('## Deleted sitemap.xml');
+// delete all old missing sitemaps
+foreach ($sitemapToDeleteArr as $value) {
+$this->delete($value);
+
+$fileName = $this->getFileName($value);
+$this->writeLog('Deleted '.$fileName);
 }
 
 // set new sitemap is available
@@ -779,110 +814,6 @@ $this->state = null;
 $this->httpCode = null;
 $this->insUrl = null;
 $this->pageBody = null; 
-
-}
-################################################################################
-################################################################################
-private function save(){
-
-$this->query = "SELECT url, lastmod, changefreq, priority FROM getSeoSitemap "
-. "WHERE httpCode = '200' AND size != 0 AND state = 'scan'";
-$this->execQuery();
-
-$fp = fopen(SITEMAPPATH.'sitemap.xml','w');
-if ($fp === false){
-$this->writeLog('Execution has been stopped because fopen cannot open sitemap.xml');    
-
-$this->exec = 'n';
-$this->updateExec();
-
-exit();
-}
-
-$txt = <<<EOD
-<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd" xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-<!-- Created with $this->userAgent -->
-
-EOD;
-
-foreach ($this->row as $value){
-$dT = new DateTime();
-$dT->setTimestamp($value['lastmod']);
-$lastmod = $dT->format(DATE_W3C);
-
-$url = $this->entityEscaping($value['url']);
-
-$txt .= '<url><loc>'.$url.'</loc><lastmod>'.$lastmod.'</lastmod>'
-. '<changefreq>'.$value['changefreq'].'</changefreq><priority>'.$value['priority'].'</priority></url>
-';
-}
-
-$txt .= <<<EOD
-</urlset>
-EOD;
-
-if (fwrite($fp, $txt) === false){
-$this->writeLog('Execution has been stopped because fwrite cannot write sitemap.xml');  
-
-$this->exec = 'n';
-$this->updateExec();
-
-exit();
-}
-
-if (fclose($fp) !== true){
-$this->writeLog('Execution has been stopped because fclose cannot close sitemap.xml'); 
-
-$this->exec = 'n';
-$this->updateExec();
-
-exit();
-}
-else {$this->succ = true;}
-
-}
-################################################################################
-################################################################################
-private function gzip(){
-
-$file = SITEMAPPATH.'sitemap.xml';
-$gzfile = $file.'.gz';
-
-$fp = gzopen($gzfile, 'w9');
-
-if ($fp === false){
-$this->writeLog('Execution has been stopped because gzopen cannot open sitemap.xml.gz');   
-
-$this->exec = 'n';
-$this->updateExec();
-
-exit();
-}
-
-$fileCont = file_get_contents($file);
-if ($fileCont === false){
-$this->writeLog('Execution has been stopped because file_get_contents cannot get content of sitemap.xml');   
-
-$this->exec = 'n';
-$this->updateExec();
-
-exit();
-}
-
-gzwrite($fp, $fileCont);
-
-if (gzclose($fp) !== true) {
-$this->writeLog('Execution has been stopped because gzclose cannot close sitemap.xml.gz');   
-
-$this->exec = 'n';
-$this->updateExec();
-
-exit();
-}  
-else {
-$this->succ = true;
-}
 
 }
 ################################################################################
@@ -965,29 +896,6 @@ $this->query = "SELECT COUNT(*) AS count FROM getSeoSitemap "
 . "WHERE httpCode = '200' AND size != 0 AND state = 'scan'";
 $this->execQuery();
 $this->writeLog('Included '.$this->count.' URLs into sitemap'.PHP_EOL);
-
-}
-################################################################################
-################################################################################
-private function copy($file, $newFile){
-
-$fileName = basename($file);  
-
-if (file_exists($file) === true) {
-
-if (copy($file, $newFile) !== true) {
-$this->writeLog('Back copy of the previous '.$fileName.' has not been saved and execution has been stopped');
-exit();
-}
-else {
-$this->succ = true;
-}
-
-}
-else {
-$this->writeLog('Back copy of the previous '.$fileName.' has not been saved because this file does not exist '
-. '(probably this is the first time you are using getSeoSitemap)');
-}
 
 }
 ################################################################################
@@ -1352,13 +1260,15 @@ private function getTypeList(){
 
 // print all kind of different URLs separately if $fileToAdd is an array. 
 // otherwise print all URLs that are into sitemap altogether in an alphaberic order.
-if ($this->fileToAdd !== true){
+if ($this->fileToAdd !== true) {
 // if start url has not the extension file included into $fileToAdd wrote that separately...
 $n = true;
 foreach ($this->fileToAdd as $value){
-if(strpos(strrev(STARTURL), strrev($value)) === 0){$n = false;}
+if(strpos(strrev(STARTURL), strrev($value)) === 0) {
+$n = false;
 }
-if ($n === true){
+}
+if ($n === true) {
 $this->writeLog('##### Start URL into sitemap');
 $this->writeLog(STARTURL);
 $this->writeLog('##########'.PHP_EOL);
@@ -1442,11 +1352,13 @@ exit();
 }
 ################################################################################
 ################################################################################
-// delete sitemap.xml
-private function delete(){
+// delete a file
+private function delete($fileName){
 
-if (unlink(SITEMAPPATH.'sitemap.xml') === false){
-$this->writeLog('Execution has been stopped because unlink cannot delete sitemap.xml');    
+$this->succ = false;
+
+if (unlink($fileName) === false){
+$this->writeLog('Execution has been stopped because of unlink cannot delete sitemap.xml');    
 
 $this->exec = 'n';
 $this->updateExec();
@@ -1467,6 +1379,245 @@ $url = str_replace($key, $value, $url);
 }
 
 return $url;
+
+}
+################################################################################
+################################################################################
+private function save(){
+
+$this->succ = false;
+
+$this->query = "SELECT url, lastmod, changefreq, priority FROM getSeoSitemap "
+. "WHERE httpCode = '200' AND size != 0 AND state = 'scan'";
+$this->execQuery();
+
+// set sitemap counter start value
+if ($this->rowNum <= $this->maxUrlsInSitemap) {
+$sitemapCount = null;
+$multipleSitemaps = false;
+}
+else {
+$sitemapCount = 1;
+$multipleSitemaps = true;
+}
+
+ // general row counter + sitemap internal row counter
+$genCount = $sitemapIntCount = 1;
+
+foreach ($this->row as $value) {
+if ($sitemapIntCount === 1) {
+
+$fp = fopen(SITEMAPPATH.'sitemap'.$sitemapCount.'.xml', 'w');
+if ($fp === false){
+$this->writeLog('Execution has been stopped because of fopen cannot open sitemap'.$sitemapCount.'.xml');    
+
+$this->exec = 'n';
+$this->updateExec();
+
+exit();
+}
+
+$txt = <<<EOD
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd" xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<!-- Created with $this->userAgent -->
+
+EOD;
+
+}
+
+$dT = new DateTime();
+$dT->setTimestamp($value['lastmod']);
+$lastmod = $dT->format(DATE_W3C);
+
+$url = $this->entityEscaping($value['url']);
+
+$txt .= '<url><loc>'.$url.'</loc><lastmod>'.$lastmod.'</lastmod>'
+. '<changefreq>'.$value['changefreq'].'</changefreq><priority>'.$value['priority'].'</priority></url>
+';
+
+if ($sitemapIntCount === $this->maxUrlsInSitemap || $genCount === $this->rowNum) {
+$sitemapIntCount = 0;
+
+$txt .= <<<EOD
+</urlset>
+EOD;
+
+if (fwrite($fp, $txt) === false) {
+$this->writeLog('Execution has been stopped because of fwrite cannot write sitemap'.$sitemapCount.'.xml');  
+
+$this->exec = 'n';
+$this->updateExec();
+
+exit();
+}
+
+if (fclose($fp) !== true) {
+$this->writeLog('Execution has been stopped because of fclose cannot close sitemap'.$sitemapCount.'.xml');  
+
+$this->exec = 'n';
+$this->updateExec();
+
+exit();
+}
+else {
+$this->writeLog('Saved sitemap'.$sitemapCount.'.xml');
+$this->sitemapNameArr[] = SITEMAPPATH.'sitemap'.$sitemapCount.'.xml';
+}
+
+if ($multipleSitemaps === true && $genCount !== $this->rowNum) {
+$sitemapCount++;
+}
+
+}
+
+$sitemapIntCount++;
+$genCount++;
+}
+
+// if there are multiple sitemaps, save sitemapindex 
+if ($multipleSitemaps === true) {
+$time = time();
+
+$dT = new DateTime();
+$dT->setTimestamp($time);
+$lastmod = $dT->format(DATE_W3C);
+
+$fp = fopen(SITEMAPPATH.'sitemapindex.xml', 'w');
+if ($fp === false){
+$this->writeLog('Execution has been stopped because of fopen cannot open sitemapindex.xml');    
+
+$this->exec = 'n';
+$this->updateExec();
+
+exit();
+}
+
+$txt = <<<EOD
+<?xml version="1.0" encoding="UTF-8"?>
+<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<!-- Created with $this->userAgent -->
+
+EOD;
+
+foreach ($this->sitemapNameArr as $value) {
+
+// get sitemap name
+$sm = $this->getFileName($value);
+
+$txt .= '<sitemap><loc>'.$sm.'.gz</loc><lastmod>'.$lastmod.'</lastmod></sitemap>
+';
+}
+
+$txt .= <<<EOD
+</sitemapindex>
+EOD;
+
+if (fwrite($fp, $txt) === false) {
+$this->writeLog('Execution has been stopped because of fwrite cannot write sitemapindex.xml');  
+
+$this->exec = 'n';
+$this->updateExec();
+
+exit();
+}
+
+if (fclose($fp) !== true) {
+$this->writeLog('Execution has been stopped because of fclose cannot close sitemapindex.xml');   
+
+$this->exec = 'n';
+$this->updateExec();
+
+exit();
+}
+else {
+$this->writeLog('Saved sitemapindex.xml');
+$this->sitemapNameArr[] = SITEMAPPATH.'sitemapindex.xml';
+}
+
+}
+
+$this->succ = true;
+
+}
+################################################################################
+################################################################################
+private function gzip($fileName){
+
+$this->succ = false;
+
+$gzFile = $fileName.'.gz';
+
+$fp = gzopen($gzFile, 'w9');
+
+if ($fp === false){
+$this->writeLog('Execution has been stopped because of gzopen cannot open '.$gzFile);   
+
+$this->exec = 'n';
+$this->updateExec();
+
+exit();
+}
+
+$fileCont = file_get_contents($fileName);
+if ($fileCont === false){
+$this->writeLog('Execution has been stopped because of file_get_contents cannot get content of '.$fileName);   
+
+$this->exec = 'n';
+$this->updateExec();
+
+exit();
+}
+
+gzwrite($fp, $fileCont);
+
+if (gzclose($fp) !== true) {
+$this->writeLog('Execution has been stopped because of gzclose cannot close '.$gzFile);   
+
+$this->exec = 'n';
+$this->updateExec();
+
+exit();
+}  
+else {
+$this->succ = true;
+}
+
+}
+################################################################################
+################################################################################
+// get file name without the rest of path
+private function getFileName($filePath){
+
+$this->succ = false;
+
+$fileName = str_replace(SITEMAPPATH, '', $filePath);
+
+$this->succ = true;
+return $fileName;
+
+}
+################################################################################
+################################################################################
+// get all sitemap names included in SITEMAPPATH
+private function getSitemapNames(){
+
+$this->succ = false;
+
+$sitemapNameArr = glob(SITEMAPPATH.'sitemap*.xml*');
+
+if ($sitemapNameArr !== false) {
+$this->succ = true;
+return $sitemapNameArr;
+}
+else {
+$this->writeLog('Execution has been stopped because of glob error');   
+
+$this->exec = 'n';
+$this->updateExec();
+
+exit();
+}
 
 }
 ################################################################################
