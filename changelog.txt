@@ -1,5 +1,13 @@
 getSeoSitemap CHANGELOG
 
+v2.3.1 (2018-01-31)
+- Added feature to check all sitemap sizes that must be no larger than 50 Mb.
+- Added variable $printSitemapSizeList to print a list of all sitemap sizes.
+- Added execution stop if total sitemaps are more than 50000.
+- Fixed bug of sitemap header.
+- Fixed bug of sitemap index header.
+- Fixed bug of sitemap URLs listed into sitemap index.
+
 2.3 (2018-01-30)
 - Added feature to create sitemap index and multiple sitemaps when total URLs are more than 50000.
 - Fixed bug that created an infinite loop on some mysqli errors.
