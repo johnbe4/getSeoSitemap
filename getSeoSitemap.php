@@ -1,9 +1,9 @@
 <?php
 
 /*
-getSeoSitemap v2.3 LICENSE (2018-01-30)
+getSeoSitemap v2.3.1 LICENSE (2018-01-31)
 
-getSeoSitemap v2.3 is distributed under the following BSD-style license: 
+getSeoSitemap v2.3.1 is distributed under the following BSD-style license: 
 
 Copyright (c) 2016-2018, 
 Giovanni Bertone (RED Racing Parts) - https://www.redracingparts.com
@@ -41,7 +41,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ###################################################################################################
 
 ##### start of user constants
-const DOMAINURL = 'https://www.example.com'; // domain url (value must be absolute) - every URL must contain this value at the beginning
+const DOMAINURL = 'https://www.example.com'; // domain url (value must be absolute).
+//every URL must contain this value at the beginning
 const STARTURL = 'https://www.example.com'; // starting url to crawl (value must be absolute)
 const DEFAULTPRIORITY = '0.5'; // default priority for URLs not included in $fullUrlPriority and $partialUrlPriority
 const DBHOST = DATABASE_HOST_I; // database host
@@ -49,7 +50,7 @@ const DBUSER = DATABASE_USER_I; // database user
 const DBPASS = DATABASE_PASSWORD_I; // database password
 const DBNAME = DATABASE_NAME_I; // database name
 const GETSITEMAPPATH = '/example/example/example/example/example/example/example/getSeoSitemap/'; // getSeoSitemap path inside server
-const SITEMAPPATH = '/example/example/examples/example/example/example/'; // sitemap path inside server
+const SITEMAPPATH = '/example/example/example/example/example/example/'; // sitemap path inside server
 const PRINTINTSKIPURLS = false; // set to false if you do not want the list of internal skipped URLs in your log file
 const PRINTCONTAINEROFSKIPPED = false; // set to true to get a list of container URLs of skipped URLs. It is useful to fix wrong URLs.
 const BINGMAXSIZE = '125.00'; // bing max file size in Kb. this param is only for SEO.
@@ -77,7 +78,7 @@ private $fullUrlPriority = [ // set priority of particular URLs that are equal t
 ],
 '0.9' => [
 'https://www.example.com/example/motorbikesmotorcycles/introducingpages/11/22/hotproducts.php',
-'https://www.example.com/italiano/motocicli/pagineintroduttive/11/22/hotproducts.php'
+'https://www.example.com/example/motocicli/pagineintroduttive/11/22/hotproducts.php'
 ],
 ];
 private $partialUrlPriority = [ // set priority of particular URLs that start with these values (values must be absolute)
@@ -93,7 +94,8 @@ private $partialUrlPriority = [ // set priority of particular URLs that start wi
 private $printChangefreqList = false; // set to true to print URLs list following changefreq
 private $printPriorityList = false; // set to true to print URLs list following priority
 private $printTypeList = false; // set to true to print URLs list following type                                                                                                             
-private $extUrlsTest = true; // set to false to skip external URLs test (default value is true).                   
+private $extUrlsTest = true; // set to false to skip external URLs test (default value is true)
+private $printSitemapSizeList = true; // set to true to print a size list of all sitemaps       
 ##### end of user parameters
 
 #################################################
@@ -148,6 +150,7 @@ private $escapeCodeArr = [ // escape code conversions
 '<' => '&lt;',
 ];
 private $maxUrlsInSitemap = 50000; // max number of URLs into a single sitemap
+private $sitemapMaxSize = 52428800; // max sitemap size (bytes)
 private $sitemapNameArr = []; // includes names of all saved sitemaps at the end of the process
 // text to add on some MySQL errors
 private $txtToAddOnMysqliErr = ' - Remember to set exec to n on getSeoSitemapExec table to restart the script.'; 
@@ -762,6 +765,7 @@ $this->writeLog('Deleted '.$fileName);
 $this->newSitemapAvailable();
 
 $this->getTotalUrls();
+$this->checkSitemapSize();
 $this->getExtUrls();
 
 // print type list if setted to true
@@ -1405,6 +1409,17 @@ $multipleSitemaps = true;
 $genCount = $sitemapIntCount = 1;
 
 foreach ($this->row as $value) {
+
+if ($sitemapCount > $this->maxUrlsInSitemap) {
+$this->writeLog('Execution has been stopped because total sitemaps are more than '.$this->maxUrlsInSitemap.
+' - You must contact John to fix that issue');  
+
+$this->exec = 'n';
+$this->updateExec();
+
+exit();
+}
+
 if ($sitemapIntCount === 1) {
 
 $fp = fopen(SITEMAPPATH.'sitemap'.$sitemapCount.'.xml', 'w');
@@ -1418,7 +1433,7 @@ exit();
 }
 
 $txt = <<<EOD
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='UTF-8'?>
 <urlset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd" xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 <!-- Created with $this->userAgent -->
 
@@ -1494,18 +1509,18 @@ exit();
 }
 
 $txt = <<<EOD
-<?xml version="1.0" encoding="UTF-8"?>
-<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<?xml version='1.0' encoding='UTF-8'?>
+<sitemapindex xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/siteindex.xsd" xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 <!-- Created with $this->userAgent -->
 
 EOD;
 
 foreach ($this->sitemapNameArr as $value) {
 
-// get sitemap name
-$sm = $this->getFileName($value);
+// get sitemap URL
+$sitemapUrl = DOMAINURL.'/'.$this->getFileName($value).'.gz';
 
-$txt .= '<sitemap><loc>'.$sm.'.gz</loc><lastmod>'.$lastmod.'</lastmod></sitemap>
+$txt .= '<sitemap><loc>'.$sitemapUrl.'</loc><lastmod>'.$lastmod.'</lastmod></sitemap>
 ';
 }
 
@@ -1618,6 +1633,49 @@ $this->updateExec();
 
 exit();
 }
+
+}
+################################################################################
+################################################################################
+// check all sitemap sizes. they must be non larger than $sitemapMaxSize
+private function checkSitemapSize(){
+
+$this->succ = false;
+
+if ($this->printSitemapSizeList === true) {
+$this->writeLog('##### Sitemap sizes list');
+}
+
+foreach ($this->sitemapNameArr as $value) {
+$fileName = $this->getFileName($value);
+
+$size = filesize($value);
+
+if ($size === false) {
+$this->writeLog('Execution has been stopped because of filesize error checking '.$fileName);   
+
+$this->exec = 'n';
+$this->updateExec();
+
+exit();
+}
+elseif ($size > $this->sitemapMaxSize) {
+$this->writeLog('Warnuing: size of '.$fileName.' is larger than '.$this->sitemapMaxSize.' - double-check that file to fix it!');
+}
+
+if ($this->printSitemapSizeList === true) {
+
+$kbSize = round($size * 0.0009765625, 2);
+
+$this->writeLog('Size: '.$kbSize.' Kb - sitemap: '.$fileName);
+}
+}
+
+if ($this->printSitemapSizeList === true) {
+$this->writeLog('##########'.PHP_EOL);
+}
+
+$this->succ = true;
 
 }
 ################################################################################
