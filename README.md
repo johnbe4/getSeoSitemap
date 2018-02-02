@@ -42,6 +42,7 @@ Using getSeoSitemap, you will be able to give a better surfing experience to you
     A command line example to schedule the script every day at 7:45:00 AM is:<br>
     45 7  *    *    *    php /example/websites/clients/client1/web5/example/example/getSeoSitemap/getSeoSitemap.php<br>
 
-**Notice<br>**
+**Warning<br>**
 To run getSeoSitemp faster, using a script like geoplugin.class you should exclude geoSeoSitemap user-agent from that.<br>
-**Before moving from releases 1.0 or 1.1 to 2.0 or higher, you must delete the getSeoSitemap table into your dBase.**
+**Before moving from releases 1.0 or 1.1 to 2.0 or higher, you must delete the getSeoSitemap table into your dBase.<br>
+Do not save any file with name that starts with sitemap in the same folder of sitemaps, otherwise getSeoSitemap script could cancel it.**
