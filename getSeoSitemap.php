@@ -135,7 +135,7 @@ private $seoExclusion = [ // file type to exclude from seo functions
 ];
 private $changefreqArr = ['daily', 'weekly', 'monthly', 'yearly']; // changefreq accepted values
 private $priorityArr = ['1.0', '0.9', '0.8', '0.7', '0.6', '0.5', '0.4', '0.3', '0.2', '0.1']; // priority accepted values
-private $userAgent = 'getSeoSitemap v2.3 by John';
+private $userAgent = 'getSeoSitemap v2.3.1 by John';
 private $exec = 'n'; // execution value (could be y or n)
 private $errCounter = 0; // error counter
 private $maxErr = 20; // max number of errors to stop execution
