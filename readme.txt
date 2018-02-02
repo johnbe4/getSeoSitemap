@@ -41,3 +41,4 @@ Instructions
 Notice
 To run getSeoSitemp faster, using a script like geoplugin.class you should exclude geoSeoSitemap user-agent from that.
 Before moving from releases 1.0 or 1.1 to 2.0 or higher, you must delete the getSeoSitemap table into your dBase.
+Do not save any file with name that starts with sitemap in the same folder of sitemaps, otherwise getSeoSitemap script could cancel it.
