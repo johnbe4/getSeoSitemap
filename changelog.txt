@@ -1,5 +1,19 @@
 getSeoSitemap CHANGELOG
 
+v3.0 (2018-03-06)
+- Added function to detect if sitemap is UTF-8 encoded.
+- Removed BINGMAXSIZE from user constants.
+- Added $bingMaxSize variable.
+- Changed unit measure of size into getSeoSitemap table from Kb to byte.
+- Fixed bug of id value into getSeoSitemap table: id could be up to 4294967295 instead of 32767.
+- Changed getSeoSitemap table engine from MyISAM to InnoDB.
+- Improved getSeoSitemap table.
+- Added getSeoSitemap table optimization.
+- Added function to check URL length.
+- Added more info to SEO lists.
+- Fixed bug of parse_url if response is false or path is not setted.
+- Small changes.
+
 v2.3.1 (2018-01-31)
 - Added feature to check all sitemap sizes that must be no larger than 50 Mb.
 - Added variable $printSitemapSizeList to print a list of all sitemap sizes.
@@ -8,23 +22,23 @@ v2.3.1 (2018-01-31)
 - Fixed bug of sitemap index head.
 - Fixed bug of sitemap URLs listed into sitemap index.
 
-2.3 (2018-01-30)
+v2.3 (2018-01-30)
 - Added feature to create sitemap index and multiple sitemaps when total URLs are more than 50000.
 - Fixed bug that created an infinite loop on some mysqli errors.
 - Removed constant SITEMAPURL.
-- Removed feature to save sitemap.back.xml.gz.
+- Removed function to save sitemap.back.xml.gz.
 
-2.2 (2018-01-23)
+v2.2 (2018-01-23)
 - Added entity escaping function to clean URLs before saving into sitemap.
 - Added function to delete sitemap.xml: it exists only sitemap.xml.gz from now.
 - Small changes.
 
-2.1 (2018-01-18)
+v2.1 (2018-01-18)
 - Modified $fileToAdd user constant to add and follow all kind of URLs.
 - Updated pageTest function to prevent skipping URLs with GET section if the file extension is a value of $fileToAdd.
 - Added $extUrls user parameter to skip external URLs test.
 
-2.0 (2018-01-09)
+v2.0 (2018-01-09)
 - Added list of URLs with size > 125.00 Kb (bing SEO).
 - Added function to set execution equal n on error.
 - Added function to count errors preventing stop.
@@ -32,7 +46,7 @@ v2.3.1 (2018-01-31)
 - Added functions to check page title (bing SEO and google SEO).
 - Removed LASTMODCHANGE and SIZEDIFF constants.
 
-1.1 (2017-02-25)
+v1.1 (2017-02-25)
 - Added checkTables function to auto-create the tables into dBase (getSeoSitemap and getSeoSitemapExec).
 - Added prepared statements to increase security and speed.
 - Added check on cURL functions.
@@ -42,5 +56,5 @@ v2.3.1 (2018-01-31)
 - Updated error messages.
 - Fixed errors in printing lists.
 
-1.0 (2017-01-22)
+v1.0 (2017-01-22)
 - First stable release.
