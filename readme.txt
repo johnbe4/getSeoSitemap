@@ -1,4 +1,4 @@
-getSeoSitemap v2.3.1 README (2018-01-31)
+getSeoSitemap v3.0 README (2018-03-06)
 
 Php library to get sitemap.
 It crawls a whole website checking all internal and external links.
@@ -14,6 +14,7 @@ The script requires PHP 5.4 and MySQL 5.5.
 This script creates a full gzip sitemap or multiple gzip sitemaps plus a gzip sitemap index.
 It includes change frequency, last modification date and priority all setted following your own rules.
 Change frequency will be automatically selected between daily, weekly, monthly and yearly.
+Max URL lenght must be 767 characters, otherwise the script will fail.
 URLs with http response code different from 200 or with size = 0 will not be included into sitemap.
 It checks all internal and external links.
 If failed (http response code different from 200 or with size = 0), external URLs from the domain will be included into failed URLs list.
@@ -34,11 +35,11 @@ Instructions
     That is very important because search engines do not like relative links and that prevent negative issues.
     Only using absolute link you are 100% sure how the link will be treated by search engines, browsers etc.
 3 - set all user constants and parameters.
-4 - on your server cronotab schedule the script once each day prefereble when your server is not too much busy.
+4 - on your server cronotab, schedule the script once each day prefereble when your server is not too much busy.
     A command line example to schedule the script every day at 7:45:00 AM is:
     45 7  *    *    *    php /example/websites/clients/client1/web5/example/example/getSeoSitemap/getSeoSitemap.php
 
-Notice
-To run getSeoSitemp faster, using a script like geoplugin.class you should exclude geoSeoSitemap user-agent from that.
-Before moving from releases 1.0 or 1.1 to 2.0 or higher, you must delete the getSeoSitemap table into your dBase.
+Warning
+To run getSeoSitemp faster, using a script like geoPlugin you should exclude geoSeoSitemap user-agent from that.
+Before moving from releases lower than 3.0 to 3.0 or higher, you must drop getSeoSitemap and getSeoSitemapExec tables into your dBase.
 Do not save any file with name that starts with sitemap in the same folder of sitemaps, otherwise getSeoSitemap script could cancel it.
