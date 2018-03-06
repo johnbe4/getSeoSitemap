@@ -1,4 +1,4 @@
-# getSeoSitemap v2.3.1 (2018-01-31)
+# getSeoSitemap v3.0 (2018-03-06)
 *Php library to get sitemap.<br>
 It crawls a whole website checking all internal and external links.<br>
 It makes a Search Engine Optimization.*<br>
@@ -18,6 +18,7 @@ The script requires PHP 5.4 and MySQL 5.5.
 This script creates a full gzip sitemap or multiple gzip sitemaps plus a gzip sitemap index.<br>
 It includes change frequency, last modification date and priority all setted following your own rules.<br>
 Change frequency will be automatically selected between daily, weekly, monthly and yearly.<br>
+Max URL lenght must be 767 characters, otherwise the script will fail.<br>
 URLs with http response code different from 200 or with size = 0 will not be included into sitemap.<br>
 It checks all internal and external links.<br>
 If failed (http response code different from 200 or with size = 0), external URLs from the domain will be included into failed URLs list.<br>
@@ -44,5 +45,5 @@ Using getSeoSitemap, you will be able to give a better surfing experience to you
 
 **Warning<br>**
 To run getSeoSitemp faster, using a script like geoplugin.class you should exclude geoSeoSitemap user-agent from that.<br>
-**Before moving from releases 1.0 or 1.1 to 2.0 or higher, you must delete the getSeoSitemap table into your dBase.<br>
+**Before moving from releases lower than 3.0 to 3.0 or higher, you must drop getSeoSitemap and getSeoSitemapExec tables into your dBase.<br>
 Do not save any file with name that starts with sitemap in the same folder of sitemaps, otherwise getSeoSitemap script could cancel it.**
