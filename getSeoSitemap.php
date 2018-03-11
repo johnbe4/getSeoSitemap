@@ -1,7 +1,7 @@
 <?php
 
 /*
-getSeoSitemap v3.0 LICENSE (2018-02-10)
+getSeoSitemap v3.0 LICENSE (2018-03-06)
 
 getSeoSitemap v3.0 is distributed under the following BSD-style license: 
 
