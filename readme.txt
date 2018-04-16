@@ -1,4 +1,4 @@
-getSeoSitemap v3.0 README (2018-03-06)
+getSeoSitemap v3.1 README (2018-04-16)
 
 Php library to get sitemap.
 It crawls a whole website checking all internal and external links.
@@ -25,7 +25,8 @@ You must use only absolute URLs inside the site.
 There is not any automatic function to submit updated sitemap to google or bing.
 That is because I discovered search engines prefer submission by their webmaster tools.
 In fact, submitting sitemap by their own link, they never update the last submission time inside webmaster tools.
-There is not any maximum limit of URLs number to scan and to add to sitemap.
+It rewrites robots.txt adding updated sitemap informations.
+Maximum limit of URLs to insert into sitemap is 2.5T.
 
 Using getSeoSitemap, you will be able to give a better surfing experience to your clients.
 
