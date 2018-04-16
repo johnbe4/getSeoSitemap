@@ -1,5 +1,14 @@
 getSeoSitemap CHANGELOG
 
+v3.1 (2018-04-16)
+- Added function to print MySQL warnings (added variable $printMysqlWarn).
+- Added function to print a list of malformed URL addresses (added variable $printMalfUrls).
+- Added max limit of URLs to insert into sitemap (2.5T).
+- Added function to rewrite robots.txt adding updated sitemap infos (added variable $rewriteRobots).
+- Fixed bug of log path: now it will remain the same from the start to the end of execution.
+- Increased speed of writeLog function using file_put_contents.
+- Small changes.
+
 v3.0 (2018-03-06)
 - Added function to detect if sitemap is UTF-8 encoded.
 - Removed BINGMAXSIZE from user constants.
@@ -15,7 +24,7 @@ v3.0 (2018-03-06)
 - Small changes.
 
 v2.3.1 (2018-01-31)
-- Added feature to check all sitemap sizes that must be no larger than 50 Mb.
+- Added function to check all sitemap sizes that must be no larger than 50 Mb.
 - Added variable $printSitemapSizeList to print a list of all sitemap sizes.
 - Added execution stop if total sitemaps are more than 50000.
 - Fixed bug of sitemap head.
