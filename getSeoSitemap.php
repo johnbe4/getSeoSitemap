@@ -1,9 +1,9 @@
 <?php
 
 /*
-getSeoSitemap v3.0 LICENSE (2018-03-06)
+getSeoSitemap v3.1 LICENSE (2018-04-16)
 
-getSeoSitemap v3.0 is distributed under the following BSD-style license: 
+getSeoSitemap v3.1 is distributed under the following BSD-style license: 
 
 Copyright (c) 2016-2018 
 Giovanni Bertone (RED Racing Parts)
@@ -67,8 +67,8 @@ class getSeoSitemap {
 ##### start of user parameters
 private $skipUrl = [ // skip all urls that start or are equal these values (values must be absolute)
 'https://www.example.com/shop/',
-'https://www.example.com/example/example/example/general/intro/google_site_search.php',
-'https://www.example.com/example/example/example/generale/intro/google_site_search.php',
+'https://www.example.com/example/example/productsandcomponents/general/intro/google_site_search.php',
+'https://www.example.com/example/example/prodottiecomponenti/generale/intro/google_site_search.php',
 'https://www.example.com/example/currency.php',
 ];
 // set $fileToAdd to true to follow and add all kind of URLs.
@@ -101,14 +101,17 @@ private $printChangefreqList = false; // set to true to print URLs list followin
 private $printPriorityList = false; // set to true to print URLs list following priority
 private $printTypeList = false; // set to true to print URLs list following type                                                                                                             
 private $extUrlsTest = true; // set to false to skip external URLs test (default value is true)
-private $printSitemapSizeList = false; // set to true to print a size list of all sitemaps       
+private $printSitemapSizeList = false; // set to true to print a size list of all sitemaps   
+private $printMysqlWarn = true; // set to true to print MySQL warnings    
+private $printMalfUrls = true; // set to true to print a malformed URL list following a standard good practice
+private $rewriteRobots = false; // set to true to rewrite robots.txt including updated sitemap infos
 ##### end of user parameters
 
 #################################################
 ##### WARNING: DO NOT CHANGE ANYTHING BELOW #####
 #################################################
 
-private $version = 'v3.0';
+private $version = 'v3.1';
 private $userAgent = 'getSeoSitemap ver. by John';
 private $url = null; // an aboslute URL (ex. https://www.example.com/test/test1.php )
 private $size = null; // size of file in Kb
@@ -157,17 +160,27 @@ private $escapeCodeArr = [ // escape code conversions
 '<' => '&lt;',
 ];
 private $maxUrlsInSitemap = 50000; // max number of URLs into a single sitemap
+private $maxTotalUrls = 2500000000; // max total number of URLs
+private $totUrls = null; // total URLs at the end of 
 private $sitemapMaxSize = 52428800; // max sitemap size (bytes)
 private $sitemapNameArr = []; // includes names of all saved sitemaps at the end of the process
 // text to add on some MySQL errors
 private $txtToAddOnMysqliErr = ' - fix it remembering to set exec to n in getSeoSitemapExec table.'; 
 private $bingMaxSize = 128000; // bing max file size in byte. this param is only for SEO
 private $maxUrlLength = 767; // max URL length
+private $malfChars = [' ']; // list of characters to detect malformed URLs following a standard good practice
+private $multipleSitemaps = null; // when multiple sitemaps are avaialble is true
+private $logPath = null; // log path
+private $scriptVerNum = null; // version number of the script
+private $dBaseVerNum = null; // version number of database
 
 ################################################################################
 public function start(){
 
 $time = time();
+
+// set log path: it will remain the same from the start to the end of execution
+$this->logPath = GETSITEMAPPATH.'log/'.date('Ymd').'.log';
 
 // set version in userAgent
 $this->userAgent = str_replace('ver.', $this->version, $this->userAgent);
@@ -192,6 +205,7 @@ exit();
 }
 // check if prevous full scan was ended to start a new full scan
 elseif ($this->row[0]['exec'] === 'n') {
+$this->writeLog('## getSeoSitemap '.$this->version);
 $this->writeLog('## Execution start');
 }
 else {
@@ -213,7 +227,7 @@ $this->writeLog('## Scan start');
 $this->stmt2 = $this->mysqli->prepare("INSERT INTO getSeoSitemap (url, state) VALUES (?, 'new') "
 ."ON DUPLICATE KEY UPDATE state = IF(state = 'old', 'new', state)");
 if ($this->stmt2 === false) {  
-$this->writeLog('Execution has been stopped because of MySQL prepare error: '.$this->mysqli->error.'.'); 
+$this->writeLog('Execution has been stopped because of MySQL prepare error: '.lcfirst($this->mysqli->error)); 
 
 $this->stopExec();
 }
@@ -226,7 +240,7 @@ $this->stmt3 = $this->mysqli->prepare("UPDATE getSeoSitemap SET "
 . "httpCode = ? "
 . "WHERE url = ? LIMIT 1");
 if ($this->stmt3 === false) {  
-$this->writeLog('Execution has been stopped because of MySQL prepare error: '.$this->mysqli->error.'.');
+$this->writeLog('Execution has been stopped because of MySQL prepare error: '.lcfirst($this->mysqli->error));
 
 $this->stopExec();
 }
@@ -258,7 +272,7 @@ $this->stmt4 = $this->mysqli->prepare("INSERT INTO getSeoSitemap ("
 . "state = 'skip', "
 . "httpCode = ?");
 if ($this->stmt4 === false) {  
-$this->writeLog('Execution has been stopped because of MySQL prepare error: '.$this->mysqli->error.'.');   
+$this->writeLog('Execution has been stopped because of MySQL prepare error: '.lcfirst($this->mysqli->error));   
 
 $this->stopExec();
 }
@@ -267,7 +281,7 @@ $this->stmt5 = $this->mysqli->prepare("UPDATE getSeoSitemap SET "
 . "title = ? "
 . "WHERE url = ? LIMIT 1");
 if ($this->stmt5 === false) {  
-$this->writeLog('Execution has been stopped because of MySQL prepare error: '.$this->mysqli->error.'.');
+$this->writeLog('Execution has been stopped because of MySQL prepare error: '.lcfirst($this->mysqli->error));
 
 $this->stopExec();
 }
@@ -279,7 +293,7 @@ $this->openCurlConn();
 
 $this->stmt = $this->mysqli->prepare("UPDATE getSeoSitemap SET state = 'scan' WHERE url = ? LIMIT 1");
 if ($this->stmt === false) {  
-$this->writeLog('Execution has been stopped because of MySQL prepare error: '.$this->mysqli->error.'.');  
+$this->writeLog('Execution has been stopped because of MySQL prepare error: '.lcfirst($this->mysqli->error));  
 $this->stopExec();
 }
 
@@ -298,12 +312,12 @@ $this->getHref($url);
 $this->linksScan();
 
 if ($this->stmt->bind_param('s', $url) !== true) {  
-$this->writeLog('Execution has been stopped because of MySQL error binding parameters: '.$this->stmt->error.'.');  
+$this->writeLog('Execution has been stopped because of MySQL error binding parameters: '.lcfirst($this->stmt->error));  
 $this->stopExec();
 }
 
 if ($this->stmt->execute() !== true) {  
-$this->writeLog('Execution has been stopped because of MySQL execute error: '.$this->stmt->error.'.');   
+$this->writeLog('Execution has been stopped because of MySQL execute error: '.lcfirst($this->stmt->error));   
 $this->stopExec();
 }
 }
@@ -424,7 +438,7 @@ exit();
 }
 
 if (!$this->mysqli->set_charset('utf8')) {
-$this->writeLog('Execution has been stopped because of MySQL error loading character set utf8: '.$this->mysqli->error);  
+$this->writeLog('Execution has been stopped because of MySQL error loading character set utf8: '.lcfirst($this->mysqli->error));  
 
 $this->stopExec();
 } 
@@ -438,8 +452,24 @@ private function execQuery(){
 $this->row = [];
  
 if (!($result = $this->mysqli->query($this->query))) { 
-$this->writeLog('Execution has been stopped because of MySQL query error: '.$this->mysqli->error.' - query: '.$this->query.$this->txtToAddOnMysqliErr);   
+$this->writeLog('Execution has been stopped because of MySQL error. Error ('.$this->mysqli->errno.'): '
+.$this->mysqli->error.' - query: "'.$this->query.'"'.$this->txtToAddOnMysqliErr);   
 exit();
+}
+
+// write query warnings
+if ($this->printMysqlWarn === true) {
+
+if ($this->mysqli->warning_count > 0) {
+if ($warnRes = $this->mysqli->query("SHOW WARNINGS")) {
+$warnRow = $warnRes->fetch_row();
+
+$warnMsg = sprintf("%s (%d): %s", $warnRow[0], $warnRow[1], lcfirst($warnRow[2]));
+$this->writeLog($warnMsg.' - query: "'.$this->query.'"');   
+        
+$warnRes->close();
+}
+}
 }
 
 // if query is select....
@@ -451,8 +481,7 @@ $row = $result->fetch_assoc();
 $this->count = $row['count'];
 }
 else {
-
-// i choose the while below cause it is faster than the equivalent for
+// the while below is faster than the equivalent for
 $i = 0;
 while ($row = $result->fetch_assoc()) {
 $this->row[$i] = $row;
@@ -462,6 +491,11 @@ $i++;
 $this->rowNum = $result->num_rows;
 }
 
+$result->free_result();
+}
+// else if query is show....
+elseif (strpos($this->query, 'SHOW') === 0) {
+$this->rowNum = $result->num_rows;
 $result->free_result();
 }
 
@@ -478,13 +512,30 @@ $result->free_result();
 } 
 while ($this->mysqli->next_result());
 }
-else {$this->writeLog('Execution has been stopped because of MySQL multi_query error: '.$this->mysqli->error.' - query: '.$this->query.$this->txtToAddOnMysqliErr);   
+else {$this->writeLog('Execution has been stopped because of MySQL multi_query error. Error ('
+.$this->mysqli->errno.'): '.lcfirst($this->mysqli->error).' - query: '.$this->query.$this->txtToAddOnMysqliErr);   
 exit();
 }
 
 if ($this->mysqli->errno) {
-$this->writeLog('Execution has been stopped because of MySQL multi_query error: '.$this->mysqli->error.' - query: '.$this->query.$this->txtToAddOnMysqliErr);   
+$this->writeLog('Execution has been stopped because of MySQL multi_query error. Error ('
+.$this->mysqli->errno.'): '.lcfirst($this->mysqli->error).' - query: '.$this->query.$this->txtToAddOnMysqliErr);   
 exit();
+}
+
+// write query warnings
+if ($this->printMysqlWarn === true) {
+
+if ($this->mysqli->warning_count > 0) {
+if ($warnRes = $this->mysqli->query("SHOW WARNINGS")) {
+$warnRow = $warnRes->fetch_row();
+
+$warnMsg = sprintf("%s (%d): %s", $warnRow[0], $warnRow[1], lcfirst($warnRow[2]));
+$this->writeLog($warnMsg.' - query: "'.$this->query.'"');   
+        
+$warnRes->close();
+}
+}
 }
 
 }
@@ -494,31 +545,31 @@ exit();
 private function closeMysqliStmt(){
 
 if ($this->stmt->close() !== true) {  
-$this->writeLog('Execution has been stopped because of MySQL stmt close error: '.$this->mysqli->error);   
+$this->writeLog('Execution has been stopped because of MySQL stmt close error: '.lcfirst($this->mysqli->error));   
 
 $this->stopExec();
 }
 
 if ($this->stmt2->close() !== true) {  
-$this->writeLog('Execution has been stopped because of MySQL stmt2 close error: '.$this->mysqli->error);  
+$this->writeLog('Execution has been stopped because of MySQL stmt2 close error: '.lcfirst($this->mysqli->error));  
 
 $this->stopExec();
 }
 
 if ($this->stmt3->close() !== true) {  
-$this->writeLog('Execution has been stopped because of MySQL stmt3 close error: '.$this->mysqli->error);   
+$this->writeLog('Execution has been stopped because of MySQL stmt3 close error: '.lcfirst($this->mysqli->error));   
 
 $this->stopExec();
 }
 
 if ($this->stmt4->close() !== true) {  
-$this->writeLog('Execution has been stopped because of MySQL stmt4 close error: '.$this->mysqli->error); 
+$this->writeLog('Execution has been stopped because of MySQL stmt4 close error: '.lcfirst($this->mysqli->error)); 
 
 $this->stopExec();
 }
 
 if ($this->stmt5->close() !== true) {  
-$this->writeLog('Execution has been stopped because of MySQL stmt5 close error: '.$this->mysqli->error);   
+$this->writeLog('Execution has been stopped because of MySQL stmt5 close error: '.lcfirst($this->mysqli->error));   
 
 $this->stopExec();
 }
@@ -530,7 +581,8 @@ $this->stopExec();
 private function closeMysqliConn(){
 
 if ($this->mysqli->close() !== true) {  
-$this->writeLog('Execution has been stopped because of MySQL mysqli close error: '.$this->mysqli->error.$this->txtToAddOnMysqliErr);   
+$this->writeLog('Execution has been stopped because of MySQL mysqli close error: '
+.lcfirst($this->mysqli->error).$this->txtToAddOnMysqliErr);   
 exit();
 }
 
@@ -621,12 +673,12 @@ $title = null;
 }
 
 if ($this->stmt5->bind_param('ss', $title, $url) !== true) {  
-$this->writeLog('Execution has been stopped because of MySQL error binding parameters: '.$this->stmt5->error.'.');   
+$this->writeLog('Execution has been stopped because of MySQL error binding parameters: '.lcfirst($this->stmt5->error));   
 $this->stopExec();
 }
 
 if ($this->stmt5->execute() !== true) {  
-$this->writeLog('Execution has been stopped because of MySQL execute error: '.$this->stmt5->error.'.'); 
+$this->writeLog('Execution has been stopped because of MySQL execute error: '.lcfirst($this->stmt5->error)); 
 $this->stopExec();
 }
 
@@ -665,6 +717,9 @@ $this->testExtUrls();
 $this->closeCurlConn();
 }
 
+// close msqli statements
+$this->closeMysqliStmt();
+
 $this->query = "SELECT * FROM getSeoSitemap WHERE httpCode != '200' OR size = 0 ORDER BY url";
 $this->execQuery();
 
@@ -693,6 +748,19 @@ $this->writeLog('##########');
 }
 
 $this->writeLog($this->rowNum.' failed URLs (external URLs are included)'.PHP_EOL);
+
+// get total URLs to insert into sitemap
+$this->query = "SELECT COUNT(*) AS count FROM getSeoSitemap "
+."WHERE httpCode = '200' AND size != 0 AND state = 'scan'";
+$this->execQuery();
+$this->totUrls = $this->count;
+
+// stop exec if total URLs to insert is higher than $maxTotalUrls
+if ($this->totUrls > $this->maxTotalUrls) {
+$this->writeLog("Execution has been stopped because of total URLs to insert into sitemap is $this->totUrls "
+. "and higher than max limit of $this->maxTotalUrls"); 
+$this->stopExec();
+}
 
 $this->writeLog('##### SEO');
 $this->getSizeList();
@@ -740,7 +808,7 @@ $fullSitemapNameArr = $this->getSitemapNames();
 // create an array of all sitemaps to delete
 $sitemapToDeleteArr = array_diff($fullSitemapNameArr, $this->sitemapNameArr);
 
-// delete all old missing sitemaps
+// delete old missing sitemaps
 foreach ($sitemapToDeleteArr as $value) {
 $this->delete($value);
 
@@ -748,11 +816,17 @@ $fileName = $this->getFileName($value);
 $this->writeLog('Deleted '.$fileName);
 }
 
+$this->checkSitemapSize();
+
 // set new sitemap is available
 $this->newSitemapAvailable();
 
+// rewrite robots.txt
+if ($this->rewriteRobots === true ) {
+$this->getRewriteRobots();
+}
+
 $this->getTotalUrls();
-$this->checkSitemapSize();
 $this->getExtUrls();
 
 // print type list if setted to true
@@ -770,8 +844,10 @@ if ($this->printPriorityList === true) {
 $this->getPriorityList();
 }
 
-// close msqli statements
-$this->closeMysqliStmt();
+// print malformed list if setted to true
+if ($this->printMalfUrls === true) {
+$this->getMalfList();
+}
 
 // optimize tables
 $this->optimTables();
@@ -783,7 +859,8 @@ $this->writeLog('Total execution time '.$execTime);
 $this->writeLog('##### Execution end'.PHP_EOL.PHP_EOL);
 
 // update last execution time and set exec to n (a full scan has been successfully done) plus write version of getSeoSitemap
-$this->query = "UPDATE getSeoSitemapExec SET version = '$this->version',  mDate = '$endTime', exec = 'n' WHERE func = 'getSeoSitemap' LIMIT 1";
+$this->query = "UPDATE getSeoSitemapExec "
+. "SET version = '$this->version',  mDate = '$endTime', exec = 'n' WHERE func = 'getSeoSitemap' LIMIT 1";
 $this->execQuery();
 
 // close msqli connection
@@ -818,12 +895,12 @@ $this->pageBody = null;
 ################################################################################
 private function writeLog($logMsg) {
 
-$fp = fopen(GETSITEMAPPATH.'log/'.date('Ymd').'.log','a');    
-
 $msgLine = date('Y-m-d H:i:s').' - '.$logMsg.PHP_EOL;
 
-fwrite($fp, $msgLine);  
-fclose($fp);
+if (file_put_contents($this->logPath, $msgLine, FILE_APPEND | LOCK_EX) === false) {
+error_log('Execution has been stopped because of file_put_contents cannot write '.$this->logPath, 0);
+$this->stopExec();
+}
 
 }
 ################################################################################
@@ -890,10 +967,7 @@ $this->writeLog('Included '.$this->count.' '.$value.' URLs into sitemap');
 }
 }
 
-$this->query = "SELECT COUNT(*) AS count FROM getSeoSitemap "
-."WHERE httpCode = '200' AND size != 0 AND state = 'scan'";
-$this->execQuery();
-$this->writeLog('Included '.$this->count.' URLs into sitemap'.PHP_EOL);
+$this->writeLog('Included '.$this->totUrls.' URLs into sitemap'.PHP_EOL);
 
 }
 ################################################################################
@@ -956,7 +1030,8 @@ $this->writeLog($this->rowNum.' external skipped URLs'.PHP_EOL);
 ################################################################################
 private function testExtUrls() {
 
-$this->query = "SELECT url FROM getSeoSitemap WHERE state = 'skip' AND url NOT LIKE '".DOMAINURL."%' AND url NOT LIKE 'mailto:%'";
+$this->query = "SELECT url FROM getSeoSitemap "
+. "WHERE state = 'skip' AND url NOT LIKE '".DOMAINURL."%' AND url NOT LIKE 'mailto:%'";
 $this->execQuery();
 
 if ($this->rowNum > 0) {
@@ -965,7 +1040,7 @@ $this->stmt = $this->mysqli->prepare("UPDATE getSeoSitemap SET "
 . "httpCode = ? "
 . "WHERE url = ? LIMIT 1");
 if ($this->stmt === false) {  
-$this->writeLog('Execution has been stopped because of MySQL prepare error: '.$this->mysqli->error.'.'); 
+$this->writeLog('Execution has been stopped because of MySQL prepare error: '.lcfirst($this->mysqli->error)); 
 
 $this->stopExec();
 }
@@ -975,13 +1050,13 @@ $url = $value['url'];
 $this->getPage($url);
 
 if ($this->stmt->bind_param('sss', $this->size, $this->httpCode, $url) !== true) {  
-$this->writeLog('Execution has been stopped because of MySQL error binding parameters: '.$this->stmt->error.'.');    
+$this->writeLog('Execution has been stopped because of MySQL error binding parameters: '.lcfirst($this->stmt->error));    
 
 $this->stopExec();
 }
 
 if ($this->stmt->execute() !== true) {  
-$this->writeLog('Execution has been stopped because of MySQL execute error: '.$this->stmt->error.'.'); 
+$this->writeLog('Execution has been stopped because of MySQL execute error: '.lcfirst($this->stmt->error)); 
 $this->stopExec();
 }
 }
@@ -1007,12 +1082,12 @@ private function insUpdNewUrlQuery($url){
 $this->checkUrlLength($url);
 
 if ($this->stmt2->bind_param('s', $url) !== true) {  
-$this->writeLog('Execution has been stopped because of MySQL error binding parameters: '.$this->stmt2->error.'.'); 
+$this->writeLog('Execution has been stopped because of MySQL error binding parameters: '.lcfirst($this->stmt2->error)); 
 $this->stopExec();
 }
 
 if ($this->stmt2->execute() !== true) {  
-$this->writeLog('Execution has been stopped because of MySQL execute error: '.$this->stmt2->error.'.'); 
+$this->writeLog('Execution has been stopped because of MySQL execute error: '.lcfirst($this->stmt2->error)); 
 $this->stopExec();
 }
 
@@ -1040,13 +1115,14 @@ $this->changefreq = 'daily';
 
 $this->update();
 
-if ($this->stmt3->bind_param('ssssss', $this->size, $this->md5, $this->lastmod, $this->changefreq, $this->httpCode, $url) !== true) {  
-$this->writeLog('Execution has been stopped because of MySQL error binding parameters: '.$this->stmt3->error.'.');   
+if (
+$this->stmt3->bind_param('ssssss', $this->size, $this->md5, $this->lastmod, $this->changefreq, $this->httpCode, $url) !== true) {  
+$this->writeLog('Execution has been stopped because of MySQL error binding parameters: '.lcfirst($this->stmt3->error));   
 $this->stopExec();
 }
 
 if ($this->stmt3->execute() !== true) {  
-$this->writeLog('Execution has been stopped because of MySQL execute error: '.$this->stmt3->error.'.'); 
+$this->writeLog('Execution has been stopped because of MySQL execute error: '.lcfirst($this->stmt3->error)); 
 $this->stopExec();
 }
 }
@@ -1059,12 +1135,12 @@ private function insSkipUrl($url){
 $this->checkUrlLength($url);
 
 if ($this->stmt4->bind_param('sssss', $url, $this->size, $this->httpCode, $this->size, $this->httpCode) !== true) {  
-$this->writeLog('Execution has been stopped because of MySQL error binding parameters: '.$this->stmt4->error.'.');  
+$this->writeLog('Execution has been stopped because of MySQL error binding parameters: '.lcfirst($this->stmt4->error));  
 $this->stopExec();
 }
 
 if ($this->stmt4->execute() !== true) {  
-$this->writeLog('Execution has been stopped because of MySQL execute error: '.$this->stmt4->error.'.');  
+$this->writeLog('Execution has been stopped because of MySQL execute error: '.lcfirst($this->stmt4->error));  
 $this->stopExec();
 }
 
@@ -1074,7 +1150,8 @@ $this->stopExec();
 private function getChangefreqList(){
 
 foreach ($this->changefreqArr as $value) {
-$this->query = "SELECT url FROM getSeoSitemap WHERE changefreq = '$value' AND state != 'skip' AND httpCode = '200' AND size != 0";
+$this->query = "SELECT url FROM getSeoSitemap "
+. "WHERE changefreq = '$value' AND state != 'skip' AND httpCode = '200' AND size != 0";
 $this->execQuery();
 $this->writeLog('##### URLs with '.$value.' change frequency into sitemap');
 
@@ -1116,9 +1193,11 @@ private function getSizeList(){
 
 $kbBingMaxSize = $this->getKb($this->bingMaxSize);
 
-$this->query = "SELECT url, size FROM getSeoSitemap WHERE size > '".$this->bingMaxSize."' AND state != 'skip' AND httpCode = '200'";
+$this->query = "SELECT url, size FROM getSeoSitemap WHERE size > '".$this->bingMaxSize
+."' AND state != 'skip' AND httpCode = '200'";
 $this->execQuery();
-$this->writeLog('##### URLs with size > '.$kbBingMaxSize.' Kb into sitemap (Bing SEO - page size should be lower than '.$kbBingMaxSize.' Kb)');
+$this->writeLog('##### URLs with size > '.$kbBingMaxSize.' Kb into sitemap (Bing SEO - page size should be lower than '
+.$kbBingMaxSize.' Kb)');
 
 $i = 0;
 if ($this->rowNum > 0) {
@@ -1155,7 +1234,8 @@ private function getMinTitleLengthList(){
 $this->query = "SELECT url, CHAR_LENGTH(title) AS titleLength FROM getSeoSitemap WHERE CHAR_LENGTH(title) < "
 .$this->bingTitleLength[0]." AND state != 'skip' AND httpCode = '200' AND title IS NOT NULL";
 $this->execQuery();
-$this->writeLog('##### URLs with title length < '.$this->bingTitleLength[0].' characters into sitemap (Bing SEO - page title length should be higher than '.$this->bingTitleLength[0].' characters)');
+$this->writeLog('##### URLs with title length < '.$this->bingTitleLength[0]
+.' characters into sitemap (Bing SEO - page title length should be higher than '.$this->bingTitleLength[0].' characters)');
 
 $i = 0;
 if ($this->rowNum > 0){
@@ -1183,7 +1263,8 @@ private function getMaxTitleLengthList(){
 $this->query = "SELECT url, CHAR_LENGTH(title) AS titleLength FROM getSeoSitemap WHERE CHAR_LENGTH(title) > "
 .$this->bingTitleLength[1]." AND state != 'skip' AND httpCode = '200' AND title IS NOT NULL";
 $this->execQuery();
-$this->writeLog('##### URLs with title length > '.$this->bingTitleLength[1].' characters into sitemap (Bing SEO - page title length should be lower than '.$this->bingTitleLength[1].' characters)');
+$this->writeLog('##### URLs with title length > '.$this->bingTitleLength[1]
+.' characters into sitemap (Bing SEO - page title length should be lower than '.$this->bingTitleLength[1].' characters)');
 
 $i = 0;
 if ($this->rowNum > 0){
@@ -1342,7 +1423,6 @@ $this->succ = false;
 
 if (unlink($fileName) === false){
 $this->writeLog('Execution has been stopped because of unlink cannot delete sitemap.xml');    
-
 $this->stopExec();
 }
 
@@ -1372,13 +1452,10 @@ $this->query = "SELECT url, lastmod, changefreq, priority FROM getSeoSitemap "
 $this->execQuery();
 
 // set sitemap counter start value
-if ($this->rowNum <= $this->maxUrlsInSitemap) {
 $sitemapCount = null;
-$multipleSitemaps = false;
-}
-else {
+if ($this->rowNum > $this->maxUrlsInSitemap) {
 $sitemapCount = 1;
-$multipleSitemaps = true;
+$this->multipleSitemaps = true;
 }
 
  // general row counter + sitemap internal row counter
@@ -1393,13 +1470,6 @@ $this->stopExec();
 }
 
 if ($sitemapIntCount === 1) {
-
-$fp = fopen(SITEMAPPATH.'sitemap'.$sitemapCount.'.xml', 'w');
-if ($fp === false){
-$this->writeLog('Execution has been stopped because of fopen cannot open sitemap'.$sitemapCount.'.xml');    
-
-$this->stopExec();
-}
 
 $txt = <<<EOD
 <?xml version='1.0' encoding='UTF-8'?>
@@ -1427,31 +1497,26 @@ $txt .= <<<EOD
 </urlset>
 EOD;
 
-if (fwrite($fp, $txt) === false) {
-$this->writeLog('Execution has been stopped because of fwrite cannot write sitemap'.$sitemapCount.'.xml');  
+$sitemapFile = 'sitemap'.$sitemapCount.'.xml';
+
+if (file_put_contents(SITEMAPPATH.$sitemapFile, $txt) === false) {
+$this->writeLog('Execution has been stopped because of file_put_contents cannot write '.$sitemapFile); 
 
 $this->stopExec();
 }
 
-if (fclose($fp) !== true) {
-$this->writeLog('Execution has been stopped because of fclose cannot close sitemap'.$sitemapCount.'.xml');  
-
-$this->stopExec();
-}
-else {
-$this->writeLog('Saved sitemap'.$sitemapCount.'.xml');
-$this->sitemapNameArr[] = SITEMAPPATH.'sitemap'.$sitemapCount.'.xml';
-}
+$this->writeLog('Saved '.$sitemapFile);
+$this->sitemapNameArr[] = SITEMAPPATH.$sitemapFile;
 
 $utf8Enc = $this->detectUtf8Enc($txt);
 
 if ($utf8Enc !== true) {
-$this->writeLog('Execution has been stopped because of sitemap'.$sitemapCount.'.xml is not UTF-8 encoded');  
+$this->writeLog('Execution has been stopped because of '.$sitemapFile.' is not UTF-8 encoded');  
 
 $this->stopExec();
 }
 
-if ($multipleSitemaps === true && $genCount !== $this->rowNum) {
+if ($this->multipleSitemaps === true && $genCount !== $this->rowNum) {
 $sitemapCount++;
 }
 
@@ -1462,19 +1527,12 @@ $genCount++;
 }
 
 // if there are multiple sitemaps, save sitemapindex 
-if ($multipleSitemaps === true) {
+if ($this->multipleSitemaps === true) {
 $time = time();
 
 $dT = new DateTime();
 $dT->setTimestamp($time);
 $lastmod = $dT->format(DATE_W3C);
-
-$fp = fopen(SITEMAPPATH.'sitemapindex.xml', 'w');
-if ($fp === false){
-$this->writeLog('Execution has been stopped because of fopen cannot open sitemapindex.xml');    
-
-$this->stopExec();
-}
 
 $txt = <<<EOD
 <?xml version='1.0' encoding='UTF-8'?>
@@ -1484,7 +1542,6 @@ $txt = <<<EOD
 EOD;
 
 foreach ($this->sitemapNameArr as $value) {
-
 // get sitemap URL
 $sitemapUrl = DOMAINURL.'/'.$this->getFileName($value).'.gz';
 
@@ -1496,26 +1553,21 @@ $txt .= <<<EOD
 </sitemapindex>
 EOD;
 
-if (fwrite($fp, $txt) === false) {
-$this->writeLog('Execution has been stopped because of fwrite cannot write sitemapindex.xml');  
+$sitemapFile = 'sitemapindex.xml';
+
+if (file_put_contents(SITEMAPPATH.$sitemapFile, $txt) === false) {
+$this->writeLog('Execution has been stopped because of file_put_contents cannot write '.$sitemapFile); 
 
 $this->stopExec();
 }
 
-if (fclose($fp) !== true) {
-$this->writeLog('Execution has been stopped because of fclose cannot close sitemapindex.xml');   
-
-$this->stopExec();
-}
-else {
-$this->writeLog('Saved sitemapindex.xml');
-$this->sitemapNameArr[] = SITEMAPPATH.'sitemapindex.xml';
-}
+$this->writeLog('Saved '.$sitemapFile);
+$this->sitemapNameArr[] = SITEMAPPATH.$sitemapFile;
 
 $utf8Enc = $this->detectUtf8Enc($txt);
 
 if ($utf8Enc !== true) {
-$this->writeLog('Execution has been stopped because of sitemapindex.xml is not UTF-8 encoded');  
+$this->writeLog('Execution has been stopped because of '.$sitemapFile.' is not UTF-8 encoded');  
 
 $this->stopExec();
 }
@@ -1692,20 +1744,76 @@ $this->succ = true;
 }
 ################################################################################
 ################################################################################
+// rewrite robots.txt with new sitemap infos
+private function getRewriteRobots(){
+
+$file = 'robots.txt';
+$filePath = SITEMAPPATH.$file;
+$fileLines = [];
+
+// if file exists
+if (file_exists($filePath) === true) {
+// get file line by line into an array
+$fileLines = file($filePath, FILE_IGNORE_NEW_LINES);
+
+if ($fileLines === false) {
+$this->writeLog('Execution has been stopped because of file cannot read '.$file);   
+$this->stopExec();
+}
+
+// remove all old sitemap lines from robots.txt
+foreach ($fileLines as $key => $value) {
+if ($value === '# Sitemap' || $value === '# Sitemapindex' || strpos($value, 'Sitemap: ') === 0) {
+unset($fileLines[$key]);
+}
+}
+}
+
+if ($this->multipleSitemaps !== true) {
+$fileLines[] = '# Sitemap';
+$fileLines[] = 'Sitemap: '.DOMAINURL.'/sitemap.xml.gz';
+}
+else {
+$fileLines[] = '# Sitemapindex';
+$fileLines[] = 'Sitemap: '.DOMAINURL.'/sitemapindex.xml.gz';
+}
+
+$newCont = null;
+
+// get new file content
+foreach ($fileLines as $key => $value) {
+$newCont .= $value.PHP_EOL;
+}
+
+// rewrite file
+if (file_put_contents($filePath, $newCont) === false) {
+$this->writeLog('Execution has been stopped because of file_put_contents cannot write '.$file);   
+$this->stopExec();
+}
+
+$this->writeLog('Wrote '.$file);
+
+}
+################################################################################
+################################################################################
 // check tables
 private function checkTables(){
 
-$this->query = "CREATE TABLE IF NOT EXISTS `getSeoSitemapExec` (
+$this->query = "SHOW TABLES LIKE 'getSeoSitemapExec'";
+$this->execQuery();
+
+if ($this->rowNum === 0) {
+
+$this->query = "CREATE TABLE `getSeoSitemapExec` (
  `id` int(1) NOT NULL AUTO_INCREMENT,
  `func` varchar(20) COLLATE utf8_unicode_ci DEFAULT NULL,
  `version` varchar(10) COLLATE utf8_unicode_ci DEFAULT NULL,
  `mDate` int(10) DEFAULT NULL COMMENT 'timestamp of last mod',
  `exec` varchar(1) COLLATE utf8_unicode_ci DEFAULT NULL,
+ `step` int(2) NOT NULL DEFAULT '0' COMMENT 'passed step',
  `newData` varchar(1) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'n' COMMENT 'set to y when new data are avaialble',
  UNIQUE KEY `id` (`id`),
- UNIQUE KEY `func` (`func`),
- KEY `exec` (`exec`),
- KEY `newData` (`newData`)
+ UNIQUE KEY `func` (`func`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT='execution of getSeoSitemap functions'";
 $this->execQuery();
 
@@ -1713,8 +1821,26 @@ $this->query = "INSERT INTO getSeoSitemapExec (func, mDate, exec, newData)
 SELECT 'getSeoSitemap', 0, 'n', 'n' FROM DUAL WHERE NOT EXISTS 
 (SELECT func FROM getSeoSitemapExec WHERE func='getSeoSitemap')";
 $this->execQuery();
+}
+elseif ($this->rowNum === 1) {
+$this->getDbaseVerNum();
 
-$this->query = "CREATE TABLE IF NOT EXISTS `getSeoSitemap` (
+if ($this->dBaseVerNum < 310) {
+$this->query = "SHOW COLUMNS FROM getSeoSitemapExec WHERE FIELD = 'step'";
+$this->execQuery();
+
+if ($this->rowNum === 0) {
+$this->query = "ALTER TABLE getSeoSitemapExec ADD COLUMN step int(2) NOT NULL DEFAULT '0' COMMENT 'passed step' AFTER exec";
+$this->execQuery();
+}
+}
+}
+
+$this->query = "SHOW TABLES LIKE 'getSeoSitemap'";
+$this->execQuery();
+
+if ($this->rowNum === 0) {
+$this->query = "CREATE TABLE `getSeoSitemap` (
  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
  `url` varbinary(767) NOT NULL,
  `size` int(10) unsigned NOT NULL COMMENT 'byte',
@@ -1735,6 +1861,7 @@ $this->query = "CREATE TABLE IF NOT EXISTS `getSeoSitemap` (
  KEY `priority` (`priority`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
 $this->execQuery();
+}
 
 }
 ################################################################################
@@ -1752,6 +1879,77 @@ $this->query = "OPTIMIZE TABLE getSeoSitemap";
 $this->execQuery();
 
 $this->writeLog('Optimized getSeoSitemap table');  
+
+}
+################################################################################
+################################################################################
+private function getMalfList(){
+
+$i = 0;
+
+foreach ($this->malfChars as $value) {
+$this->query = "SELECT url FROM getSeoSitemap WHERE url LIKE '%".$value
+."%' AND state != 'skip' AND httpCode = '200' AND size != 0";
+$this->execQuery();
+$this->writeLog("##### URLs with '$value' malformed character into sitemap (good pratice - do not use that character in URL address)");
+
+if ($this->rowNum > 0) {
+asort($this->row);
+foreach ($this->row as $v) {
+$this->writeLog($v['url']);
+
+$i++;
+}
+}
+
+$this->writeLog('##########');
+$this->writeLog($i.' URLs with malformed characters into sitemap'.PHP_EOL);
+}
+
+}
+################################################################################
+################################################################################
+// get number from version (examples: v12.2 => 1220, v11.2.2 => 1122, v3.1.1 => 311, v3.1 => 310)
+private function getVerNum($ver){
+
+// return digits only
+$verNum = filter_var($ver, FILTER_SANITIZE_NUMBER_INT);
+
+if ($verNum === false) {
+$this->writeLog("Execution has been stopped because of filter_var cannot filter value '".$ver."'"); 
+$this->stopExec();
+}
+
+$mainNo = substr($ver, 1, 2);
+
+$digits = 3;
+
+if (ctype_digit($mainNo) === true) {
+$digits = 4;
+}
+
+$verNum = str_pad($verNum, $digits, '0');
+
+return $verNum;
+
+}
+################################################################################
+################################################################################
+// get version number of the script
+private function getScriptVerNum(){
+
+$this->scriptVerNum = $this->getVerNum($this->version);
+
+}
+################################################################################
+################################################################################
+// get version number of database
+private function getDbaseVerNum(){
+
+$this->query = "SELECT version FROM getSeoSitemapExec WHERE func = 'getSeoSitemap' LIMIT 1";
+$this->execQuery();
+
+$this->dBaseVerNum = $this->getVerNum($this->row[0]['version']);
 
 }
 ################################################################################
