@@ -1,4 +1,4 @@
-getSeoSitemap v3.1 README (2018-04-16)
+getSeoSitemap v3.2 README (2018-08-08)
 
 Php library to get sitemap.
 It crawls a whole website checking all internal and external links.
@@ -9,7 +9,7 @@ It makes a Search Engine Optimization.
 # with BTC bitcoin to the address 19928gKpqdyN6CHUh4Tae1GW9NAMT6SfQH                              #
 ###################################################################################################
 
-The script requires PHP 5.4 and MySQL 5.5.
+The script requires PHP 5.5 and MySQL 5.5.
 
 This script creates a full gzip sitemap or multiple gzip sitemaps plus a gzip sitemap index.
 It includes change frequency, last modification date and priority all setted following your own rules.
@@ -20,7 +20,7 @@ It checks all internal and external links.
 If failed (http response code different from 200 or with size = 0), external URLs from the domain will be included into failed URLs list.
 Mailto URLs with will not be included into sitemap.
 URLs inside pdf files will not be scanned and will not be included into sitemap.
-It checks page title and page size to improve SEO.
+It checks page title, page description and page size to improve SEO.
 You must use only absolute URLs inside the site.
 There is not any automatic function to submit updated sitemap to google or bing.
 That is because I discovered search engines prefer submission by their webmaster tools.
