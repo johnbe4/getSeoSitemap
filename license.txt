@@ -1,6 +1,6 @@
-getSeoSitemap v3.1 LICENSE (2018-04-16)
+getSeoSitemap v3.2 LICENSE (2018-08-08)
 
-getSeoSitemap v3.1 is distributed under the following BSD-style license: 
+getSeoSitemap v3.2 is distributed under the following BSD-style license: 
 
 Copyright (c) 2016-2018
 Giovanni Bertone (RED Racing Parts)
