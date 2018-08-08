@@ -1,5 +1,12 @@
 getSeoSitemap CHANGELOG
 
+v3.2 (2018-08-08)
+- It requires PHP 5.5.
+- Added functions to check page description.
+- Improved list of title errors.
+- Improved getHref function to prevent checking of failed pages.
+- Small changes.
+
 v3.1 (2018-04-16)
 - Added function to print MySQL warnings (added variable $printMysqlWarn).
 - Added function to print a list of malformed URL addresses (added variable $printMalfUrls).
