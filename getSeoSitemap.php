@@ -1,9 +1,9 @@
 <?php
 
 /*
-getSeoSitemap v3.1 LICENSE (2018-04-16)
+getSeoSitemap v3.2 LICENSE (2018-08-08)
 
-getSeoSitemap v3.1 is distributed under the following BSD-style license: 
+getSeoSitemap v3.2 is distributed under the following BSD-style license: 
 
 Copyright (c) 2016-2018 
 Giovanni Bertone (RED Racing Parts)
@@ -111,11 +111,12 @@ private $rewriteRobots = false; // set to true to rewrite robots.txt including u
 ##### WARNING: DO NOT CHANGE ANYTHING BELOW #####
 #################################################
 
-private $version = 'v3.1';
+private $version = 'v3.2';
 private $userAgent = 'getSeoSitemap ver. by John';
 private $url = null; // an aboslute URL (ex. https://www.example.com/test/test1.php )
 private $size = null; // size of file in Kb
-private $bingTitleLength = [5, 100]; // min, max bing title length
+private $titleLength = [5, 100]; // min, max title length
+private $descriptionLength = [35, 160]; // min, max description length
 private $md5 = null; // md5 of string (hexadecimal)
 private $changefreq = null; // change frequency of file (values: daily, weekly, monthly, yearly)
 private $lastmod = null; // timestamp of last modified date of URL
@@ -173,158 +174,16 @@ private $multipleSitemaps = null; // when multiple sitemaps are avaialble is tru
 private $logPath = null; // log path
 private $scriptVerNum = null; // version number of the script
 private $dBaseVerNum = null; // version number of database
+private $countUrlWithoutDesc = 0; // counter of URL without description
+private $countUrlWithMultiDesc = 0; // counter of URL with multiple description
+private $countUrlWithoutTitle = 0; // counter of URL without title
+private $countUrlWithMultiTitle = 0; // counter of URL with multiple title
 
 ################################################################################
 public function start(){
 
-$time = time();
-
-// set log path: it will remain the same from the start to the end of execution
-$this->logPath = GETSITEMAPPATH.'log/'.date('Ymd').'.log';
-
-// set version in userAgent
-$this->userAgent = str_replace('ver.', $this->version, $this->userAgent);
-
-// set start time
-$this->startTime = $time;
-
-// open mysqli connection
-$this->openMysqliConn();
-
-// check tables into dbase
-$this->checkTables();
-
-$this->query = "SELECT exec FROM getSeoSitemapExec WHERE func = 'getSeoSitemap' LIMIT 1";
-$this->execQuery();
-
-// check if getSeoSitemp is already running and stop it to prevent double execution
-if ($this->row[0]['exec'] === 'y') {
-$this->writeLog('An error has occoured: execution has been stopped; '
-.'maybe the previous scan was not ended correctly. Double-check log to fix it.'.$this->txtToAddOnMysqliErr);
-exit();
-}
-// check if prevous full scan was ended to start a new full scan
-elseif ($this->row[0]['exec'] === 'n') {
-$this->writeLog('## getSeoSitemap '.$this->version);
-$this->writeLog('## Execution start');
-}
-else {
-$this->writeLog('Value of state in getSeoSitemapExec table is not correct: '
-.'execution has been stopped. Double-check log to fix it.'.$this->txtToAddOnMysqliErr);
-exit();
-}
-
-// set function execution to y
-$this->exec = 'y';
-$this->updateExec();
-
-// update all states to old to be ready for the new full scan
-$this->query = "UPDATE getSeoSitemap SET state = 'old'";
-$this->execQuery();
-
-$this->writeLog('## Scan start');
-
-$this->stmt2 = $this->mysqli->prepare("INSERT INTO getSeoSitemap (url, state) VALUES (?, 'new') "
-."ON DUPLICATE KEY UPDATE state = IF(state = 'old', 'new', state)");
-if ($this->stmt2 === false) {  
-$this->writeLog('Execution has been stopped because of MySQL prepare error: '.lcfirst($this->mysqli->error)); 
-
-$this->stopExec();
-}
-
-$this->stmt3 = $this->mysqli->prepare("UPDATE getSeoSitemap SET "
-. "size = ?, "
-. "md5 = ?, "
-. "lastmod = ?, "
-. "changefreq = ?, "
-. "httpCode = ? "
-. "WHERE url = ? LIMIT 1");
-if ($this->stmt3 === false) {  
-$this->writeLog('Execution has been stopped because of MySQL prepare error: '.lcfirst($this->mysqli->error));
-
-$this->stopExec();
-}
-
-$this->stmt4 = $this->mysqli->prepare("INSERT INTO getSeoSitemap ("
-. "url, "
-. "size, "
-. "md5, "
-. "lastmod, "
-. "changefreq, "
-. "priority, "
-. "state, "
-. "httpCode) "
-. "VALUES ("
-. "?, "
-. "?, "
-. "'', "
-. "'', "
-. "'', "
-. "NULL, "
-. "'skip', "
-. "?) "
-. "ON DUPLICATE KEY UPDATE "
-. "size = ?, "
-. "md5 = '', "
-. "lastmod = 0, "
-. "changefreq = '', "
-. "priority = NULL, "
-. "state = 'skip', "
-. "httpCode = ?");
-if ($this->stmt4 === false) {  
-$this->writeLog('Execution has been stopped because of MySQL prepare error: '.lcfirst($this->mysqli->error));   
-
-$this->stopExec();
-}
-
-$this->stmt5 = $this->mysqli->prepare("UPDATE getSeoSitemap SET "
-. "title = ? "
-. "WHERE url = ? LIMIT 1");
-if ($this->stmt5 === false) {  
-$this->writeLog('Execution has been stopped because of MySQL prepare error: '.lcfirst($this->mysqli->error));
-
-$this->stopExec();
-}
-
-// insert or update STARTURL
-$this->insUpdNewUrlQuery(STARTURL);
-
-$this->openCurlConn();
-
-$this->stmt = $this->mysqli->prepare("UPDATE getSeoSitemap SET state = 'scan' WHERE url = ? LIMIT 1");
-if ($this->stmt === false) {  
-$this->writeLog('Execution has been stopped because of MySQL prepare error: '.lcfirst($this->mysqli->error));  
-$this->stopExec();
-}
-
-do {
-$this->query = "SELECT url, size, md5, lastmod FROM getSeoSitemap WHERE state = 'new' LIMIT 1";
-$this->execQuery();
-$rowNum = $this->rowNum;
-
-// if there is almost 1 record into getSeoSitemap table with state new....
-if ($rowNum === 1){ 
-$this->url = $this->row[0]['url'];
-$url = $this->url;
-
-$this->scan($url);
-$this->getHref($url);
-$this->linksScan();
-
-if ($this->stmt->bind_param('s', $url) !== true) {  
-$this->writeLog('Execution has been stopped because of MySQL error binding parameters: '.lcfirst($this->stmt->error));  
-$this->stopExec();
-}
-
-if ($this->stmt->execute() !== true) {  
-$this->writeLog('Execution has been stopped because of MySQL execute error: '.lcfirst($this->stmt->error));   
-$this->stopExec();
-}
-}
-
-}
-while ($rowNum === 1);
-
+$this->prep();
+$this->fullScan();
 $this->closeCurlConn();
 $this->writeLog('## Scan end');
 $this->end();
@@ -628,6 +487,11 @@ $html = $this->pageBody;
 // reset pageLinks
 $this->pageLinks = [];
 
+// return if httpCode is not 200 to prevent checking of failed pages
+if ($this->httpCode !== 200) {
+return;
+}
+
 // return if $html is empty to prevent error on $dom->loadHTML($html)
 if (empty($html) === true) {
 return;
@@ -664,15 +528,48 @@ $title = null;
 }
 }
 elseif ($titleCount > 1) {
-$this->writeLog('Title No.: '.$titleCount.' (title has not been registered into dBase because is not single) - URL '.$url);
+$this->writeLog('There are '.$titleCount.' titles (title has not been registered into dBase because is not single) - URL '.$url);
 $title = null;
+$this->countUrlWithMultiTitle++;
 }
 elseif ($titleCount === 0) {
-$this->writeLog('Title does not exist - URL '.$url);
+$this->writeLog('Title does not exist (SEO: title should be present) - URL '.$url);
 $title = null;
+$this->countUrlWithoutTitle++;
 }
 
-if ($this->stmt5->bind_param('ss', $title, $url) !== true) {  
+$metaArr = $dom->getElementsByTagName('meta');
+
+$descriptionCount = 0;
+
+foreach ($metaArr as $val) {
+if (strtolower($val->getAttribute('name')) == 'description') {
+$description = $val->getAttribute('content');
+$descriptionCount++;
+}
+}
+
+if ($descriptionCount === 1) {
+$descriptionLength = strlen($description);
+
+if ($descriptionLength > 300) {
+$this->writeLog('Description length: '.$descriptionLength
+.' characters (description has not been registered into dBase because of its length is more than 300 characters) - URL '.$url);
+$description = null;
+}
+}
+elseif ($descriptionCount > 1) {
+$this->writeLog('There are '.$descriptionCount.' descriptions (description has not been registered into dBase because is not single) - URL '.$url);
+$description = null;
+$this->countUrlWithMultiDesc++;
+}
+elseif ($descriptionCount === 0) {
+$this->writeLog('Description does not exist (SEO: description should be present) - URL '.$url);
+$description = null;
+$this->countUrlWithoutDesc++;
+}
+
+if ($this->stmt5->bind_param('sss', $title, $description, $url) !== true) {  
 $this->writeLog('Execution has been stopped because of MySQL error binding parameters: '.lcfirst($this->stmt5->error));   
 $this->stopExec();
 }
@@ -709,7 +606,11 @@ $this->execQuery();
 
 $this->query = "SELECT COUNT(*) AS count FROM getSeoSitemap WHERE state != 'skip'";
 $this->execQuery();
-$this->writeLog($this->count.' scanned URLs (skipped URLs are not included - failed URls are included)'.PHP_EOL);
+$this->writeLog($this->count.' scanned URLs (skipped URLs are not included - failed URls are included)');
+$this->writeLog($this->countUrlWithoutTitle.' URLs without title (SEO: title should be present)');
+$this->writeLog($this->countUrlWithMultiTitle.' URLs with multiple title (SEO: title should be single)');
+$this->writeLog($this->countUrlWithoutDesc.' URLs without description (SEO: description should be present)');
+$this->writeLog($this->countUrlWithMultiDesc.' URLs with multiple description (SEO: description should be single)'.PHP_EOL);
 
 if ($this->extUrlsTest === true) {
 $this->openCurlConn();
@@ -767,6 +668,9 @@ $this->getSizeList();
 $this->getMinTitleLengthList();
 $this->getMaxTitleLengthList();
 $this->getDuplicateTitle();
+$this->getMinDescriptionLengthList();
+$this->getMaxDescriptionLengthList();
+$this->getDuplicateDescription();
 $this->getIntUrls();
 $this->setPriority();
 
@@ -1082,12 +986,14 @@ private function insUpdNewUrlQuery($url){
 $this->checkUrlLength($url);
 
 if ($this->stmt2->bind_param('s', $url) !== true) {  
-$this->writeLog('Execution has been stopped because of MySQL error binding parameters: '.lcfirst($this->stmt2->error)); 
+$this->writeLog('Execution has been stopped because of MySQL error binding parameters: '.$this->stmt2->error); 
+
 $this->stopExec();
 }
 
 if ($this->stmt2->execute() !== true) {  
-$this->writeLog('Execution has been stopped because of MySQL execute error: '.lcfirst($this->stmt2->error)); 
+$this->writeLog('Execution has been stopped because of MySQL execute error: '.$this->stmt2->error); 
+
 $this->stopExec();
 }
 
@@ -1196,7 +1102,7 @@ $kbBingMaxSize = $this->getKb($this->bingMaxSize);
 $this->query = "SELECT url, size FROM getSeoSitemap WHERE size > '".$this->bingMaxSize
 ."' AND state != 'skip' AND httpCode = '200'";
 $this->execQuery();
-$this->writeLog('##### URLs with size > '.$kbBingMaxSize.' Kb into sitemap (Bing SEO - page size should be lower than '
+$this->writeLog('##### URLs with size > '.$kbBingMaxSize.' Kb into sitemap (SEO: page size should be lower than '
 .$kbBingMaxSize.' Kb)');
 
 $i = 0;
@@ -1232,10 +1138,10 @@ return $kb;
 private function getMinTitleLengthList(){
 
 $this->query = "SELECT url, CHAR_LENGTH(title) AS titleLength FROM getSeoSitemap WHERE CHAR_LENGTH(title) < "
-.$this->bingTitleLength[0]." AND state != 'skip' AND httpCode = '200' AND title IS NOT NULL";
+.$this->titleLength[0]." AND state != 'skip' AND httpCode = '200' AND title IS NOT NULL";
 $this->execQuery();
-$this->writeLog('##### URLs with title length < '.$this->bingTitleLength[0]
-.' characters into sitemap (Bing SEO - page title length should be higher than '.$this->bingTitleLength[0].' characters)');
+$this->writeLog('##### URLs with title length < '.$this->titleLength[0]
+.' characters into sitemap (SEO: page title length should be higher than '.$this->titleLength[0].' characters)');
 
 $i = 0;
 if ($this->rowNum > 0){
@@ -1253,7 +1159,7 @@ $i++;
 }
 
 $this->writeLog('##########');
-$this->writeLog($i.' URLs with title length < '.$this->bingTitleLength[0].' characters into sitemap'.PHP_EOL);
+$this->writeLog($i.' URLs with title length < '.$this->titleLength[0].' characters into sitemap'.PHP_EOL);
 
 }
 ################################################################################
@@ -1261,10 +1167,10 @@ $this->writeLog($i.' URLs with title length < '.$this->bingTitleLength[0].' char
 private function getMaxTitleLengthList(){
 
 $this->query = "SELECT url, CHAR_LENGTH(title) AS titleLength FROM getSeoSitemap WHERE CHAR_LENGTH(title) > "
-.$this->bingTitleLength[1]." AND state != 'skip' AND httpCode = '200' AND title IS NOT NULL";
+.$this->titleLength[1]." AND state != 'skip' AND httpCode = '200' AND title IS NOT NULL";
 $this->execQuery();
-$this->writeLog('##### URLs with title length > '.$this->bingTitleLength[1]
-.' characters into sitemap (Bing SEO - page title length should be lower than '.$this->bingTitleLength[1].' characters)');
+$this->writeLog('##### URLs with title length > '.$this->titleLength[1]
+.' characters into sitemap (SEO: page title length should be lower than '.$this->titleLength[1].' characters)');
 
 $i = 0;
 if ($this->rowNum > 0){
@@ -1282,7 +1188,7 @@ $i++;
 }
 
 $this->writeLog('##########');
-$this->writeLog($i.' URLs with title length > '.$this->bingTitleLength[1].' characters into sitemap'.PHP_EOL);
+$this->writeLog($i.' URLs with title length > '.$this->titleLength[1].' characters into sitemap'.PHP_EOL);
 
 }
 ################################################################################
@@ -1296,7 +1202,7 @@ $this->execQuery();
 $rowNum = $this->rowNum;
 $row = $this->row;
 
-$this->writeLog('##### URLs with duplicate title into sitemap (Google SEO - URLs should have unique title into the website)');
+$this->writeLog('##### URLs with duplicate title into sitemap (SEO: URLs should have unique title into the website)');
 
 $i = 0;
 
@@ -1317,6 +1223,98 @@ $i++;
 
 $this->writeLog('##########');
 $this->writeLog($i.' URLs with duplicate title into sitemap'.PHP_EOL);
+
+}
+################################################################################
+################################################################################
+private function getMinDescriptionLengthList(){
+
+$this->query = "SELECT url, CHAR_LENGTH(description) AS descriptionLength FROM getSeoSitemap WHERE CHAR_LENGTH(description) < "
+.$this->descriptionLength[0]." AND state != 'skip' AND httpCode = '200' AND title IS NOT NULL";
+$this->execQuery();
+$this->writeLog('##### URLs with description length < '.$this->descriptionLength[0]
+.' characters into sitemap (SEO: page description length should be higher than '.$this->descriptionLength[0].' characters)');
+
+$i = 0;
+if ($this->rowNum > 0){
+asort($this->row);
+foreach ($this->row as $v){
+foreach ($this->seoExclusion as $value){
+$fileExt = $this->getUrlExt($v['url']);
+
+if ($value !== $fileExt) {
+$this->writeLog('Description length: '.$v['descriptionLength'].' characters - URL: '.$v['url']);
+$i++;
+}
+}
+}
+}
+
+$this->writeLog('##########');
+$this->writeLog($i.' URLs with description length < '.$this->descriptionLength[0].' characters into sitemap'.PHP_EOL);
+
+}
+################################################################################
+################################################################################
+private function getMaxDescriptionLengthList(){
+
+$this->query = "SELECT url, CHAR_LENGTH(description) AS descriptionLength FROM getSeoSitemap WHERE CHAR_LENGTH(description) > "
+.$this->descriptionLength[1]." AND state != 'skip' AND httpCode = '200' AND description IS NOT NULL";
+$this->execQuery();
+$this->writeLog('##### URLs with description length > '.$this->descriptionLength[1]
+.' characters into sitemap (SEO: page description length should be lower than '.$this->descriptionLength[1].' characters)');
+
+$i = 0;
+if ($this->rowNum > 0){
+asort($this->row);
+foreach ($this->row as $v){
+foreach ($this->seoExclusion as $value) {
+$fileExt = $this->getUrlExt($v['url']);
+
+if ($value !== $fileExt) {
+$this->writeLog('Description length: '.$v['descriptionLength'].' characters - URL: '.$v['url']);
+$i++;
+}
+}
+}
+}
+
+$this->writeLog('##########');
+$this->writeLog($i.' URLs with description length > '.$this->descriptionLength[1].' characters into sitemap'.PHP_EOL);
+
+}
+################################################################################
+################################################################################
+private function getDuplicateDescription(){
+
+$this->query = "SELECT description FROM getSeoSitemap WHERE state != 'skip' AND httpCode = '200' AND"
+." title IS NOT NULL GROUP BY title HAVING COUNT(*) > 1";
+$this->execQuery();
+
+$rowNum = $this->rowNum;
+$row = $this->row;
+
+$this->writeLog('##### URLs with duplicate description into sitemap (SEO: URLs should have unique description into the website)');
+
+$i = 0;
+
+if ($rowNum > 0){
+asort($row);
+
+foreach ($row as $v){
+$this->query = "SELECT url, description FROM getSeoSitemap WHERE description = '"
+.$v['description']."' AND state != 'skip' AND httpCode = '200'";
+$this->execQuery();
+
+foreach ($this->row as $v2){
+$this->writeLog('Duplicate description: '.$v2['description'].' - URL: '.$v2['url']);
+$i++;
+}
+}
+}
+
+$this->writeLog('##########');
+$this->writeLog($i.' URLs with duplicate description into sitemap'.PHP_EOL);
 
 }
 ################################################################################
@@ -1950,6 +1948,188 @@ $this->query = "SELECT version FROM getSeoSitemapExec WHERE func = 'getSeoSitema
 $this->execQuery();
 
 $this->dBaseVerNum = $this->getVerNum($this->row[0]['version']);
+
+}
+################################################################################
+################################################################################
+private function fullScan(){
+
+do {
+$this->query = "SELECT url, size, md5, lastmod FROM getSeoSitemap WHERE state = 'new' LIMIT 1";
+$this->execQuery();
+$rowNum = $this->rowNum;
+
+// if there is almost 1 record into getSeoSitemap table with state new....
+if ($rowNum === 1){ 
+$this->url = $this->row[0]['url'];
+$url = $this->url;
+
+$this->scan($url);
+$this->getHref($url);
+$this->linksScan();
+
+if ($this->stmt->bind_param('s', $url) !== true) {  
+$this->writeLog('Execution has been stopped because of MySQL error binding parameters: '.$this->stmt->error); 
+
+$this->stopExec();
+}
+
+if ($this->stmt->execute() !== true) {  
+$this->writeLog('Execution has been stopped because of MySQL execute error: '.$this->stmt->error); 
+
+$this->stopExec();
+}
+}
+
+}
+while ($rowNum === 1);
+
+}
+################################################################################
+################################################################################
+private function prep(){
+
+$time = time();
+
+// set log path: it will remain the same from the start to the end of execution
+$this->logPath = GETSITEMAPPATH.'log/'.date('Ymd', $time).'.log';
+
+// set start time
+$this->startTime = $time;
+
+// set version in userAgent
+$this->userAgent = str_replace('ver.', $this->version, $this->userAgent);
+
+// open mysqli connection
+$this->openMysqliConn();
+
+$this->query = "SELECT exec FROM getSeoSitemapExec WHERE func = 'getSeoSitemap' LIMIT 1";
+$this->execQuery();
+
+// check if getSeoSitemp is already running and stop it to prevent double execution
+if ($this->row[0]['exec'] === 'y') {
+$this->writeLog('An error has occoured: execution has been stopped; '
+.'maybe the previous scan was not ended correctly. Double-check log to fix it.'.$this->txtToAddOnMysqliErr);
+
+exit();
+}
+// check if prevous full scan was ended to start a new full scan
+elseif ($this->row[0]['exec'] === 'n') {
+$this->writeLog('## getSeoSitemap '.$this->version);
+$this->writeLog('## Execution start');
+}
+else {
+$this->writeLog('Value of state in getSeoSitemapExec table is not correct: '
+.'execution has been stopped. Double-check log to fix it.'.$this->txtToAddOnMysqliErr);
+
+exit();
+}
+
+// set execution of function to y
+$this->exec = 'y';
+$this->updateExec();
+
+// check tables into dbase
+$this->checkTables();
+
+// update all states to old to be ready for the new full scan
+$this->query = "UPDATE getSeoSitemap SET state = 'old'";
+$this->execQuery();
+
+$this->writeLog('## Scan start');
+
+// prepare mysqli statements
+$this->prepMysqliStmt();
+
+// insert or update STARTURL
+$this->insUpdNewUrlQuery(STARTURL);
+
+$this->openCurlConn();
+
+}
+################################################################################
+################################################################################
+// prepare mysqli statements
+private function prepMysqliStmt(){
+
+$this->stmt = $this->mysqli->prepare("UPDATE getSeoSitemap SET state = 'scan' WHERE url = ? LIMIT 1");
+if ($this->stmt === false) {  
+$this->writeLog('Execution has been stopped because of MySQL prepare error: '.lcfirst($this->mysqli->error));  
+
+$this->stopExec();
+}
+
+$this->stmt2 = $this->mysqli->prepare("INSERT INTO getSeoSitemap (url, state) VALUES (?, 'new') "
+."ON DUPLICATE KEY UPDATE state = IF(state = 'old', 'new', state)");
+if ($this->stmt2 === false) {  
+$this->writeLog('Execution has been stopped because of MySQL prepare error: '.lcfirst($this->mysqli->error)); 
+
+$this->stopExec();
+}
+
+$this->stmt3 = $this->mysqli->prepare("UPDATE getSeoSitemap SET "
+. "size = ?, "
+. "md5 = ?, "
+. "lastmod = ?, "
+. "changefreq = ?, "
+. "httpCode = ? "
+. "WHERE url = ? LIMIT 1");
+if ($this->stmt3 === false) {  
+$this->writeLog('Execution has been stopped because of MySQL prepare error: '.lcfirst($this->mysqli->error));
+
+$this->stopExec();
+}
+
+$this->stmt4 = $this->mysqli->prepare("INSERT INTO getSeoSitemap ("
+. "url, "
+. "size, "
+. "md5, "
+. "lastmod, "
+. "changefreq, "
+. "priority, "
+. "state, "
+. "httpCode) "
+. "VALUES ("
+. "?, "
+. "?, "
+. "'', "
+. "'', "
+. "'', "
+. "NULL, "
+. "'skip', "
+. "?) "
+. "ON DUPLICATE KEY UPDATE "
+. "size = ?, "
+. "md5 = '', "
+. "lastmod = 0, "
+. "changefreq = '', "
+. "priority = NULL, "
+. "state = 'skip', "
+. "httpCode = ?");
+if ($this->stmt4 === false) {  
+$this->writeLog('Execution has been stopped because of MySQL prepare error: '.lcfirst($this->mysqli->error));   
+
+$this->stopExec();
+}
+
+$this->stmt5 = $this->mysqli->prepare("UPDATE getSeoSitemap SET "
+. "title = ?, "
+. "description = ? "
+. "WHERE url = ? LIMIT 1");
+if ($this->stmt5 === false) {  
+$this->writeLog('Execution has been stopped because of MySQL prepare error: '.lcfirst($this->mysqli->error));
+
+$this->stopExec();
+}
+
+}
+################################################################################
+################################################################################
+// update step
+private function updateStep($step){
+
+$this->query = "UPDATE getSeoSitemapExec SET step = '$step' WHERE func = 'getSeoSitemap' LIMIT 1";
+$this->execQuery();
 
 }
 ################################################################################
