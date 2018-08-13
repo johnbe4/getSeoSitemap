@@ -13,7 +13,7 @@ It makes a Search Engine Optimization.<br>
 * **link**        https://www.redracingparts.com
 * **source**      https://github.com/johnbe4/getSeoSitemap
 
-The script requires PHP 5.5 and MySQL 5.5.
+It requires PHP 5.5 and MySQL 5.5.
 
 This script creates a full gzip sitemap or multiple gzip sitemaps plus a gzip sitemap index.<br>
 It includes change frequency, last modification date and priority all setted following your own rules.<br>
