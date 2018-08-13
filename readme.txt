@@ -9,7 +9,7 @@ It makes a Search Engine Optimization.
 # with BTC bitcoin to the address 19928gKpqdyN6CHUh4Tae1GW9NAMT6SfQH                              #
 ###################################################################################################
 
-The script requires PHP 5.5 and MySQL 5.5.
+It requires PHP 5.5 and MySQL 5.5.
 
 This script creates a full gzip sitemap or multiple gzip sitemaps plus a gzip sitemap index.
 It includes change frequency, last modification date and priority all setted following your own rules.
