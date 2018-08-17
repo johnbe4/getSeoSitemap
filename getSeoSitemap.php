@@ -1,9 +1,9 @@
 <?php
 
 /*
-getSeoSitemap v3.2 LICENSE (2018-08-08)
+getSeoSitemap v3.2.1 LICENSE (2018-08-18)
 
-getSeoSitemap v3.2 is distributed under the following BSD-style license: 
+getSeoSitemap v3.2.1 is distributed under the following BSD-style license: 
 
 Copyright (c) 2016-2018 
 Giovanni Bertone (RED Racing Parts)
@@ -69,7 +69,7 @@ private $skipUrl = [ // skip all urls that start or are equal these values (valu
 'https://www.example.com/shop/',
 'https://www.example.com/example/example/productsandcomponents/general/intro/google_site_search.php',
 'https://www.example.com/example/example/prodottiecomponenti/generale/intro/google_site_search.php',
-'https://www.example.com/example/currency.php',
+'https://www.example.com/php_library/currency.php',
 ];
 // set $fileToAdd to true to follow and add all kind of URLs.
 // set $fileToAdd to an array to follow and add only some kinds of URLs (example: $fileToAdd = ['php','pdf',];).
@@ -111,12 +111,12 @@ private $rewriteRobots = false; // set to true to rewrite robots.txt including u
 ##### WARNING: DO NOT CHANGE ANYTHING BELOW #####
 #################################################
 
-private $version = 'v3.2';
+private $version = 'v3.2.1';
 private $userAgent = 'getSeoSitemap ver. by John';
 private $url = null; // an aboslute URL (ex. https://www.example.com/test/test1.php )
 private $size = null; // size of file in Kb
 private $titleLength = [5, 100]; // min, max title length
-private $descriptionLength = [35, 160]; // min, max description length
+private $descriptionLength = [50, 160]; // min, max description length
 private $md5 = null; // md5 of string (hexadecimal)
 private $changefreq = null; // change frequency of file (values: daily, weekly, monthly, yearly)
 private $lastmod = null; // timestamp of last modified date of URL
