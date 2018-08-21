@@ -1,4 +1,4 @@
-# getSeoSitemap v3.2.1 (2018-08-18)
+# getSeoSitemap v3.2.2 (2018-08-21)
 Php library to get sitemap.<br>
 It crawls a whole website checking all internal and external links.<br>
 It makes a Search Engine Optimization.<br>
