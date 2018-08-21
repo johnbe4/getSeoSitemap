@@ -1,9 +1,9 @@
 <?php
 
 /*
-getSeoSitemap v3.2.1 LICENSE (2018-08-18)
+getSeoSitemap v3.2.2 LICENSE (2018-08-21)
 
-getSeoSitemap v3.2.1 is distributed under the following BSD-style license: 
+getSeoSitemap v3.2.2 is distributed under the following BSD-style license: 
 
 Copyright (c) 2016-2018 
 Giovanni Bertone (RED Racing Parts)
@@ -111,7 +111,7 @@ private $rewriteRobots = false; // set to true to rewrite robots.txt including u
 ##### WARNING: DO NOT CHANGE ANYTHING BELOW #####
 #################################################
 
-private $version = 'v3.2.1';
+private $version = 'v3.2.2';
 private $userAgent = 'getSeoSitemap ver. by John';
 private $url = null; // an aboslute URL (ex. https://www.example.com/test/test1.php )
 private $size = null; // size of file in Kb
