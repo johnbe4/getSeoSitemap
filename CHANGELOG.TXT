@@ -1,5 +1,8 @@
 getSeoSitemap CHANGELOG
 
+v3.2.2 (2018-08-21)
+- removed composer.json.
+
 v3.2.1 (2018-08-18)
 - Updated variable $descriptionLength to respect Google rules.
 - added VERSION.
