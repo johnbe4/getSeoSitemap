@@ -1,5 +1,10 @@
 getSeoSitemap CHANGELOG
 
+v3.4.0 (2018-10-18)
+- Added functions to manage relative URLs.
+- Improved script speed.
+- Updated variables $pageMaxSize to respect new search engines rules.
+
 v3.3.0 (2018-10-04)
 - Added callerUrl column into getSeoSitemap table to show in printing lists.
 - Updated variables $titleLength and $bingMaxSize to respect new search engines rules.
