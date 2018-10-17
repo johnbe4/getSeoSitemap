@@ -1,14 +1,14 @@
 <?php
 
 /*
-getSeoSitemap v3.3.0 LICENSE (2018-10-04)
+getSeoSitemap v3.4.0 LICENSE (2018-10-18)
 
-getSeoSitemap v3.3.0 is distributed under the following BSD-style license: 
+getSeoSitemap v3.4.0 is distributed under the following BSD-style license: 
 
 Copyright (c) 2016-2018 
 Giovanni Bertone (RED Racing Parts)
-https://www.redracingparts.com
-red@redracingparts.com
+https://www.example.com
+red@example.com
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -47,15 +47,15 @@ const DOMAINURL = 'https://www.example.com'; // domain url (value must be absolu
 // every URL must contain this value at the beginning
 const STARTURL = 'https://www.example.com'; // starting url to crawl (value must be absolute)
 const DEFAULTPRIORITY = '0.5'; // default priority for URLs not included in $fullUrlPriority and $partialUrlPriority
-const DBHOST = DATABASE_HOST_I; // database host
-const DBUSER = DATABASE_USER_I; // database user
-const DBPASS = DATABASE_PASSWORD_I; // database password
-const DBNAME = DATABASE_NAME_I; // database name
+const DBHOST = '***********"'; // database host
+const DBUSER = '***********"'; // database user
+const DBPASS = '***********"'; // database password
+const DBNAME = '***********"'; // database name
 
  // getSeoSitemap path inside server
-const GETSITEMAPPATH = '/example/example/getSeoSitemap/';
+const GETSITEMAPPATH = '/example/example/example/example/example/example/example/getSeoSitemap/';
 
-const SITEMAPPATH = '/example/example/'; // sitemap path inside server
+const SITEMAPPATH = '/example/example/example/example/example/example/'; // sitemap path inside server
 const PRINTINTSKIPURLS = false; // set to false if you do not want the list of internal skipped URLs in your log file
 
  // set to true to get a list of container URLs of skipped URLs. It is useful to fix wrong URLs.
@@ -67,8 +67,8 @@ class getSeoSitemap {
 ##### start of user parameters
 private $skipUrl = [ // skip all urls that start or are equal these values (values must be absolute)
 'https://www.example.com/example/',
-'https://www.example.com/example/example/example/example.php',
-'https://www.example.com/exampleexample/example.php',
+'https://www.example.com/example/example/example/example/example/example.php',
+'https://www.example.com/example/example/example/example/example/example.php',
 'https://www.example.com/example/example.php',
 ];
 // set $fileToAdd to true to follow and add all kind of URLs.
@@ -83,18 +83,18 @@ private $fullUrlPriority = [ // set priority of particular URLs that are equal t
 'https://www.example.com'
 ],
 '0.9' => [
-'https://www.example.com/example.php',
-'https://www.example.com/example/example/example.php'
+'https://www.example.com/example/example/example/example/example/hotproducts.php',
+'https://www.example.com/example/example/example/example/example/hotproducts.php'
 ],
 ];
 private $partialUrlPriority = [ // set priority of particular URLs that start with these values (values must be absolute)
 '0.8' => [
-'https://www.example.com/example/',
-'https://www.example.com/example/example/',
+'https://www.example.com/example/example/example/example/example/',
+'https://www.example.com/example/example/example/example/example/',
 ],
 '0.7' => [
-'https://www.example.com/example/',
-'https://www.example.com/example/example/example/',
+'https://www.example.com/example/example/example/example/example/',
+'https://www.example.com/example/example/example/example/example/',
 ],
 ];
 private $printChangefreqList = false; // set to true to print URLs list following changefreq
@@ -111,7 +111,7 @@ private $rewriteRobots = false; // set to true to rewrite robots.txt including u
 ##### WARNING: DO NOT CHANGE ANYTHING BELOW #####
 #################################################
 
-private $version = 'v3.3.0';
+private $version = 'v3.4.0';
 private $userAgent = 'getSeoSitemap ver. by John';
 private $url = null; // an aboslute URL (ex. https://www.example.com/test/test1.php )
 private $size = null; // size of file in Kb
@@ -167,7 +167,7 @@ private $sitemapMaxSize = 52428800; // max sitemap size (bytes)
 private $sitemapNameArr = []; // includes names of all saved sitemaps at the end of the process
 // text to add on some MySQL errors
 private $txtToAddOnMysqliErr = ' - fix it remembering to set exec to n in getSeoSitemapExec table.'; 
-private $pageMaxSize = 184320; // page max file size in byte. this param is only for SEO
+private $pageMaxSize = 132096; // page max file size in byte. this param is only for SEO
 private $maxUrlLength = 767; // max URL length
 private $malfChars = [' ']; // list of characters to detect malformed URLs following a standard good practice
 private $multipleSitemaps = null; // when multiple sitemaps are avaialble is true
@@ -456,10 +456,11 @@ private function update(){
 if ($this->row[0]['size'] > 0) { // to prevent error on empty page
 $sizeDiff = abs($this->size - $this->row[0]['size']);
 
-$newLastmod = $this->row[0]['lastmod'];
-
 if ($this->row[0]['md5'] !== $this->md5) {
 $newLastmod = $this->lastmod;
+}
+else {
+$newLastmod = $this->row[0]['lastmod'];
 }
 
 $lastmodDiff = $this->lastmod - $this->row[0]['lastmod'];
@@ -585,20 +586,25 @@ $this->writeLog('Execution has been stopped because of MySQL execute error: '.lc
 $this->stopExec();
 }
 
-foreach ($links as $link){ // iterate over extracted links and display their URLs
-$href = $link->getAttribute('href'); // extract href attribute
+// iterate over extracted links and display their URLs
+foreach ($links as $link){
 
 // set skipCallerUrl to prepare pageTest in case of calling insSkipUrl from pageTest
 $this->skipCallerUrl = $url;
 
+
+// get absolute URL
+$absHref = $this->getAbsoluteUrl($link->getAttribute('href'), $url);
+
 // add only links to include
-$this->pageTest($href);
+$this->pageTest($absHref);
+
 if ($this->insUrl === true) {
-$this->pageLinks[] = $href;
+$this->pageLinks[] = $absHref;
 }
 // print URL of the page that includes skipped URL into log
 elseif (PRINTCONTAINEROFSKIPPED === true) {
-$this->writeLog('Into '.$url.' skipped '.$href);
+$this->writeLog('Into '.$url.' skipped '.$absHref);
 }
 }
 
@@ -642,7 +648,6 @@ if ($value['httpCode'] !== '200') {
 if (array_key_exists($value['httpCode'], $this->errMsg) === true) {
 $logMsg = $this->errMsg[$value['httpCode']].' '.$value['httpCode'].' - URL: '.$value['url'].' - caller URL: '.$value['callerUrl'];
 }
-
 else {
 $logMsg = 'Http code '.$value['httpCode'].' - URL: '.$value['url'].' - caller URL: '.$value['callerUrl'];
 }
@@ -1155,8 +1160,7 @@ $this->writeLog($i.' URLs with size > '.$kbBingMaxSize.' Kb into sitemap'.PHP_EO
 // get Kb from byte rounded 2 decimals and formatted 2 decimals
 private function getKb($byte){
 
-$kb = sprintf('%0.2f', round($byte / 1024, 2));
-return $kb;
+return sprintf('%0.2f', round($byte / 1024, 2));
 
 }
 ################################################################################
@@ -1685,9 +1689,7 @@ $this->stopExec();
 // detect if enconding is UTF-8
 private function detectUtf8Enc($str){
 
-$enc = mb_detect_encoding($str, 'UTF-8', true);
-
-if ($enc === 'UTF-8') {
+if (mb_detect_encoding($str, 'UTF-8', true) === 'UTF-8') {
 return true;
 }
 else {
@@ -1763,10 +1765,7 @@ $this->writeLog('Warnuing: size of '.$fileName.' is larger than '.$this->sitemap
 }
 
 if ($this->printSitemapSizeList === true) {
-
-$kbSize = round($size * 0.0009765625, 2);
-
-$this->writeLog('Size: '.$kbSize.' Kb - sitemap: '.$fileName);
+$this->writeLog('Size: '.round($size * 0.0009765625, 2).' Kb - sitemap: '.$fileName);
 }
 }
 
@@ -1976,10 +1975,11 @@ $this->stopExec();
 
 $mainNo = substr($ver, 1, 2);
 
-$digits = 3;
-
 if (ctype_digit($mainNo) === true) {
 $digits = 4;
+}
+else{
+$digits = 3;
 }
 
 $verNum = str_pad($verNum, $digits, '0');
@@ -2194,6 +2194,69 @@ private function updateStep($step){
 
 $this->query = "UPDATE getSeoSitemapExec SET step = '$step' WHERE func = 'getSeoSitemap' LIMIT 1";
 $this->execQuery();
+
+}
+################################################################################
+################################################################################
+// get absolute url from relative url
+private function getAbsoluteUrl($relativeUrl, $baseUrl){
+
+// if already absolute URL 
+if (parse_url($relativeUrl, PHP_URL_SCHEME) !== null){
+return $relativeUrl;
+}
+
+// queries and anchors
+if ($relativeUrl[0] === '#' || $relativeUrl[0] === '?'){
+return $baseUrl.$relativeUrl;
+}
+
+// parse base URL and convert to: $scheme, $host, $path, $query, $port, $user, $pass
+extract(parse_url($baseUrl));
+
+// remove non-directory element from $path
+$path = preg_replace('#/[^/]*$#', '', $path);
+
+// if realtive URL starts with //
+if (substr($relativeUrl, 0, 2) === '//'){
+return $scheme.':'.$relativeUrl;
+}
+
+// if realtive URL starts with /
+if ($relativeUrl[0] === '/'){
+$path = null;
+}
+
+$abs = null;
+
+// if realtive URL contains a user
+if (isset($user) === true){
+$abs .= $user;
+
+// if realtive URL contains a password
+if (isset($pass) === true){
+$abs .= ':'.$pass;
+}
+
+$abs .= '@';
+}
+
+$abs .= $host;
+
+// if realtive URL contains a port
+if (isset($port) === true){
+$abs .= ':'.$port;
+}
+
+$abs .= $path.'/'.$relativeUrl.(isset($query) === true ? '?'.$query : null);
+
+// replace // or /./ or /foo/../ with /
+$re = ['#(/\.?/)#', '#/(?!\.\.)[^/]+/\.\./#'];
+for ($n = 1; $n > 0; $abs = preg_replace($re, '/', $abs, -1, $n)) {
+}
+
+// return absolute URL
+return $scheme.'://'.$abs;
 
 }
 ################################################################################
