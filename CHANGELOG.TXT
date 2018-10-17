@@ -16,11 +16,11 @@ v3.2.2 (2018-08-21)
 
 v3.2.1 (2018-08-18)
 - Updated variable $descriptionLength to respect Google rules.
-- added VERSION.
-- added composer.json.
-- removed readme.txt.
-- renamed changelog.txt to CHANGELOG.TXT.
-- renamed license.txt to LICENSE.TXT.
+- Added VERSION.
+- Added composer.json.
+- Removed readme.txt.
+- Renamed changelog.txt to CHANGELOG.TXT.
+- Renamed license.txt to LICENSE.TXT.
 
 v3.2 (2018-08-08)
 - It requires PHP 5.5.
