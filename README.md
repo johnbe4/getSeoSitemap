@@ -1,4 +1,4 @@
-# getSeoSitemap v3.3.0 (2018-10-04)
+# getSeoSitemap v3.4.0 (2018-10-18)
 Php library to get sitemap.<br>
 It crawls a whole website checking all internal and external links.<br>
 It makes a Search Engine Optimization.<br>
@@ -25,7 +25,7 @@ If failed (http response code different from 200 or with size = 0), external URL
 Mailto URLs with will not be included into sitemap.<br>
 URLs inside pdf files will not be scanned and will not be included into sitemap.<br>
 It checks page title, page description and page size to improve SEO.<br>
-You must use only absolute URLs inside the site.<br>
+You can use absolute or relative URLs inside the site.<br>
 There is not any automatic function to submit updated sitemap to google or bing.<br>
 That is because I discovered search engines prefer submission by their webmaster tools.<br>
 In fact, submitting sitemap by their own link, they never update the last submission time inside webmaster tools.<br>
@@ -36,11 +36,8 @@ Using getSeoSitemap, you will be able to give a better surfing experience to you
 
 **Instructions<br>**
 1 - copy getSeoSitemap folder in a protected zone of your server.<br>
-2 - all links of your website must be setted to absolute links ( including always http:// or https:// ).<br>
-    That is very important because search engines do not like relative links and that prevent negative issues.<br>
-    Only using absolute link you are 100% sure how the link will be treated by search engines, browsers etc.<br>
-3 - set all user constants and parameters.<br>
-4 - on your server cronotab schedule the script once each day prefereble when your server is not too much busy.<br>
+2 - set all user constants and parameters.<br>
+3 - on your server cronotab schedule the script once each day prefereble when your server is not too much busy.<br>
     A command line example to schedule the script every day at 7:45:00 AM is:<br>
     45 7  *    *    *    php /example/websites/clients/client1/web5/example/example/getSeoSitemap/getSeoSitemap.php<br>
 
