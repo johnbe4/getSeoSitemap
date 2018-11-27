@@ -1,6 +1,6 @@
-# getSeoSitemap v3.4.0 (2018-10-18)
+# getSeoSitemap v3.5.0 (2018-11-28)
 Php library to get sitemap.<br>
-It crawls a whole website checking all internal and external links.<br>
+It crawls a whole website checking all links and sources.<br>
 It makes a Search Engine Optimization.<br>
 
 [![donate via paypal](https://img.shields.io/badge/donate-paypal-87ceeb.svg)](https://www.paypal.me/johnbe4)<br>
@@ -20,7 +20,7 @@ It includes change frequency, last modification date and priority all setted fol
 Change frequency will be automatically selected between daily, weekly, monthly and yearly.<br>
 Max URL lenght must be 767 characters, otherwise the script will fail.<br>
 URLs with http response code different from 200 or with size = 0 will not be included into sitemap.<br>
-It checks all internal and external links.<br>
+It checks all internal and external links and sources.<br>
 If failed (http response code different from 200 or with size = 0), external URLs from the domain will be included into failed URLs list.<br>
 Mailto URLs with will not be included into sitemap.<br>
 URLs inside pdf files will not be scanned and will not be included into sitemap.<br>
