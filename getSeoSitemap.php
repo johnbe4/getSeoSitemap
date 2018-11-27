@@ -1,14 +1,14 @@
 <?php
 
 /*
-getSeoSitemap v3.4.0 LICENSE (2018-10-18)
+getSeoSitemap v3.5.0 LICENSE (2018-11-28)
 
-getSeoSitemap v3.4.0 is distributed under the following BSD-style license: 
+getSeoSitemap v3.5.0 is distributed under the following BSD-style license: 
 
 Copyright (c) 2016-2018 
 Giovanni Bertone (RED Racing Parts)
-https://www.example.com
-red@example.com
+https://www.redracingparts.com
+red@redracingparts.com
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -47,10 +47,10 @@ const DOMAINURL = 'https://www.example.com'; // domain url (value must be absolu
 // every URL must contain this value at the beginning
 const STARTURL = 'https://www.example.com'; // starting url to crawl (value must be absolute)
 const DEFAULTPRIORITY = '0.5'; // default priority for URLs not included in $fullUrlPriority and $partialUrlPriority
-const DBHOST = '***********"'; // database host
-const DBUSER = '***********"'; // database user
-const DBPASS = '***********"'; // database password
-const DBNAME = '***********"'; // database name
+const DBHOST = DATABASE_HOST_I; // database host
+const DBUSER = DATABASE_USER_I; // database user
+const DBPASS = DATABASE_PASSWORD_I; // database password
+const DBNAME = DATABASE_NAME_I; // database name
 
  // getSeoSitemap path inside server
 const GETSITEMAPPATH = '/example/example/example/example/example/example/example/getSeoSitemap/';
@@ -67,9 +67,9 @@ class getSeoSitemap {
 ##### start of user parameters
 private $skipUrl = [ // skip all urls that start or are equal these values (values must be absolute)
 'https://www.example.com/example/',
-'https://www.example.com/example/example/example/example/example/example.php',
-'https://www.example.com/example/example/example/example/example/example.php',
-'https://www.example.com/example/example.php',
+'https://www.example.com/example/example/example/general/intro/google_site_search.php',
+'https://www.example.com/example/example/prodottiecomponenti/generale/intro/google_site_search.php',
+'https://www.example.com/example/currency.php',
 ];
 // set $fileToAdd to true to follow and add all kind of URLs.
 // set $fileToAdd to an array to follow and add only some kinds of URLs (example: $fileToAdd = ['php','pdf',];).
@@ -83,18 +83,18 @@ private $fullUrlPriority = [ // set priority of particular URLs that are equal t
 'https://www.example.com'
 ],
 '0.9' => [
-'https://www.example.com/example/example/example/example/example/hotproducts.php',
-'https://www.example.com/example/example/example/example/example/hotproducts.php'
+'https://www.example.com/example/example/introducingpages/11/22/hotproducts.php',
+'https://www.example.com/example/example/pagineintroduttive/11/22/hotproducts.php'
 ],
 ];
 private $partialUrlPriority = [ // set priority of particular URLs that start with these values (values must be absolute)
 '0.8' => [
-'https://www.example.com/example/example/example/example/example/',
-'https://www.example.com/example/example/example/example/example/',
+'https://www.example.com/example/example/introducingpages/11/22/',
+'https://www.example.com/example/example/pagineintroduttive/11/22/',
 ],
 '0.7' => [
-'https://www.example.com/example/example/example/example/example/',
-'https://www.example.com/example/example/example/example/example/',
+'https://www.example.com/example/example/prodottiecomponenti/generale/intro/',
+'https://www.example.com/example/example/example/general/intro/',
 ],
 ];
 private $printChangefreqList = false; // set to true to print URLs list following changefreq
@@ -111,7 +111,7 @@ private $rewriteRobots = false; // set to true to rewrite robots.txt including u
 ##### WARNING: DO NOT CHANGE ANYTHING BELOW #####
 #################################################
 
-private $version = 'v3.4.0';
+private $version = 'v3.5.0';
 private $userAgent = 'getSeoSitemap ver. by John';
 private $url = null; // an aboslute URL (ex. https://www.example.com/test/test1.php )
 private $size = null; // size of file in Kb
@@ -167,7 +167,7 @@ private $sitemapMaxSize = 52428800; // max sitemap size (bytes)
 private $sitemapNameArr = []; // includes names of all saved sitemaps at the end of the process
 // text to add on some MySQL errors
 private $txtToAddOnMysqliErr = ' - fix it remembering to set exec to n in getSeoSitemapExec table.'; 
-private $pageMaxSize = 132096; // page max file size in byte. this param is only for SEO
+private $pageMaxSize = 327680; // page max file size in byte. this param is only for SEO
 private $maxUrlLength = 767; // max URL length
 private $malfChars = [' ']; // list of characters to detect malformed URLs following a standard good practice
 private $multipleSitemaps = null; // when multiple sitemaps are avaialble is true
@@ -516,7 +516,26 @@ if (@$dom->loadHTML($html) === false) {
 $this->writeLog('DOMDocument parse error on URL '.$url);
 }
 
-$links = $dom->getElementsByTagName('a'); // get all links
+// get all as
+$as = $dom->getElementsByTagName('a'); 
+
+// get all imgs
+$imgs = $dom->getElementsByTagName('img'); 
+
+ // get all scripts
+$scripts = $dom->getElementsByTagName('script');
+
+// get all links
+$links = $dom->getElementsByTagName('link');
+
+// get all iframes
+$iframes = $dom->getElementsByTagName('iframe');
+
+// get all videos
+$videos = $dom->getElementsByTagName('video'); 
+
+ // get all audios
+$audios = $dom->getElementsByTagName('audio');
 
 $titleArr = $dom->getElementsByTagName('title');
 $titleCount = $titleArr->length;
@@ -587,14 +606,13 @@ $this->stopExec();
 }
 
 // iterate over extracted links and display their URLs
-foreach ($links as $link){
+foreach ($as as $a){
 
 // set skipCallerUrl to prepare pageTest in case of calling insSkipUrl from pageTest
 $this->skipCallerUrl = $url;
 
-
-// get absolute URL
-$absHref = $this->getAbsoluteUrl($link->getAttribute('href'), $url);
+// get absolute URL of href
+$absHref = $this->getAbsoluteUrl($a->getAttribute('href'), $url);
 
 // add only links to include
 $this->pageTest($absHref);
@@ -606,6 +624,66 @@ $this->pageLinks[] = $absHref;
 elseif (PRINTCONTAINEROFSKIPPED === true) {
 $this->writeLog('Into '.$url.' skipped '.$absHref);
 }
+}
+
+// iterate over extracted imgs and display their URLs
+foreach ($imgs as $img){
+// get absolute URL of image
+$absImg = $this->getAbsoluteUrl($img->getAttribute('src'), $url);
+
+// insert img URL as skipped...in that way the class will check http response code
+$this->insSkipUrl($absImg);
+}
+
+// iterate over extracted scripts and display their URLs
+foreach ($scripts as $script){
+$scriptSrc = $script->getAttribute('src');
+
+// get absolute URL script src if src exits only (this is to prevent error when script does not have src)
+if ($scriptSrc !== ''){
+// get absolute URL of script
+$absScript = $this->getAbsoluteUrl($scriptSrc, $url);
+
+// insert acript URL as skipped...in that way the class will check http response code
+$this->insSkipUrl($absScript);
+}
+}
+
+// iterate over extracted links and display their URLs
+foreach ($links as $link){
+
+// get absolute URL of link
+$absLink = $this->getAbsoluteUrl($link->getAttribute('href'), $url);
+
+// insert link URL as skipped...in that way the class will check http response code
+$this->insSkipUrl($absLink);
+}
+
+// iterate over extracted iframes and display their URLs
+foreach ($iframes as $iframe){
+// get absolute URL of iframe
+$absIframe = $this->getAbsoluteUrl($iframe->getAttribute('src'), $url);
+
+// insert iframe URL as skipped...in that way the class will check http response code
+$this->insSkipUrl($absIframe);
+}
+
+// iterate over extracted video and display their URLs
+foreach ($videos as $video){
+// get absolute URL of video
+$absVideo = $this->getAbsoluteUrl($video->getAttribute('src'), $url);
+
+// insert video URL as skipped...in that way the class will check http response code
+$this->insSkipUrl($absVideo);
+}
+
+// iterate over extracted audios and display their URLs
+foreach ($audios as $audio){
+// get absolute URL of audio
+$absAudio = $this->getAbsoluteUrl($audio->getAttribute('src'), $url);
+
+// insert audio URL as skipped...in that way the class will check http response code
+$this->insSkipUrl($absAudio);
 }
 
 $this->pageLinks = array_unique($this->pageLinks);
@@ -2214,26 +2292,31 @@ return $baseUrl.$relativeUrl;
 // parse base URL and convert to: $scheme, $host, $path, $query, $port, $user, $pass
 extract(parse_url($baseUrl));
 
-// remove non-directory element from $path
+// if base URL contains a path remove non-directory elements from $path
+if (isset($path) === true){
 $path = preg_replace('#/[^/]*$#', '', $path);
+}
+else {
+$path = '';
+}
 
-// if realtive URL starts with //
+// if relative URL starts with //
 if (substr($relativeUrl, 0, 2) === '//'){
 return $scheme.':'.$relativeUrl;
 }
 
-// if realtive URL starts with /
+// if relative URL starts with /
 if ($relativeUrl[0] === '/'){
 $path = null;
 }
 
 $abs = null;
 
-// if realtive URL contains a user
+// if relative URL contains a user
 if (isset($user) === true){
 $abs .= $user;
 
-// if realtive URL contains a password
+// if relative URL contains a password
 if (isset($pass) === true){
 $abs .= ':'.$pass;
 }
@@ -2243,7 +2326,7 @@ $abs .= '@';
 
 $abs .= $host;
 
-// if realtive URL contains a port
+// if relative URL contains a port
 if (isset($port) === true){
 $abs .= ':'.$port;
 }
@@ -2259,6 +2342,7 @@ for ($n = 1; $n > 0; $abs = preg_replace($re, '/', $abs, -1, $n)) {
 return $scheme.'://'.$abs;
 
 }
+################################################################################
 ################################################################################
 }
 
