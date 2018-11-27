@@ -1,5 +1,10 @@
 getSeoSitemap CHANGELOG
 
+v3.5.0 (2018-11-28)
+- Added functions to check http response code of all internal and external sources (images, scripts, links, iframes, 
+videos, audios).
+- Updated variable $pageMaxSize to respect new search engines rules.
+
 v3.4.0 (2018-10-18)
 - Added functions to manage relative URLs.
 - Improved script speed.
