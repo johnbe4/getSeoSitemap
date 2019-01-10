@@ -1,9 +1,9 @@
 <?php
 
 /*
-getSeoSitemap v3.5.0 LICENSE (2018-11-28)
+getSeoSitemap v3.6.0 LICENSE (2019-01-11)
 
-getSeoSitemap v3.5.0 is distributed under the following BSD-style license: 
+getSeoSitemap v3.6.0 is distributed under the following BSD-style license: 
 
 Copyright (c) 2016-2018 
 Giovanni Bertone (RED Racing Parts)
@@ -67,9 +67,9 @@ class getSeoSitemap {
 ##### start of user parameters
 private $skipUrl = [ // skip all urls that start or are equal these values (values must be absolute)
 'https://www.example.com/example/',
-'https://www.example.com/example/example/example/general/intro/google_site_search.php',
-'https://www.example.com/example/example/prodottiecomponenti/generale/intro/google_site_search.php',
-'https://www.example.com/example/currency.php',
+'https://www.example.com/example/example/example/example/example/example.php',
+'https://www.example.com/example/example/example/example/example/example.php',
+'https://www.example.com/example/example.php',
 ];
 // set $fileToAdd to true to follow and add all kind of URLs.
 // set $fileToAdd to an array to follow and add only some kinds of URLs (example: $fileToAdd = ['php','pdf',];).
@@ -83,17 +83,17 @@ private $fullUrlPriority = [ // set priority of particular URLs that are equal t
 'https://www.example.com'
 ],
 '0.9' => [
-'https://www.example.com/example/example/introducingpages/11/22/hotproducts.php',
-'https://www.example.com/example/example/pagineintroduttive/11/22/hotproducts.php'
+'https://www.example.com/example/example/example/11/22/example.php',
+'https://www.example.com/example/example/example/11/22/example.php'
 ],
 ];
 private $partialUrlPriority = [ // set priority of particular URLs that start with these values (values must be absolute)
 '0.8' => [
-'https://www.example.com/example/example/introducingpages/11/22/',
-'https://www.example.com/example/example/pagineintroduttive/11/22/',
+'https://www.example.com/example/example/example/11/22/',
+'https://www.example.com/example/example/example/11/22/',
 ],
 '0.7' => [
-'https://www.example.com/example/example/prodottiecomponenti/generale/intro/',
+'https://www.example.com/example/example/example/example/intro/',
 'https://www.example.com/example/example/example/general/intro/',
 ],
 ];
@@ -111,11 +111,11 @@ private $rewriteRobots = false; // set to true to rewrite robots.txt including u
 ##### WARNING: DO NOT CHANGE ANYTHING BELOW #####
 #################################################
 
-private $version = 'v3.5.0';
+private $version = 'v3.6.0';
 private $userAgent = 'getSeoSitemap ver. by John';
 private $url = null; // an aboslute URL (ex. https://www.example.com/test/test1.php )
 private $size = null; // size of file in Kb
-private $titleLength = [5, 104]; // min, max title length
+private $titleLength = [5, 112]; // min, max title length
 private $descriptionLength = [50, 160]; // min, max description length
 private $md5 = null; // md5 of string (hexadecimal)
 private $changefreq = null; // change frequency of file (values: daily, weekly, monthly, yearly)
@@ -167,7 +167,7 @@ private $sitemapMaxSize = 52428800; // max sitemap size (bytes)
 private $sitemapNameArr = []; // includes names of all saved sitemaps at the end of the process
 // text to add on some MySQL errors
 private $txtToAddOnMysqliErr = ' - fix it remembering to set exec to n in getSeoSitemapExec table.'; 
-private $pageMaxSize = 327680; // page max file size in byte. this param is only for SEO
+private $pageMaxSize = 135168; // page max file size in byte. this param is only for SEO
 private $maxUrlLength = 767; // max URL length
 private $malfChars = [' ']; // list of characters to detect malformed URLs following a standard good practice
 private $multipleSitemaps = null; // when multiple sitemaps are avaialble is true
@@ -630,6 +630,15 @@ $this->writeLog('Into '.$url.' skipped '.$absHref);
 foreach ($imgs as $img){
 // get absolute URL of image
 $absImg = $this->getAbsoluteUrl($img->getAttribute('src'), $url);
+
+// check if img title and img alt are present and length >= 1
+if (strlen($img->getAttribute('title')) < 1){
+$this->writeLog('Image without title: '.$absImg.' - URL: '.$url);
+}
+
+if (strlen($img->getAttribute('alt')) < 1){
+$this->writeLog('Image without alt: '.$absImg.' - URL: '.$url);
+}
 
 // insert img URL as skipped...in that way the class will check http response code
 $this->insSkipUrl($absImg);
