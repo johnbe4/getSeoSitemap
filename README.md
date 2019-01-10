@@ -1,4 +1,4 @@
-# getSeoSitemap v3.5.0 (2018-11-28)
+# getSeoSitemap v3.6.0 (2019-01-11)
 Php library to get sitemap.<br>
 It crawls a whole website checking all links and sources.<br>
 It makes a Search Engine Optimization.<br>
@@ -24,7 +24,16 @@ It checks all internal and external links and sources.<br>
 If failed (http response code different from 200 or with size = 0), external URLs from the domain will be included into failed URLs list.<br>
 Mailto URLs with will not be included into sitemap.<br>
 URLs inside pdf files will not be scanned and will not be included into sitemap.<br>
-It checks page title, page description and page size to improve SEO.<br>
+
+To improve SEO, it checks:<br>
+- malformed URLs<br>
+- http response code of all internal and external sources (images, scripts, links, iframes, videos, audios)<br>
+- page title<br>
+- page description<br>
+- page size<br>
+- image alt<br>
+- image title.<br>
+
 You can use absolute or relative URLs inside the site.<br>
 There is not any automatic function to submit updated sitemap to google or bing.<br>
 That is because I discovered search engines prefer submission by their webmaster tools.<br>
@@ -39,7 +48,8 @@ Using getSeoSitemap, you will be able to give a better surfing experience to you
 2 - set all user constants and parameters.<br>
 3 - on your server cronotab schedule the script once each day prefereble when your server is not too much busy.<br>
     A command line example to schedule the script every day at 7:45:00 AM is:<br>
-    45 7  *    *    *    php /example/websites/clients/client1/web5/example/example/getSeoSitemap/getSeoSitemap.php<br>
+    45 7  *    *    *    php /example/example/example/example/example/getSeoSitemap/getSeoSitemap.php<br>
+    When you know how long it takes to execute all the script, you could add a cronotab timeout.
 
 **Warning<br>**
 To run getSeoSitemp faster, using a script like geoplugin.class you should exclude geoSeoSitemap user-agent from that.<br>
