@@ -1,5 +1,10 @@
 getSeoSitemap CHANGELOG
 
+v3.6.0 (2019-01-11)
+- Added function to check if title and alt are present in images.
+- Updated variable $pageMaxSize to respect new search engines rules.
+- Updated variable $titleLength to respect new search engines rules.
+
 v3.5.0 (2018-11-28)
 - Added functions to check http response code of all internal and external sources (images, scripts, links, iframes, 
 videos, audios).
@@ -8,12 +13,12 @@ videos, audios).
 v3.4.0 (2018-10-18)
 - Added functions to manage relative URLs.
 - Improved script speed.
-- Updated variables $pageMaxSize to respect new search engines rules.
+- Updated variable $pageMaxSize to respect new search engines rules.
 
 v3.3.0 (2018-10-04)
 - Added callerUrl column into getSeoSitemap table to show in printing lists.
 - Updated variables $titleLength and $bingMaxSize to respect new search engines rules.
-- Renamed $bingMaxSize variable to $pageMaxSize.
+- Renamed variable $bingMaxSize to $pageMaxSize.
 - Improved printing lists.
 
 v3.2.2 (2018-08-21)
