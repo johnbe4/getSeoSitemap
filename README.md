@@ -9,7 +9,7 @@ It makes a Search Engine Optimization.<br>
 
 * **category**    Library
 * **author**      Giovanni Bertone <red@redracingparts.com>
-* **copyright**   2016-2018 Giovanni Bertone - RED Racing Parts
+* **copyright**   2016-2019 Giovanni Bertone - RED Racing Parts
 * **link**        https://www.redracingparts.com
 * **source**      https://github.com/johnbe4/getSeoSitemap
 
