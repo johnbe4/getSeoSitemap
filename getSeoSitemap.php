@@ -1,9 +1,9 @@
 <?php
 
 /*
-getSeoSitemap v3.6.0 LICENSE (2019-01-11)
+getSeoSitemap v3.7.0 LICENSE (2019-02-18)
 
-getSeoSitemap v3.6.0 is distributed under the following BSD-style license: 
+getSeoSitemap v3.7.0 is distributed under the following BSD-style license: 
 
 Copyright (c) 2016-2019
 Giovanni Bertone (RED Racing Parts)
@@ -53,9 +53,9 @@ const DBPASS = DATABASE_PASSWORD_I; // database password
 const DBNAME = DATABASE_NAME_I; // database name
 
  // getSeoSitemap path inside server
-const GETSITEMAPPATH = '/example/example/example/example/example/example/example/getSeoSitemap/';
+const GETSITEMAPPATH = '/example/example/example/example/getSeoSitemap/';
 
-const SITEMAPPATH = '/example/example/example/example/example/example/'; // sitemap path inside server
+const SITEMAPPATH = '/example/example/example/'; // sitemap path inside server
 const PRINTINTSKIPURLS = false; // set to false if you do not want the list of internal skipped URLs in your log file
 
  // set to true to get a list of container URLs of skipped URLs. It is useful to fix wrong URLs.
@@ -66,7 +66,7 @@ class getSeoSitemap {
 
 ##### start of user parameters
 private $skipUrl = [ // skip all urls that start or are equal these values (values must be absolute)
-'https://www.example.com/example/',
+'https://www.example.com/shop/',
 'https://www.example.com/example/example/example/example/example/example.php',
 'https://www.example.com/example/example/example/example/example/example.php',
 'https://www.example.com/example/example.php',
@@ -93,8 +93,11 @@ private $partialUrlPriority = [ // set priority of particular URLs that start wi
 'https://www.example.com/example/example/example/11/22/',
 ],
 '0.7' => [
-'https://www.example.com/example/example/example/example/intro/',
-'https://www.example.com/example/example/example/general/intro/',
+'https://www.example.com/example/example/example/example/example/',
+'https://www.example.com/example/example/example/example/example/',
+],
+'0.6' => [
+'https://www.example.com/example.php?p=',
 ],
 ];
 private $printChangefreqList = false; // set to true to print URLs list following changefreq
@@ -104,6 +107,8 @@ private $extUrlsTest = true; // set to false to skip external URLs test (default
 private $printSitemapSizeList = false; // set to true to print a size list of all sitemaps   
 private $printMysqlWarn = true; // set to true to print MySQL warnings    
 private $printMalfUrls = true; // set to true to print a malformed URL list following a standard good practice
+private $checkH2 = false; // set to true to check if h2 is present in all pages
+private $checkH3 = false; // set to true to check if h3 is present in all pages
 private $rewriteRobots = false; // set to true to rewrite robots.txt including updated sitemap infos
 ##### end of user parameters
 
@@ -111,11 +116,11 @@ private $rewriteRobots = false; // set to true to rewrite robots.txt including u
 ##### WARNING: DO NOT CHANGE ANYTHING BELOW #####
 #################################################
 
-private $version = 'v3.6.0';
+private $version = 'v3.7.0';
 private $userAgent = 'getSeoSitemap ver. by John';
 private $url = null; // an aboslute URL (ex. https://www.example.com/test/test1.php )
 private $size = null; // size of file in Kb
-private $titleLength = [5, 112]; // min, max title length
+private $titleLength = [5, 113]; // min, max title length
 private $descriptionLength = [50, 160]; // min, max description length
 private $md5 = null; // md5 of string (hexadecimal)
 private $changefreq = null; // change frequency of file (values: daily, weekly, monthly, yearly)
@@ -174,10 +179,14 @@ private $multipleSitemaps = null; // when multiple sitemaps are avaialble is tru
 private $logPath = null; // log path
 private $scriptVerNum = null; // version number of the script
 private $dBaseVerNum = null; // version number of database
-private $countUrlWithoutDesc = 0; // counter of URL without description
-private $countUrlWithMultiDesc = 0; // counter of URL with multiple description
-private $countUrlWithoutTitle = 0; // counter of URL without title
-private $countUrlWithMultiTitle = 0; // counter of URL with multiple title
+private $countUrlWithoutDesc = 0; // counter of URLs without description
+private $countUrlWithMultiDesc = 0; // counter of URLs with multiple description
+private $countUrlWithoutTitle = 0; // counter of URLs without title
+private $countUrlWithMultiTitle = 0; // counter of URLs with multiple title
+private $countUrlWithoutH1 = 0; // counter of URLs without h1
+private $countUrlWithMultiH1 = 0; // counter of URLs with multiple h1
+private $countUrlWithoutH2 = 0; // counter of URLs without h2
+private $countUrlWithoutH3 = 0; // counter of URL without h3
 private $callerUrl = null; // caller URL of normal URL
 private $skipCallerUrl = null; // caller URL of skipped URL
 
@@ -537,6 +546,41 @@ $videos = $dom->getElementsByTagName('video');
  // get all audios
 $audios = $dom->getElementsByTagName('audio');
 
+ // get all h1s
+$h1Arr = $dom->getElementsByTagName('h1');
+$h1Count = $h1Arr->length;
+
+if ($h1Count > 1) {
+$this->writeLog('There are '.$h1Count.' h1 (SEO: h1 should be single)- URL '.$url);
+$this->countUrlWithMultiH1++;
+}
+elseif ($h1Count === 0) {
+$this->writeLog('H1 does not exist (SEO: h1 should be present) - URL '.$url);
+$this->countUrlWithoutH1++;
+}
+
+if ($this->checkH2 === true){
+ // get all h2s
+$h2Arr = $dom->getElementsByTagName('h2');
+$h2Count = $h2Arr->length;
+
+if ($h2Count === 0) {
+$this->writeLog('H2 does not exist (SEO: h2 should be present) - URL '.$url);
+$this->countUrlWithoutH2++;
+}
+}
+
+if ($this->checkH3 === true){
+ // get all h3s
+$h3Arr = $dom->getElementsByTagName('h3');
+$h3Count = $h3Arr->length;
+
+if ($h3Count === 0) {
+$this->writeLog('H3 does not exist (SEO: h3 should be present) - URL '.$url);
+$this->countUrlWithoutH3++;
+}
+}
+
 $titleArr = $dom->getElementsByTagName('title');
 $titleCount = $titleArr->length;
 
@@ -713,6 +757,16 @@ $this->writeLog($this->countUrlWithoutTitle.' URLs without title (SEO: title sho
 $this->writeLog($this->countUrlWithMultiTitle.' URLs with multiple title (SEO: title should be single)');
 $this->writeLog($this->countUrlWithoutDesc.' URLs without description (SEO: description should be present)');
 $this->writeLog($this->countUrlWithMultiDesc.' URLs with multiple description (SEO: description should be single)');
+$this->writeLog($this->countUrlWithoutH1.' URLs without h1 (SEO: h1 should be present)');
+$this->writeLog($this->countUrlWithMultiH1.' URLs with multiple h1 (SEO: h1 should be single)');
+
+if ($this->checkH2 === true){
+$this->writeLog($this->countUrlWithoutH2.' URLs without h2 (SEO: h2 should be present)');
+}
+
+if ($this->checkH3 === true){
+$this->writeLog($this->countUrlWithoutH3.' URLs without h3 (SEO: h3 should be present)');
+}
 
 if ($this->extUrlsTest === true) {
 $this->openCurlConn();
@@ -966,11 +1020,19 @@ $this->writeLog('Included 1 start URL into sitemap');
 }
 
 foreach ($this->fileToAdd as $value) {
-$this->query = "SELECT COUNT(*) AS count FROM getSeoSitemap "
-."WHERE httpCode = '200' AND size != 0 AND url LIKE '%".$value."' AND state = 'scan'";
+$count = 0;
+
+$this->query = "SELECT url FROM getSeoSitemap "
+."WHERE httpCode = '200' AND size != 0 AND state = 'scan'";
 $this->execQuery();
 
-$this->writeLog('Included '.$this->count.' '.$value.' URLs into sitemap');
+foreach ($this->row as $v) {
+if ($this->getUrlExt($v['url']) === $value){
+$count++;
+}
+}
+
+$this->writeLog('Included '.$count.' '.$value.' URLs into sitemap');
 }
 }
 
@@ -2076,14 +2138,6 @@ return $verNum;
 }
 ################################################################################
 ################################################################################
-// get version number of the script
-private function getScriptVerNum(){
-
-$this->scriptVerNum = $this->getVerNum($this->version);
-
-}
-################################################################################
-################################################################################
 // get version number of database
 private function getDbaseVerNum(){
 
@@ -2272,15 +2326,6 @@ $this->writeLog('Execution has been stopped because of MySQL prepare error: '.lc
 
 $this->stopExec();
 }
-
-}
-################################################################################
-################################################################################
-// update step
-private function updateStep($step){
-
-$this->query = "UPDATE getSeoSitemapExec SET step = '$step' WHERE func = 'getSeoSitemap' LIMIT 1";
-$this->execQuery();
 
 }
 ################################################################################
