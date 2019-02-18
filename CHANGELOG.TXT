@@ -1,5 +1,11 @@
 getSeoSitemap CHANGELOG
 
+v3.7.0 (2019-02-18)
+- Added feature to check if h1 is present and single in all pages.
+- Added feature to check if h2 and h3 are present in all pages (added user parameters $checkH2 and $checkH3).
+- Fixed bug of file to add total counter: updated getTotalUrls function.
+- Updated variable $titleLength to respect new search engines rules.
+
 v3.6.0 (2019-01-11)
 - Added function to check if title and alt are present in images.
 - Updated variable $pageMaxSize to respect new search engines rules.
