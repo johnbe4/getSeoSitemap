@@ -1,4 +1,4 @@
-# getSeoSitemap v3.6.0 (2019-01-11)
+# getSeoSitemap v3.7.0 (2019-02-18)
 Php library to get sitemap.<br>
 It crawls a whole website checking all links and sources.<br>
 It makes a Search Engine Optimization.<br>
@@ -30,6 +30,7 @@ To improve SEO, it checks:<br>
 - http response code of all internal and external sources (images, scripts, links, iframes, videos, audios)<br>
 - page title<br>
 - page description<br>
+- page h1/h2/h3<br>
 - page size<br>
 - image alt<br>
 - image title.<br>
