@@ -47,7 +47,7 @@ Using getSeoSitemap, you will be able to give a better surfing experience to you
 **Instructions<br>**
 1 - copy getSeoSitemap folder in a protected zone of your server.<br>
 2 - set all user constants and parameters.<br>
-3 - on your server cronotab schedule the script once each day prefereble when your server is not too much busy.<br>
+3 - on your server cronotab schedule the script once each day preferable when your server is not too much busy.<br>
     A command line example to schedule the script every day at 7:45:00 AM is:<br>
     45 7  *    *    *    php /example/example/example/example/example/getSeoSitemap/getSeoSitemap.php<br>
     When you know how long it takes to execute all the script, you could add a cronotab timeout.
