@@ -21,7 +21,6 @@ Change frequency will be automatically selected between daily, weekly, monthly a
 Max URL lenght must be 767 characters, otherwise the script will fail.<br>
 URLs with http response code different from 200 or with size = 0 will not be included into sitemap.<br>
 It checks all internal and external links and sources.<br>
-If failed (http response code different from 200 or with size = 0), external URLs from the domain will be included into failed URLs list.<br>
 Mailto URLs with will not be included into sitemap.<br>
 URLs inside pdf files will not be scanned and will not be included into sitemap.<br>
 
