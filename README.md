@@ -1,7 +1,7 @@
-# getSeoSitemap v3.7.0 (2019-02-18)
+# getSeoSitemap v3.8.0 (2019-05-04)
 Php library to get sitemap.<br>
-It crawls a whole website checking all links and sources.<br>
-It makes a Search Engine Optimization.<br>
+It crawls a whole domain checking all links, all sources plus a partial Search Engine Optimization.<br>
+It makes a full Search Engine Optimization check of URLs into sitemap only.<br>
 
 [![donate via paypal](https://img.shields.io/badge/donate-paypal-87ceeb.svg)](https://www.paypal.me/johnbe4)<br>
 ![donate via bitcoin](https://img.shields.io/badge/donate-bitcoin-orange.svg)<br>
@@ -26,19 +26,19 @@ Mailto URLs with will not be included into sitemap.<br>
 URLs inside pdf files will not be scanned and will not be included into sitemap.<br>
 
 To improve SEO, it checks:<br>
-- malformed URLs<br>
-- http response code of all internal and external sources (images, scripts, links, iframes, videos, audios)<br>
-- page title<br>
-- page description<br>
-- page h1/h2/h3<br>
-- page size<br>
-- image alt<br>
-- image title.<br>
+- http response code of all internal and external sources into domain (images, scripts, links, iframes, videos, audios)<br>
+- malformed URLs into domain<br>
+- page title of URLs into domain<br>
+- page description of URLs into domain<br>
+- page h1/h2/h3 of URLs into domain<br>
+- page size of URLs into sitemap<br>
+- image alt of URLs into domain<br>
+- image title of URLs into domain.<br>
 
 You can use absolute or relative URLs inside the site.<br>
+Robots.txt file must be present into the main directory of the site otherwise getSeoSitemap will fail.<br>
+This script will set automatically all URLs to skip and to allow into sitemap following the robots.txt rules of "User-agent: *".<br>
 There is not any automatic function to submit updated sitemap to google or bing.<br>
-That is because I discovered search engines prefer submission by their webmaster tools.<br>
-In fact, submitting sitemap by their own link, they never update the last submission time inside webmaster tools.<br>
 It rewrites robots.txt adding updated sitemap informations.<br>
 Maximum limit of URLs to insert into sitemap is 2.5T.<br>
 
@@ -53,5 +53,7 @@ Using getSeoSitemap, you will be able to give a better surfing experience to you
     When you know how long it takes to execute all the script, you could add a cronotab timeout.
 
 **Warning<br>**
-Before moving from releases lower than 3.0 to 3.0 or higher, you must drop getSeoSitemap and getSeoSitemapExec tables into your dBase.<br>
-Do not save any file with name that starts with sitemap in the same folder of sitemaps, otherwise getSeoSitemap script could cancel it.
+To run getSeoSitemap faster, using a script like Geoplugin you should exclude geoSeoSitemap user-agent from that.<br>
+**Before moving from releases lower than 3.0 to 3.0 or higher, you must drop getSeoSitemap and getSeoSitemapExec tables into your dBase.<br>
+Do not save any file with name that starts with sitemap in the same folder of sitemaps, otherwise getSeoSitemap script could cancel it.<br>**
+**The robots.txt file must be present into the main directory of the site otherwise getSeoSitemap will fail.**
