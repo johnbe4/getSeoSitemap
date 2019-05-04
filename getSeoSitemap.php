@@ -1,11 +1,11 @@
 <?php
 
 /*
-getSeoSitemap v3.7.0 LICENSE (2019-02-18)
+getSeoSitemap v3.8.0 LICENSE (2019-05-04)
 
-getSeoSitemap v3.7.0 is distributed under the following BSD-style license: 
+getSeoSitemap v3.8.0 is distributed under the following BSD-style license: 
 
-Copyright (c) 2016-2019
+Copyright (c) 2017-2019
 Giovanni Bertone (RED Racing Parts)
 https://www.redracingparts.com
 red@redracingparts.com
@@ -43,58 +43,38 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ###################################################################################################
 
 ##### start of user constants
-const DOMAINURL = 'https://www.example.com'; // domain url (value must be absolute).
-// every URL must contain this value at the beginning
-const STARTURL = 'https://www.example.com'; // starting url to crawl (value must be absolute)
+const DOMAINURL = 'https://www.example.com'; // domain URL: value must be absolute - every URL must include it at the beginning
 const DEFAULTPRIORITY = '0.5'; // default priority for URLs not included in $fullUrlPriority and $partialUrlPriority
 const DBHOST = DATABASE_HOST_I; // database host
-const DBUSER = DATABASE_USER_I; // database user
+const DBUSER = DATABASE_USER_I; // database user (warning: user must have permissions to create / alter table)
 const DBPASS = DATABASE_PASSWORD_I; // database password
 const DBNAME = DATABASE_NAME_I; // database name
-
- // getSeoSitemap path inside server
-const GETSITEMAPPATH = '/example/example/example/example/getSeoSitemap/';
-
-const SITEMAPPATH = '/example/example/example/'; // sitemap path inside server
-const PRINTINTSKIPURLS = false; // set to false if you do not want the list of internal skipped URLs in your log file
-
- // set to true to get a list of container URLs of skipped URLs. It is useful to fix wrong URLs.
-const PRINTCONTAINEROFSKIPPED = false;
+const GETSITEMAPPATH = '/example/getSeoSitemap/'; // getSeoSitemap path into server
+const SITEMAPPATH = '/example/'; // sitemap path inside server
+const PRINTSKIPURLS = false; // set to true to print the list of URLs out of sitemap into log file
 ##### end of user constants
 
 class getSeoSitemap {
 
 ##### start of user parameters
-private $skipUrl = [ // skip all urls that start or are equal these values (values must be absolute)
-'https://www.example.com/shop/',
-'https://www.example.com/example/example/example/example/example/example.php',
-'https://www.example.com/example/example/example/example/example/example.php',
-'https://www.example.com/example/example.php',
-];
-// set $fileToAdd to true to follow and add all kind of URLs.
-// set $fileToAdd to an array to follow and add only some kinds of URLs (example: $fileToAdd = ['php','pdf',];).
-private $fileToAdd = [
-'php',
-'pdf',
-];
 // priority values must be 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0. other values are not accepted.
 private $fullUrlPriority = [ // set priority of particular URLs that are equal these values (values must be absolute)
 '1.0' => [
 'https://www.example.com'
 ],
 '0.9' => [
-'https://www.example.com/example/example/example/11/22/example.php',
-'https://www.example.com/example/example/example/11/22/example.php'
+'https://www.example.com/example.php',
+'https://www.example.com/example.php'
 ],
 ];
 private $partialUrlPriority = [ // set priority of particular URLs that start with these values (values must be absolute)
 '0.8' => [
-'https://www.example.com/example/example/example/11/22/',
-'https://www.example.com/example/example/example/11/22/',
+'https://www.example.com/example/',
+'https://www.example.com/example/',
 ],
 '0.7' => [
-'https://www.example.com/example/example/example/example/example/',
-'https://www.example.com/example/example/example/example/example/',
+'https://www.example.com/example/',
+'https://www.example.com/example/',
 ],
 '0.6' => [
 'https://www.example.com/example.php?p=',
@@ -105,28 +85,26 @@ private $printPriorityList = false; // set to true to print URLs list following 
 private $printTypeList = false; // set to true to print URLs list following type                                                                                                             
 private $extUrlsTest = true; // set to false to skip external URLs test (default value is true)
 private $printSitemapSizeList = false; // set to true to print a size list of all sitemaps   
-private $printMysqlWarn = true; // set to true to print MySQL warnings    
 private $printMalfUrls = true; // set to true to print a malformed URL list following a standard good practice
-private $checkH2 = false; // set to true to check if h2 is present in all pages
-private $checkH3 = false; // set to true to check if h3 is present in all pages
-private $rewriteRobots = false; // set to true to rewrite robots.txt including updated sitemap infos
+private $checkH2 = true; // set to true to check if h2 is present in all pages
+private $checkH3 = true; // set to true to check if h3 is present in all pages
 ##### end of user parameters
 
 #################################################
 ##### WARNING: DO NOT CHANGE ANYTHING BELOW #####
 #################################################
 
-private $version = 'v3.7.0';
+private $version = 'v3.8.0';
 private $userAgent = 'getSeoSitemap ver. by John';
 private $url = null; // an aboslute URL (ex. https://www.example.com/test/test1.php )
 private $size = null; // size of file in Kb
-private $titleLength = [5, 113]; // min, max title length
+private $titleLength = [5, 101]; // min, max title length
 private $descriptionLength = [50, 160]; // min, max description length
 private $md5 = null; // md5 of string (hexadecimal)
 private $changefreq = null; // change frequency of file (values: daily, weekly, monthly, yearly)
 private $lastmod = null; // timestamp of last modified date of URL
 private $state = null; // state of URL (values: old = URL of previous scan, new = new URL to scan, 
-// scan = new URL already scanned, skip = new skipped URL)
+// scan = new URL already scanned, skip = new skipped URL, rSkip = new skipped URL because of robots.txt rules)
 private $insUrl = null;
 private $mysqli = null; // mysqli connection
 private $ch = null; // curl connection
@@ -143,7 +121,6 @@ private $stmt3 = null; // statement 3 for prepared query
 private $stmt4 = null; // statement 4 for prepared query
 private $stmt5 = null; // statement 5 for prepared query
 private $startTime = null; // start timestamp
-private $succ = null; // success of a function (value can be true or false)
 private $doNotFollowLinksIn = [ // do not follow links inside these file types
 'pdf',
 ];
@@ -167,17 +144,19 @@ private $escapeCodeArr = [ // escape code conversions
 ];
 private $maxUrlsInSitemap = 50000; // max number of URLs into a single sitemap
 private $maxTotalUrls = 2500000000; // max total number of URLs
-private $totUrls = null; // total URLs at the end of 
+private $totUrls = null; // total URLs at the end 
 private $sitemapMaxSize = 52428800; // max sitemap size (bytes)
 private $sitemapNameArr = []; // includes names of all saved sitemaps at the end of the process
-// text to add on some MySQL errors
-private $txtToAddOnMysqliErr = ' - fix it remembering to set exec to n in getSeoSitemapExec table.'; 
+private $txtToAddOnMysqliErr = ' - fix it remembering to set exec to n in getSeoSitemapExec table.'; // additional error text
 private $pageMaxSize = 135168; // page max file size in byte. this param is only for SEO
 private $maxUrlLength = 767; // max URL length
 private $malfChars = [' ']; // list of characters to detect malformed URLs following a standard good practice
 private $multipleSitemaps = null; // when multiple sitemaps are avaialble is true
 private $logPath = null; // log path
-private $scriptVerNum = null; // version number of the script
+private $skipUrl = []; // URLs to skip
+private $allowUrl = []; // URLs to allow
+private $robotsPath = null; // robots.txt path
+private $robotsLines = []; // robots.txt lines
 private $dBaseVerNum = null; // version number of database
 private $countUrlWithoutDesc = 0; // counter of URLs without description
 private $countUrlWithMultiDesc = 0; // counter of URLs with multiple description
@@ -262,39 +241,6 @@ $this->insUrl = false;
 return;
 }
 
-// if url is to skip
-foreach ($this->skipUrl as $value){
-if (strpos($url, $value) === 0) {
-$this->insSkipUrl($url);
-$this->insUrl = false;
-return;
-}
-}
-
-// if file is not to add
-if ($url !== STARTURL) { // detect if URL is the starting URL to prevent false skip
-$this->insUrl = false;
-
-// skip URL for type if $fileToAdd is an array correctly valueted
-if ($this->fileToAdd !== true) {
-foreach ($this->fileToAdd as $value) {
-$fileExt = $this->getUrlExt($url);
-
-if ($value === $fileExt) {
-$this->insUrl = true;
-}
-}
-}
-else {
-$this->insUrl = true;
-}
-
-if ($this->insUrl === false) {
-$this->insSkipUrl($url);
-return;
-}
-}
-
 }
 ################################################################################
 ################################################################################
@@ -321,15 +267,12 @@ private function execQuery(){
 
 // reset row
 $this->row = [];
- 
-if (!($result = $this->mysqli->query($this->query))) { 
+
+if (($result = $this->mysqli->query($this->query)) === false) {
 $this->writeLog('Execution has been stopped because of MySQL error. Error ('.$this->mysqli->errno.'): '
 .$this->mysqli->error.' - query: "'.$this->query.'"'.$this->txtToAddOnMysqliErr);   
 exit();
 }
-
-// write query warnings
-if ($this->printMysqlWarn === true) {
 
 if ($this->mysqli->warning_count > 0) {
 if ($warnRes = $this->mysqli->query("SHOW WARNINGS")) {
@@ -339,7 +282,6 @@ $warnMsg = sprintf("%s (%d): %s", $warnRow[0], $warnRow[1], lcfirst($warnRow[2])
 $this->writeLog($warnMsg.' - query: "'.$this->query.'"');   
         
 $warnRes->close();
-}
 }
 }
 
@@ -367,6 +309,7 @@ $result->free_result();
 // else if query is show....
 elseif (strpos($this->query, 'SHOW') === 0) {
 $this->rowNum = $result->num_rows;
+
 $result->free_result();
 }
 
@@ -394,9 +337,6 @@ $this->writeLog('Execution has been stopped because of MySQL multi_query error. 
 exit();
 }
 
-// write query warnings
-if ($this->printMysqlWarn === true) {
-
 if ($this->mysqli->warning_count > 0) {
 if ($warnRes = $this->mysqli->query("SHOW WARNINGS")) {
 $warnRow = $warnRes->fetch_row();
@@ -405,7 +345,6 @@ $warnMsg = sprintf("%s (%d): %s", $warnRow[0], $warnRow[1], lcfirst($warnRow[2])
 $this->writeLog($warnMsg.' - query: "'.$this->query.'"');   
         
 $warnRes->close();
-}
 }
 }
 
@@ -462,7 +401,8 @@ exit();
 ################################################################################
 private function update(){
 
-if ($this->row[0]['size'] > 0) { // to prevent error on empty page
+// to prevent error on empty page
+if ($this->row[0]['size'] > 0) { 
 $sizeDiff = abs($this->size - $this->row[0]['size']);
 
 if ($this->row[0]['md5'] !== $this->md5) {
@@ -551,7 +491,7 @@ $h1Arr = $dom->getElementsByTagName('h1');
 $h1Count = $h1Arr->length;
 
 if ($h1Count > 1) {
-$this->writeLog('There are '.$h1Count.' h1 (SEO: h1 should be single)- URL '.$url);
+$this->writeLog('There are '.$h1Count.' h1 (SEO: h1 should be single) - URL '.$url);
 $this->countUrlWithMultiH1++;
 }
 elseif ($h1Count === 0) {
@@ -664,10 +604,6 @@ $this->pageTest($absHref);
 if ($this->insUrl === true) {
 $this->pageLinks[] = $absHref;
 }
-// print URL of the page that includes skipped URL into log
-elseif (PRINTCONTAINEROFSKIPPED === true) {
-$this->writeLog('Into '.$url.' skipped '.$absHref);
-}
 }
 
 // iterate over extracted imgs and display their URLs
@@ -744,28 +680,34 @@ $this->pageLinks = array_unique($this->pageLinks);
 }
 ################################################################################
 ################################################################################
-public function end(){
+private function end(){
 
 // delete old records of previous full scan
 $this->query = "DELETE FROM getSeoSitemap WHERE state = 'old'";
 $this->execQuery();
 
-$this->query = "SELECT COUNT(*) AS count FROM getSeoSitemap WHERE state != 'skip'";
+$this->writeLog('Deleted old URLs');
+
+$this->query = "SELECT COUNT(*) AS count FROM getSeoSitemap";
 $this->execQuery();
-$this->writeLog($this->count.' scanned URLs (skipped URLs are not included - failed URls are included)');
-$this->writeLog($this->countUrlWithoutTitle.' URLs without title (SEO: title should be present)');
-$this->writeLog($this->countUrlWithMultiTitle.' URLs with multiple title (SEO: title should be single)');
-$this->writeLog($this->countUrlWithoutDesc.' URLs without description (SEO: description should be present)');
-$this->writeLog($this->countUrlWithMultiDesc.' URLs with multiple description (SEO: description should be single)');
-$this->writeLog($this->countUrlWithoutH1.' URLs without h1 (SEO: h1 should be present)');
-$this->writeLog($this->countUrlWithMultiH1.' URLs with multiple h1 (SEO: h1 should be single)');
+
+$this->writeLog($this->count.' scanned URLs');
+
+$this->setUrlsToRobotsSkip();
+
+$this->writeLog($this->countUrlWithoutTitle.' URLs without title into domain (SEO: title should be present)');
+$this->writeLog($this->countUrlWithMultiTitle.' URLs with multiple title into domain (SEO: title should be single)');
+$this->writeLog($this->countUrlWithoutDesc.' URLs without description into domain (SEO: description should be present)');
+$this->writeLog($this->countUrlWithMultiDesc.' URLs with multiple description into domain (SEO: description should be single)');
+$this->writeLog($this->countUrlWithoutH1.' URLs without h1 into domain (SEO: h1 should be present)');
+$this->writeLog($this->countUrlWithMultiH1.' URLs with multiple h1 into domain (SEO: h1 should be single)');
 
 if ($this->checkH2 === true){
-$this->writeLog($this->countUrlWithoutH2.' URLs without h2 (SEO: h2 should be present)');
+$this->writeLog($this->countUrlWithoutH2.' URLs without h2 into domain (SEO: h2 should be present)');
 }
 
 if ($this->checkH3 === true){
-$this->writeLog($this->countUrlWithoutH3.' URLs without h3 (SEO: h3 should be present)');
+$this->writeLog($this->countUrlWithoutH3.' URLs without h3 into domain (SEO: h3 should be present)');
 }
 
 if ($this->extUrlsTest === true) {
@@ -781,7 +723,7 @@ $this->query = "SELECT * FROM getSeoSitemap WHERE httpCode != '200' OR size = 0 
 $this->execQuery();
 
 if ($this->rowNum > 0) {
-$this->writeLog('##### Failed URLs (external URLs are included)');
+$this->writeLog('##### Failed URLs out of sitemap');
 
 foreach ($this->row as $value) {
 if ($value['httpCode'] !== '200') {
@@ -803,21 +745,7 @@ $this->writeLog($logMsg);
 $this->writeLog('##########');
 }
 
-$this->writeLog($this->rowNum.' failed URLs (external URLs are included)'.PHP_EOL);
-
-// get total URLs to insert into sitemap
-$this->query = "SELECT COUNT(*) AS count FROM getSeoSitemap "
-."WHERE httpCode = '200' AND size != 0 AND state = 'scan'";
-$this->execQuery();
-$this->totUrls = $this->count;
-
-// stop exec if total URLs to insert is higher than $maxTotalUrls
-if ($this->totUrls > $this->maxTotalUrls) {
-$this->writeLog("Execution has been stopped because of total URLs to insert into sitemap is $this->totUrls "
-. "and higher than max limit of $this->maxTotalUrls"); 
-
-$this->stopExec();
-}
+$this->writeLog($this->rowNum.' failed URLs out of sitemap'.PHP_EOL);
 
 $this->writeLog('##### SEO');
 $this->getSizeList();
@@ -833,22 +761,28 @@ $this->setPriority();
 // write changefreq into log
 foreach ($this->changefreqArr as $value) {
 $this->query = "SELECT COUNT(*) AS count FROM getSeoSitemap "
-."WHERE changefreq = '$value' AND state != 'skip' AND httpCode = '200' AND size != 0";
+."WHERE changefreq = '$value' AND state != 'skip' AND state != 'rSkip' AND httpCode = '200' AND size != 0";
 $this->execQuery();
+
 $this->writeLog('Setted '.$value.' change frequency to '.$this->count.' URLs into sitemap');
 }
 
 // write lastmod min and max values into log
 $this->query = "SELECT MIN(lastmod) AS minLastmod, MAX(lastmod) AS maxLastmod FROM getSeoSitemap "
-."WHERE state != 'skip' AND httpCode = '200' AND size != 0";
+."WHERE state != 'skip' AND state != 'rSkip' AND httpCode = '200' AND size != 0";
 $this->execQuery();
+
 $minLastmodDate = date('Y.m.d H:i:s', $this->row[0]['minLastmod']);
 $maxLastmodDate = date('Y.m.d H:i:s', $this->row[0]['maxLastmod']);
-$this->writeLog('Min last modified time is '.$minLastmodDate);
-$this->writeLog('Max last modified time is '.$maxLastmodDate.PHP_EOL);
+$this->writeLog('Min last modified time into sitemap is '.$minLastmodDate);
+$this->writeLog('Max last modified time into sitemap is '.$maxLastmodDate.PHP_EOL);
 
 // save all sitemaps
-$this->save();
+if ($this->save() !== true){
+$this->writeLog('Execution has been stopped because of save error');   
+
+$this->stopExec();
+}
 
 // gzip all sitemaps
 foreach ($this->sitemapNameArr as $key => $value) {
@@ -873,18 +807,20 @@ foreach ($sitemapToDeleteArr as $value) {
 $this->delete($value);
 
 $fileName = $this->getFileName($value);
-$this->writeLog('Deleted '.$fileName.PHP_EOL);
+$this->writeLog('Deleted '.$fileName);
 }
 
-$this->checkSitemapSize();
+if ($this->checkSitemapSize() !== true){
+$this->writeLog('Execution has been stopped because of checkSitemapSize error');   
+
+$this->stopExec();
+}
 
 // set new sitemap is available
 $this->newSitemapAvailable();
 
 // rewrite robots.txt
-if ($this->rewriteRobots === true ) {
 $this->getRewriteRobots();
-}
 
 $this->getTotalUrls();
 $this->getExtUrls();
@@ -968,13 +904,13 @@ $this->stopExec();
 ################################################################################
 private function setPriority(){
 
-$this->query = "UPDATE getSeoSitemap SET priority = '".DEFAULTPRIORITY."' WHERE state != 'skip'";
+$this->query = "UPDATE getSeoSitemap SET priority = '".DEFAULTPRIORITY."' WHERE state != 'skip' AND state != 'rSkip'";
 $this->execQuery();
 
 foreach ($this->partialUrlPriority as $key => $value) {
 foreach ($value as $v) {
 $this->query = "UPDATE getSeoSitemap SET priority = '".$key."' "
-."WHERE url LIKE '".$v."%' AND state != 'skip' AND httpCode = '200' AND size != 0";
+."WHERE url LIKE '".$v."%' AND state != 'skip' AND state != 'rSkip' AND httpCode = '200' AND size != 0";
 $this->execQuery();
 }
 }
@@ -982,7 +918,7 @@ $this->execQuery();
 foreach ($this->fullUrlPriority as $key => $value) {
 foreach ($value as $v) {
 $this->query = "UPDATE getSeoSitemap SET priority = '".$key."' "
-."WHERE url = '".$v."' AND state != 'skip' AND httpCode = '200' AND size != 0 LIMIT 1";
+."WHERE url = '".$v."' AND state != 'skip' AND state != 'rSkip' AND httpCode = '200' AND size != 0 LIMIT 1";
 $this->execQuery();
 }
 }
@@ -995,8 +931,9 @@ rsort($priority);
 
 foreach ($priority as $value) {
 $this->query = "SELECT COUNT(*) AS count FROM getSeoSitemap "
-."WHERE priority = '".$value."' AND state != 'skip' AND httpCode = '200' AND size != 0";
+."WHERE priority = '".$value."' AND state != 'skip' AND state != 'rSkip' AND httpCode = '200' AND size != 0";
 $this->execQuery();
+
 $this->writeLog("Setted priority ".$value." to ".$this->count." URLs into sitemap");
 }
 
@@ -1004,37 +941,6 @@ $this->writeLog("Setted priority ".$value." to ".$this->count." URLs into sitema
 ################################################################################
 ################################################################################
 private function getTotalUrls() {
-
-// count all kind of different URLs if $fileToAdd is an array
-if ($this->fileToAdd !== true){
-// if start url has not the extension file included into $fileToAdd wrote that separately...
-$n = true;
-foreach ($this->fileToAdd as $value) {
-if (strpos(strrev(STARTURL), strrev($value)) === 0) {
-$n = false;
-}
-}
-
-if ($n === true) {
-$this->writeLog('Included 1 start URL into sitemap');
-}
-
-foreach ($this->fileToAdd as $value) {
-$count = 0;
-
-$this->query = "SELECT url FROM getSeoSitemap "
-."WHERE httpCode = '200' AND size != 0 AND state = 'scan'";
-$this->execQuery();
-
-foreach ($this->row as $v) {
-if ($this->getUrlExt($v['url']) === $value){
-$count++;
-}
-}
-
-$this->writeLog('Included '.$count.' '.$value.' URLs into sitemap');
-}
-}
 
 $this->writeLog('################################');
 $this->writeLog('Included '.$this->totUrls.' URLs into sitemap');
@@ -1053,48 +959,51 @@ $this->execQuery();
 ################################################################################
 private function getIntUrls() {
 
-$this->query = "SELECT url FROM getSeoSitemap WHERE state = 'skip' AND url LIKE '".DOMAINURL."%'";
+$this->query = "SELECT url, callerUrl FROM getSeoSitemap WHERE state IN ('skip', 'rSkip') AND url LIKE '".DOMAINURL."%'";
 $this->execQuery();
 
-// print list of internal skipped URLs if PRINTINTSKIPURLS === true
-if (PRINTINTSKIPURLS === true) {
-$this->writeLog('##### Internal skipped URLs');
+// print list of URLs into domain out of sitemap if PRINTSKIPURLS === true
+if (PRINTSKIPURLS === true) {
+$this->writeLog('##### URLs into domain out of sitemap');
 
 if ($this->rowNum > 0) {
 asort($this->row);
 
 foreach ($this->row as $value) {
-$this->writeLog($value['url']);
+$this->writeLog('URL: '.$value['url'].' - caller URL: '.$value['callerUrl']);
 }
 }
 
 $this->writeLog('##########');
 }
 
-$this->writeLog($this->rowNum.' internal skipped URLs');
+$this->writeLog($this->rowNum.' URLs into domain out of sitemap'.PHP_EOL);
 
 }
 ################################################################################
 ################################################################################
 private function getExtUrls() {
 
-$this->query = "SELECT url FROM getSeoSitemap WHERE state = 'skip' AND url NOT LIKE '".DOMAINURL."%'";
+$this->query = "SELECT url, callerUrl FROM getSeoSitemap WHERE state = 'skip' AND url NOT LIKE '".DOMAINURL."%'";
 $this->execQuery();
 
-// print list of external skipped URLs
-$this->writeLog('##### External skipped URLs');
+// print list of URLs out of domain out of sitemap if PRINTSKIPURLS === true
+if (PRINTSKIPURLS === true) {
+$this->writeLog('##### URLs out of domain out of sitemap');
 
 if ($this->rowNum > 0) {
 // sort ascending
 asort($this->row);
 
 foreach ($this->row as $value) {
-$this->writeLog($value['url']);
+$this->writeLog('URL: '.$value['url'].' - caller URL: '.$value['callerUrl']);
 }
 }
 
 $this->writeLog('##########');
-$this->writeLog($this->rowNum.' external skipped URLs'.PHP_EOL);
+}
+
+$this->writeLog($this->rowNum.' URLs out of domain out of sitemap');
 
 }
 ################################################################################
@@ -1237,8 +1146,9 @@ private function getChangefreqList(){
 
 foreach ($this->changefreqArr as $value) {
 $this->query = "SELECT url FROM getSeoSitemap "
-. "WHERE changefreq = '$value' AND state != 'skip' AND httpCode = '200' AND size != 0";
+. "WHERE changefreq = '$value' AND state != 'skip' AND state != 'rSkip' AND httpCode = '200' AND size != 0";
 $this->execQuery();
+
 $this->writeLog('##### URLs with '.$value.' change frequency into sitemap');
 
 if ($this->rowNum > 0) {
@@ -1258,8 +1168,9 @@ private function getPriorityList(){
 
 foreach ($this->priorityArr as $value) {
 $this->query = "SELECT url FROM getSeoSitemap WHERE priority = '".$value
-."' AND state != 'skip' AND httpCode = '200' AND size != 0";
+."' AND state != 'skip' AND state != 'rSkip' AND httpCode = '200' AND size != 0";
 $this->execQuery();
+
 $this->writeLog('##### URLs with '.$value.' priority into sitemap');
 
 if ($this->rowNum > 0) {
@@ -1280,8 +1191,9 @@ private function getSizeList(){
 $kbBingMaxSize = $this->getKb($this->pageMaxSize);
 
 $this->query = "SELECT url, size FROM getSeoSitemap WHERE size > '".$this->pageMaxSize
-."' AND state != 'skip' AND httpCode = '200'";
+."' AND state != 'skip' AND state != 'rSkip' AND httpCode = '200'";
 $this->execQuery();
+
 $this->writeLog('##### URLs with size > '.$kbBingMaxSize.' Kb into sitemap (SEO: page size should be lower than '
 .$kbBingMaxSize.' Kb)');
 
@@ -1317,7 +1229,7 @@ return sprintf('%0.2f', round($byte / 1024, 2));
 private function getMinTitleLengthList(){
 
 $this->query = "SELECT url, CHAR_LENGTH(title) AS titleLength FROM getSeoSitemap WHERE CHAR_LENGTH(title) < "
-.$this->titleLength[0]." AND state != 'skip' AND httpCode = '200' AND title IS NOT NULL";
+.$this->titleLength[0]." AND state != 'skip' AND state != 'rSkip' AND httpCode = '200' AND title IS NOT NULL";
 $this->execQuery();
 
 $i = 0;
@@ -1348,7 +1260,7 @@ $this->writeLog($i.' URLs with title length < '.$this->titleLength[0].' characte
 private function getMaxTitleLengthList(){
 
 $this->query = "SELECT url, CHAR_LENGTH(title) AS titleLength FROM getSeoSitemap WHERE CHAR_LENGTH(title) > "
-.$this->titleLength[1]." AND state != 'skip' AND httpCode = '200' AND title IS NOT NULL";
+.$this->titleLength[1]." AND state != 'skip' AND state != 'rSkip' AND httpCode = '200' AND title IS NOT NULL";
 $this->execQuery();
 
 $i = 0;
@@ -1371,14 +1283,14 @@ $i++;
 $this->writeLog('##########');
 }
 
-$this->writeLog($i.' URLs with title length > '.$this->titleLength[1].' characters into sitemap');
+$this->writeLog($i.' URLs with title length > '.$this->titleLength[1].' characters into sitemap'.PHP_EOL);
 
 }
 ################################################################################
 ################################################################################
 private function getDuplicateTitle(){
 
-$this->query = "SELECT title FROM getSeoSitemap WHERE state != 'skip' AND httpCode = '200' AND"
+$this->query = "SELECT title FROM getSeoSitemap WHERE state != 'skip' AND state != 'rSkip' AND httpCode = '200' AND"
 ." title IS NOT NULL GROUP BY title HAVING COUNT(*) > 1";
 $this->execQuery();
 
@@ -1394,7 +1306,7 @@ asort($row);
 
 foreach ($row as $v){
 $this->query = "SELECT url, title FROM getSeoSitemap WHERE title = '"
-.$v['title']."' AND state != 'skip' AND httpCode = '200'";
+.$v['title']."' AND state != 'skip' AND state != 'rSkip' AND httpCode = '200'";
 $this->execQuery();
 
 foreach ($this->row as $v2){
@@ -1414,7 +1326,7 @@ $this->writeLog($i.' URLs with duplicate title into sitemap');
 private function getMinDescriptionLengthList(){
 
 $this->query = "SELECT url, CHAR_LENGTH(description) AS descriptionLength FROM getSeoSitemap WHERE CHAR_LENGTH(description) < "
-.$this->descriptionLength[0]." AND state != 'skip' AND httpCode = '200' AND title IS NOT NULL";
+.$this->descriptionLength[0]." AND state != 'skip' AND state != 'rSkip' AND httpCode = '200' AND title IS NOT NULL";
 $this->execQuery();
 
 $i = 0;
@@ -1445,7 +1357,7 @@ $this->writeLog($i.' URLs with description length < '.$this->descriptionLength[0
 private function getMaxDescriptionLengthList(){
 
 $this->query = "SELECT url, CHAR_LENGTH(description) AS descriptionLength FROM getSeoSitemap WHERE CHAR_LENGTH(description) > "
-.$this->descriptionLength[1]." AND state != 'skip' AND httpCode = '200' AND description IS NOT NULL";
+.$this->descriptionLength[1]." AND state != 'skip' AND state != 'rSkip' AND httpCode = '200' AND description IS NOT NULL";
 $this->execQuery();
 
 $i = 0;
@@ -1475,7 +1387,7 @@ $this->writeLog($i.' URLs with description length > '.$this->descriptionLength[1
 ################################################################################
 private function getDuplicateDescription(){
 
-$this->query = "SELECT description FROM getSeoSitemap WHERE state != 'skip' AND httpCode = '200' AND"
+$this->query = "SELECT description FROM getSeoSitemap WHERE state != 'skip' AND state != 'rSkip' AND httpCode = '200' AND"
 ." title IS NOT NULL GROUP BY title HAVING COUNT(*) > 1";
 $this->execQuery();
 
@@ -1491,7 +1403,7 @@ asort($row);
 
 foreach ($row as $v){
 $this->query = "SELECT url, description FROM getSeoSitemap WHERE description = '"
-.$v['description']."' AND state != 'skip' AND httpCode = '200'";
+.$v['description']."' AND state != 'skip' AND state != 'rSkip' AND httpCode = '200'";
 $this->execQuery();
 
 foreach ($this->row as $v2){
@@ -1503,47 +1415,14 @@ $i++;
 $this->writeLog('##########');
 }
 
-$this->writeLog($i.' URLs with duplicate description into sitemap'.PHP_EOL);
+$this->writeLog($i.' URLs with duplicate description into sitemap');
 
 }
 ################################################################################
 ################################################################################
+// print all URLs into sitemap in an alphaberic order
 private function getTypeList(){
 
-// print all kind of different URLs separately if $fileToAdd is an array. 
-// or print all URLs that are into sitemap altogether in an alphaberic order.
-if ($this->fileToAdd !== true) {
-// if start url has not the extension file included into $fileToAdd wrote that separately...
-$n = true;
-foreach ($this->fileToAdd as $value){
-if(strpos(strrev(STARTURL), strrev($value)) === 0) {
-$n = false;
-}
-}
-if ($n === true) {
-$this->writeLog('##### Start URL into sitemap');
-$this->writeLog(STARTURL);
-$this->writeLog('##########'.PHP_EOL);
-}
-
-foreach ($this->fileToAdd as $value) {
-$this->query = "SELECT url FROM getSeoSitemap WHERE httpCode = '200' AND size != 0 AND url LIKE '%"
-.$value."' AND state = 'scan'";
-$this->execQuery();
-
-$this->writeLog('##### '.$value.' URLs into sitemap');
-
-if ($this->rowNum > 0) {
-asort($this->row);
-foreach ($this->row as $v) {
-$this->writeLog($v['url']);
-}
-}
-
-$this->writeLog('##########'.PHP_EOL);
-}
-}
-else {
 $this->query = "SELECT url FROM getSeoSitemap WHERE httpCode = '200' AND size != 0 AND state = 'scan'";
 $this->execQuery();
 
@@ -1557,7 +1436,6 @@ $this->writeLog($v['url']);
 }
 
 $this->writeLog('##########'.PHP_EOL);
-}
 
 }
 ################################################################################
@@ -1606,15 +1484,11 @@ $this->stopExec();
 // delete a file
 private function delete($fileName){
 
-$this->succ = false;
-
 if (unlink($fileName) === false){
 $this->writeLog('Execution has been stopped because of unlink cannot delete sitemap.xml'); 
 
 $this->stopExec();
 }
-
-$this->succ = true;
 
 }
 ################################################################################
@@ -1633,15 +1507,25 @@ return $url;
 ################################################################################
 private function save(){
 
-$this->succ = false;
-
 $this->query = "SELECT url, lastmod, changefreq, priority FROM getSeoSitemap "
 ."WHERE httpCode = '200' AND size != 0 AND state = 'scan'";
 $this->execQuery();
 
+// set total URLs into sitemap
+$this->totUrls = $this->rowNum;
+
+// stop exec if total URLs to insert is higher than $maxTotalUrls
+if ($this->totUrls > $this->maxTotalUrls) {
+$this->writeLog("Execution has been stopped because of total URLs to insert into sitemap is $this->totUrls "
+. "and higher than max limit of $this->maxTotalUrls"); 
+
+$this->stopExec();
+}
+
 // set sitemap counter start value
 $sitemapCount = null;
-if ($this->rowNum > $this->maxUrlsInSitemap) {
+
+if ($this->totUrls > $this->maxUrlsInSitemap) {
 $sitemapCount = 1;
 $this->multipleSitemaps = true;
 }
@@ -1678,7 +1562,7 @@ $txt .= '<url><loc>'.$url.'</loc><lastmod>'.$lastmod.'</lastmod>'
 .'<changefreq>'.$value['changefreq'].'</changefreq><priority>'.$value['priority'].'</priority></url>
 ';
 
-if ($sitemapIntCount === $this->maxUrlsInSitemap || $genCount === $this->rowNum) {
+if ($sitemapIntCount === $this->maxUrlsInSitemap || $genCount === $this->totUrls) {
 $sitemapIntCount = 0;
 
 $txt .= <<<EOD
@@ -1704,7 +1588,7 @@ $this->writeLog('Execution has been stopped because of '.$sitemapFile.' is not U
 $this->stopExec();
 }
 
-if ($this->multipleSitemaps === true && $genCount !== $this->rowNum) {
+if ($this->multipleSitemaps === true && $genCount !== $this->totUrls) {
 $sitemapCount++;
 }
 
@@ -1759,17 +1643,14 @@ $this->writeLog('Execution has been stopped because of '.$sitemapFile.' is not U
 
 $this->stopExec();
 }
-
 }
 
-$this->succ = true;
+return true;
 
 }
 ################################################################################
 ################################################################################
 private function gzip($fileName){
-
-$this->succ = false;
 
 $gzFile = $fileName.'.gz';
 
@@ -1794,10 +1675,7 @@ if (gzclose($fp) !== true) {
 $this->writeLog('Execution has been stopped because of gzclose cannot close '.$gzFile);   
 
 $this->stopExec();
-}  
-else {
-$this->succ = true;
-}
+} 
 
 }
 ################################################################################
@@ -1805,11 +1683,8 @@ $this->succ = true;
 // get file name without the rest of path
 private function getFileName($filePath){
 
-$this->succ = false;
-
 $fileName = str_replace(SITEMAPPATH, '', $filePath);
 
-$this->succ = true;
 return $fileName;
 
 }
@@ -1818,12 +1693,9 @@ return $fileName;
 // get all sitemap names included in SITEMAPPATH
 private function getSitemapNames(){
 
-$this->succ = false;
-
 $sitemapNameArr = glob(SITEMAPPATH.'sitemap*.xml*');
 
 if ($sitemapNameArr !== false) {
-$this->succ = true;
 return $sitemapNameArr;
 }
 else {
@@ -1893,8 +1765,6 @@ return $fileExt;
 // check all sitemap sizes. they must be non larger than $sitemapMaxSize
 private function checkSitemapSize(){
 
-$this->succ = false;
-
 if ($this->printSitemapSizeList === true) {
 $this->writeLog('##### Sitemap sizes');
 }
@@ -1922,7 +1792,7 @@ if ($this->printSitemapSizeList === true) {
 $this->writeLog('##########'.PHP_EOL);
 }
 
-$this->succ = true;
+return true;
 
 }
 ################################################################################
@@ -1930,53 +1800,37 @@ $this->succ = true;
 // rewrite robots.txt with new sitemap infos
 private function getRewriteRobots(){
 
-$file = 'robots.txt';
-$filePath = SITEMAPPATH.$file;
-$fileLines = [];
-
-// if file exists
-if (file_exists($filePath) === true) {
-// get file line by line into an array
-$fileLines = file($filePath, FILE_IGNORE_NEW_LINES);
-
-if ($fileLines === false) {
-$this->writeLog('Execution has been stopped because of file cannot read '.$file);   
-
-$this->stopExec();
-}
-
 // remove all old sitemap lines from robots.txt
-foreach ($fileLines as $key => $value) {
+foreach ($this->robotsLines as $key => $value) {
 if ($value === '# Sitemap' || $value === '# Sitemapindex' || strpos($value, 'Sitemap: ') === 0) {
-unset($fileLines[$key]);
-}
+unset($this->robotsLines[$key]);
 }
 }
 
 if ($this->multipleSitemaps !== true) {
-$fileLines[] = '# Sitemap';
-$fileLines[] = 'Sitemap: '.DOMAINURL.'/sitemap.xml.gz';
+$this->robotsLines[] = '# Sitemap';
+$this->robotsLines[] = 'Sitemap: '.DOMAINURL.'/sitemap.xml.gz';
 }
 else {
-$fileLines[] = '# Sitemapindex';
-$fileLines[] = 'Sitemap: '.DOMAINURL.'/sitemapindex.xml.gz';
+$this->robotsLines[] = '# Sitemapindex';
+$this->robotsLines[] = 'Sitemap: '.DOMAINURL.'/sitemapindex.xml.gz';
 }
 
 $newCont = null;
 
 // get new file content
-foreach ($fileLines as $key => $value) {
+foreach ($this->robotsLines as $key => $value) {
 $newCont .= $value.PHP_EOL;
 }
 
 // rewrite file
-if (file_put_contents($filePath, $newCont) === false) {
-$this->writeLog('Execution has been stopped because of file_put_contents cannot write '.$file);  
+if (file_put_contents($this->robotsPath, $newCont) === false) {
+$this->writeLog('Execution has been stopped because of file_put_contents cannot write robots.txt');  
 
 $this->stopExec();
 }
 
-$this->writeLog('Wrote '.$file);
+$this->writeLog('Wrote robots.txt'.PHP_EOL);
 
 }
 ################################################################################
@@ -2036,7 +1890,7 @@ $this->query = "CREATE TABLE `getSeoSitemap` (
  `lastmod` int(10) unsigned NOT NULL,
  `changefreq` enum('daily','weekly','monthly','yearly') COLLATE utf8_unicode_ci NOT NULL,
  `priority` enum('0.1','0.2','0.3','0.4','0.5','0.6','0.7','0.8','0.9','1.0') COLLATE utf8_unicode_ci DEFAULT NULL,
- `state` enum('new','scan','skip','old') COLLATE utf8_unicode_ci NOT NULL,
+ `state` enum('new','scan','skip','rSkip','old') COLLATE utf8_unicode_ci NOT NULL,
  `httpCode` char(3) COLLATE utf8_unicode_ci NOT NULL,
  PRIMARY KEY (`id`),
  UNIQUE KEY `url` (`url`),
@@ -2059,6 +1913,11 @@ if ($this->rowNum === 0) {
 $this->query = "ALTER TABLE getSeoSitemap ADD COLUMN callerUrl varbinary(767) AFTER url";
 $this->execQuery();
 }
+}
+
+if ($this->dBaseVerNum < 380) {
+$this->query = "ALTER TABLE getSeoSitemap CHANGE state state enum('new','scan','skip','rSkip','old') COLLATE utf8_unicode_ci NOT NULL";
+$this->execQuery();
 }
 }
 
@@ -2088,11 +1947,11 @@ $i = 0;
 
 foreach ($this->malfChars as $value) {
 $this->query = "SELECT url FROM getSeoSitemap WHERE url LIKE '%".$value
-."%' AND state != 'skip' AND httpCode = '200' AND size != 0";
+."%' AND url LIKE '".DOMAINURL."%'";
 $this->execQuery();
 
 if ($this->rowNum > 0) {
-$this->writeLog("##### URLs with '$value' malformed character into sitemap (good pratice - do not use that character in URL address)");
+$this->writeLog("##### URLs with '$value' malformed character into domain (good pratice: do not use that character in URL address)");
 
 asort($this->row);
 foreach ($this->row as $v) {
@@ -2104,7 +1963,7 @@ $i++;
 $this->writeLog('##########');
 }
 
-$this->writeLog($i.' URLs with malformed characters into sitemap'.PHP_EOL);
+$this->writeLog($i.' URLs with malformed characters into domain'.PHP_EOL);
 }
 
 }
@@ -2194,11 +2053,20 @@ $time = time();
 // set log path: it will remain the same from the start to the end of execution
 $this->logPath = GETSITEMAPPATH.'log/'.date('Ymd', $time).'.log';
 
+// set robots.txt path
+$this->robotsPath = SITEMAPPATH.'robots.txt';
+
 // set start time
 $this->startTime = $time;
 
 // set version in userAgent
 $this->userAgent = str_replace('ver.', $this->version, $this->userAgent);
+
+// read robots.txt
+$this->readRobots();
+
+// set $skipUrl
+$this->getRobotsData();
 
 // open mysqli connection
 $this->openMysqliConn();
@@ -2206,7 +2074,7 @@ $this->openMysqliConn();
 $this->query = "SELECT exec FROM getSeoSitemapExec WHERE func = 'getSeoSitemap' LIMIT 1";
 $this->execQuery();
 
-// check if getSeoSitemp is already running and stop it to prevent double execution
+// check if getSeoSitemap is already running and stop it to prevent double execution
 if ($this->row[0]['exec'] === 'y') {
 $this->writeLog('An error has occoured: execution has been stopped; '
 .'maybe the previous scan was not ended correctly. Double-check log to fix it.'.$this->txtToAddOnMysqliErr);
@@ -2241,8 +2109,8 @@ $this->writeLog('## Scan start');
 // prepare mysqli statements
 $this->prepMysqliStmt();
 
-// insert or update STARTURL
-$this->insUpdNewUrlQuery(STARTURL);
+// insert or update DOMAINURL
+$this->insUpdNewUrlQuery(DOMAINURL);
 
 $this->openCurlConn();
 
@@ -2394,6 +2262,109 @@ for ($n = 1; $n > 0; $abs = preg_replace($re, '/', $abs, -1, $n)) {
 
 // return absolute URL
 return $scheme.'://'.$abs;
+
+}
+################################################################################
+################################################################################
+private function readRobots(){
+
+// if robots.txt exists...
+if (file_exists($this->robotsPath) === true) {
+// insert robots.txt line by line into an array
+$this->robotsLines = file($this->robotsPath, FILE_IGNORE_NEW_LINES);
+
+if ($this->robotsLines === false) {
+$this->writeLog('Execution has been stopped because of file cannot read robots.txt');   
+
+$this->stopExec();
+}
+}
+else {$this->writeLog('Execution has been stopped because of robots.txt does not exist');   
+
+$this->stopExec();
+}
+
+}
+################################################################################
+################################################################################
+// get data from robots.txt to set $skipUrl and allowUrl
+private function getRobotsData(){
+
+$userAgentAll = false;
+
+foreach ($this->robotsLines as $value) {
+if ($value === 'User-agent: *'){
+$userAgentAll = true;
+}
+else {
+if ($userAgentAll === true) {
+if (substr($value, 0, 12) === 'User-agent: '){
+break;
+}
+elseif (substr($value, 0, 10) === 'Disallow: '){
+$this->skipUrl[] = DOMAINURL.substr($value, 10);
+}
+elseif (substr($value, 0, 7) === 'Allow: '){
+$this->allowUrl[] = DOMAINURL.substr($value, 7);
+}
+}
+}
+}
+
+}
+################################################################################
+################################################################################
+// set rSkip
+private function setRobotsSkip($url){
+
+$this->query = "UPDATE getSeoSitemap SET state = 'rSkip' WHERE url = '".$url."' LIMIT 1";
+$this->execQuery();
+
+}
+################################################################################
+################################################################################
+// set URLs to robots skip
+private function setUrlsToRobotsSkip(){
+
+$this->query = "SELECT url FROM getSeoSitemap "
+."WHERE httpCode = '200' AND size != 0 AND state = 'scan'";
+$this->execQuery();
+
+// set rSkip following robots.txt rules
+foreach ($this->row as $key => $v1) {
+foreach ($this->skipUrl as $v2){
+
+if (strpos($v1['url'], $v2) === 0 || fnmatch($v2, $v1['url']) === true) {
+
+if (empty($this->allowUrl) === false) {
+
+foreach ($this->allowUrl as $v3) {
+if (strpos($v1['url'], $v3) !== 0) {
+if (strpos($v1['url'], '*') !== false) {
+if (fnmatch($v3, $v1['url']) === false) {
+$this->setRobotsSkip($v1['url']);
+break 2;
+}
+}
+else {
+$this->setRobotsSkip($v1['url']);
+break 2;
+}
+}
+else {
+break 1;
+}
+}
+}
+else {
+$this->setRobotsSkip($v1['url']);
+break 1;
+}
+}
+}
+}
+
+$this->writeLog('Setted URLs to skip following robots.txt rules');
 
 }
 ################################################################################
