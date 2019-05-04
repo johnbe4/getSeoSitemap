@@ -1,5 +1,21 @@
 getSeoSitemap CHANGELOG
 
+v3.8.0 (2019-05-04)
+- From this release robots.txt must be present, otherwise getSeoSitemap will fail.
+- Removed $skipUrl and $fileToAdd from user parameters: $skipUrl will be setted following robots.txt rules on 
+  "User-agent: *".
+- Removed $rewriteRobots: the script will update robots.txt with new sitemap info always.
+- Updated variable $titleLength to respect new Bing rules.
+- Increased script speed.
+- Improved log list.
+- Removed PRINTCONTAINEROFSKIPPED user constant.
+- Removed PRINTINTSKIPURLS user constant.
+- Removed STARTURL user constant.
+- It will print MySQL warnings always: $printMysqlWarn user constant has been removed.
+- Added PRINTSKIPURLS user constant.
+- Added rSkip state.
+- Small changes.
+
 v3.7.0 (2019-02-18)
 - Added feature to check if h1 is present and single in all pages.
 - Added feature to check if h2 and h3 are present in all pages (added user parameters $checkH2 and $checkH3).
