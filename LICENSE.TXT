@@ -1,8 +1,8 @@
-getSeoSitemap v3.7.0 LICENSE (2019-02-18)
+getSeoSitemap v3.8.0 LICENSE (2019-05-04)
 
-getSeoSitemap v3.7.0 is distributed under the following BSD-style license: 
+getSeoSitemap v3.8.0 is distributed under the following BSD-style license: 
 
-Copyright (c) 2016-2019
+Copyright (c) 2017-2019
 Giovanni Bertone (RED Racing Parts)
 https://www.redracingparts.com
 red@redracingparts.com
