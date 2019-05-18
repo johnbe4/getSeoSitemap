@@ -1,5 +1,12 @@
 getSeoSitemap CHANGELOG
 
+v3.9.0 (2019-05-18)
+- Fixed bug to scan all internal and external sources correctly (images, scripts, links, iframes, 
+videos, audios).
+- Added function to scan form action URLs if method is get.
+- Increased script speed.
+- Small changes.
+
 v3.8.0 (2019-05-04)
 - From this release robots.txt must be present, otherwise getSeoSitemap will fail.
 - Removed $skipUrl and $fileToAdd from user parameters: $skipUrl will be setted following robots.txt rules on 
