@@ -1,9 +1,9 @@
 <?php
 
 /*
-getSeoSitemap v3.8.0 LICENSE (2019-05-04)
+getSeoSitemap v3.9.0 LICENSE (2019-05-18)
 
-getSeoSitemap v3.8.0 is distributed under the following BSD-style license: 
+getSeoSitemap v3.9.0 is distributed under the following BSD-style license: 
 
 Copyright (c) 2017-2019
 Giovanni Bertone (RED Racing Parts)
@@ -45,12 +45,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ##### start of user constants
 const DOMAINURL = 'https://www.example.com'; // domain URL: value must be absolute - every URL must include it at the beginning
 const DEFAULTPRIORITY = '0.5'; // default priority for URLs not included in $fullUrlPriority and $partialUrlPriority
-const DBHOST = DATABASE_HOST_I; // database host
-const DBUSER = DATABASE_USER_I; // database user (warning: user must have permissions to create / alter table)
-const DBPASS = DATABASE_PASSWORD_I; // database password
-const DBNAME = DATABASE_NAME_I; // database name
-const GETSITEMAPPATH = '/example/getSeoSitemap/'; // getSeoSitemap path into server
-const SITEMAPPATH = '/example/'; // sitemap path inside server
+const DBHOST = "***********"; // database host
+const DBUSER = "***********"; // database user (warning: user must have permissions to create / alter table)
+const DBPASS = "***********"; // database password
+const DBNAME = "***********"; // database name
+const GETSITEMAPPATH = '/example/example/getSeoSitemap/'; // getSeoSitemap path into server
+const SITEMAPPATH = '/example/example/'; // sitemap path inside server
 const PRINTSKIPURLS = false; // set to true to print the list of URLs out of sitemap into log file
 ##### end of user constants
 
@@ -63,18 +63,18 @@ private $fullUrlPriority = [ // set priority of particular URLs that are equal t
 'https://www.example.com'
 ],
 '0.9' => [
-'https://www.example.com/example.php',
-'https://www.example.com/example.php'
+'https://www.example.com/en/example.php',
+'https://www.example.com/it/example.php'
 ],
 ];
 private $partialUrlPriority = [ // set priority of particular URLs that start with these values (values must be absolute)
 '0.8' => [
-'https://www.example.com/example/',
-'https://www.example.com/example/',
+'https://www.example.com/example/in/',
+'https://www.example.com/example/out/',
 ],
 '0.7' => [
-'https://www.example.com/example/',
-'https://www.example.com/example/',
+'https://www.example.com/example/ext/',
+'https://www.example.com/example/ins/',
 ],
 '0.6' => [
 'https://www.example.com/example.php?p=',
@@ -94,9 +94,9 @@ private $checkH3 = true; // set to true to check if h3 is present in all pages
 ##### WARNING: DO NOT CHANGE ANYTHING BELOW #####
 #################################################
 
-private $version = 'v3.8.0';
+private $version = 'v3.9.0';
 private $userAgent = 'getSeoSitemap ver. by John';
-private $url = null; // an aboslute URL (ex. https://www.example.com/test/test1.php )
+private $url = null; // an aboslute URL ( ex. https://www.example.com/test/test1.php )
 private $size = null; // size of file in Kb
 private $titleLength = [5, 101]; // min, max title length
 private $descriptionLength = [50, 160]; // min, max description length
@@ -452,9 +452,7 @@ return;
 
 // do not search links inside $doNotFollowLinksIn
 foreach ($this->doNotFollowLinksIn as $value) {
-$fileExt = $this->getUrlExt($url);
-
-if ($value === $fileExt) {
+if ($value === $this->getUrlExt($url)) {
 return;
 }
 }
@@ -489,6 +487,9 @@ $audios = $dom->getElementsByTagName('audio');
  // get all h1s
 $h1Arr = $dom->getElementsByTagName('h1');
 $h1Count = $h1Arr->length;
+
+ // get all forms
+$forms = $dom->getElementsByTagName('form');
 
 if ($h1Count > 1) {
 $this->writeLog('There are '.$h1Count.' h1 (SEO: h1 should be single) - URL '.$url);
@@ -589,11 +590,11 @@ $this->writeLog('Execution has been stopped because of MySQL execute error: '.lc
 $this->stopExec();
 }
 
-// iterate over extracted links and display their URLs
-foreach ($as as $a){
-
 // set skipCallerUrl to prepare pageTest in case of calling insSkipUrl from pageTest
 $this->skipCallerUrl = $url;
+
+// iterate over extracted links and display their URLs
+foreach ($as as $a){
 
 // get absolute URL of href
 $absHref = $this->getAbsoluteUrl($a->getAttribute('href'), $url);
@@ -630,49 +631,56 @@ $scriptSrc = $script->getAttribute('src');
 
 // get absolute URL script src if src exits only (this is to prevent error when script does not have src)
 if ($scriptSrc !== ''){
-// get absolute URL of script
-$absScript = $this->getAbsoluteUrl($scriptSrc, $url);
 
 // insert acript URL as skipped...in that way the class will check http response code
-$this->insSkipUrl($absScript);
+$this->insSkipUrl($this->getAbsoluteUrl($scriptSrc, $url));
 }
 }
 
 // iterate over extracted links and display their URLs
 foreach ($links as $link){
 
-// get absolute URL of link
-$absLink = $this->getAbsoluteUrl($link->getAttribute('href'), $url);
-
 // insert link URL as skipped...in that way the class will check http response code
-$this->insSkipUrl($absLink);
+$this->insSkipUrl($this->getAbsoluteUrl($link->getAttribute('href'), $url));
 }
 
 // iterate over extracted iframes and display their URLs
 foreach ($iframes as $iframe){
-// get absolute URL of iframe
-$absIframe = $this->getAbsoluteUrl($iframe->getAttribute('src'), $url);
 
 // insert iframe URL as skipped...in that way the class will check http response code
-$this->insSkipUrl($absIframe);
+$this->insSkipUrl($this->getAbsoluteUrl($iframe->getAttribute('src'), $url));
 }
 
 // iterate over extracted video and display their URLs
 foreach ($videos as $video){
-// get absolute URL of video
-$absVideo = $this->getAbsoluteUrl($video->getAttribute('src'), $url);
 
 // insert video URL as skipped...in that way the class will check http response code
-$this->insSkipUrl($absVideo);
+$this->insSkipUrl($this->getAbsoluteUrl($video->getAttribute('src'), $url));
 }
 
 // iterate over extracted audios and display their URLs
 foreach ($audios as $audio){
-// get absolute URL of audio
-$absAudio = $this->getAbsoluteUrl($audio->getAttribute('src'), $url);
 
 // insert audio URL as skipped...in that way the class will check http response code
-$this->insSkipUrl($absAudio);
+$this->insSkipUrl($this->getAbsoluteUrl($audio->getAttribute('src'), $url));
+}
+
+// iterate over extracted forms and get their action URLs
+foreach ($forms as $form){
+
+// check and scan form with get method only
+if ($form->getAttribute('method') === 'get'){
+
+// get absolute URL of form
+$absForm = $this->getAbsoluteUrl($form->getAttribute('action'), $url);
+
+// add only URL to include
+$this->pageTest($absForm);
+
+if ($this->insUrl === true) {
+$this->pageLinks[] = $absForm;
+}
+}
 }
 
 $this->pageLinks = array_unique($this->pageLinks);
@@ -712,7 +720,7 @@ $this->writeLog($this->countUrlWithoutH3.' URLs without h3 into domain (SEO: h3 
 
 if ($this->extUrlsTest === true) {
 $this->openCurlConn();
-$this->testExtUrls();
+$this->checkSkipUrls();
 $this->closeCurlConn();
 }
 
@@ -1008,10 +1016,9 @@ $this->writeLog($this->rowNum.' URLs out of domain out of sitemap');
 }
 ################################################################################
 ################################################################################
-private function testExtUrls() {
+private function checkSkipUrls() {
 
-$this->query = "SELECT url FROM getSeoSitemap "
-. "WHERE state = 'skip' AND url NOT LIKE '".DOMAINURL."%' AND url NOT LIKE 'mailto:%'";
+$this->query = "SELECT url FROM getSeoSitemap WHERE state IN ('skip', 'rSkip') AND url NOT LIKE 'mailto:%'";
 $this->execQuery();
 
 if ($this->rowNum > 0) {
@@ -1614,6 +1621,7 @@ $txt = <<<EOD
 EOD;
 
 foreach ($this->sitemapNameArr as $value) {
+
 // get sitemap URL
 $sitemapUrl = DOMAINURL.'/'.$this->getFileName($value).'.gz';
 
@@ -2326,8 +2334,8 @@ $this->execQuery();
 // set URLs to robots skip
 private function setUrlsToRobotsSkip(){
 
-$this->query = "SELECT url FROM getSeoSitemap "
-."WHERE httpCode = '200' AND size != 0 AND state = 'scan'";
+$this->query = "SELECT url FROM getSeoSitemap";
+
 $this->execQuery();
 
 // set rSkip following robots.txt rules
