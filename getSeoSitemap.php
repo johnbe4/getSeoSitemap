@@ -1,9 +1,9 @@
 <?php
 
 /*
-getSeoSitemap v3.9.0 LICENSE (2019-05-18)
+getSeoSitemap v3.9.1 LICENSE (2019-07-02)
 
-getSeoSitemap v3.9.0 is distributed under the following BSD-style license: 
+getSeoSitemap v3.9.1 is distributed under the following BSD-style license: 
 
 Copyright (c) 2017-2019
 Giovanni Bertone (RED Racing Parts)
@@ -42,15 +42,19 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # with BTC bitcoin to the address 19928gKpqdyN6CHUh4Tae1GW9NAMT6SfQH                              #
 ###################################################################################################
 
+
+
+// inserire indirizzo BTC kraken
+
 ##### start of user constants
 const DOMAINURL = 'https://www.example.com'; // domain URL: value must be absolute - every URL must include it at the beginning
 const DEFAULTPRIORITY = '0.5'; // default priority for URLs not included in $fullUrlPriority and $partialUrlPriority
-const DBHOST = "***********"; // database host
-const DBUSER = "***********"; // database user (warning: user must have permissions to create / alter table)
-const DBPASS = "***********"; // database password
-const DBNAME = "***********"; // database name
-const GETSITEMAPPATH = '/example/example/getSeoSitemap/'; // getSeoSitemap path into server
-const SITEMAPPATH = '/example/example/'; // sitemap path inside server
+const DBHOST = '***'; // database host
+const DBUSER = '***'; // database user (warning: user must have permissions to create / alter table)
+const DBPASS = '***'; // database password
+const DBNAME = '***'; // database name
+const GETSITEMAPPATH = '/example/getSeoSitemap/'; // getSeoSitemap path into server
+const SITEMAPPATH = '/example/web/'; // sitemap path inside server
 const PRINTSKIPURLS = false; // set to true to print the list of URLs out of sitemap into log file
 ##### end of user constants
 
@@ -63,21 +67,21 @@ private $fullUrlPriority = [ // set priority of particular URLs that are equal t
 'https://www.example.com'
 ],
 '0.9' => [
-'https://www.example.com/en/example.php',
-'https://www.example.com/it/example.php'
+'https://www.example.com/example/introducingpages/11/22/hotproducts.php',
+'https://www.example.com/example/pagineintroduttive/11/22/hotproducts.php'
 ],
 ];
 private $partialUrlPriority = [ // set priority of particular URLs that start with these values (values must be absolute)
 '0.8' => [
-'https://www.example.com/example/in/',
-'https://www.example.com/example/out/',
+'https://www.example.com/example/introducingpages/11/22/',
+'https://www.example.com/example/pagineintroduttive/11/22/',
 ],
 '0.7' => [
-'https://www.example.com/example/ext/',
-'https://www.example.com/example/ins/',
+'https://www.example.com/example/prodottiecomponenti/generale/intro/',
+'https://www.example.com/example/productsandcomponents/general/intro/',
 ],
 '0.6' => [
-'https://www.example.com/example.php?p=',
+'https://www.example.com/catalog.php?p=',
 ],
 ];
 private $printChangefreqList = false; // set to true to print URLs list following changefreq
@@ -94,7 +98,7 @@ private $checkH3 = true; // set to true to check if h3 is present in all pages
 ##### WARNING: DO NOT CHANGE ANYTHING BELOW #####
 #################################################
 
-private $version = 'v3.9.0';
+private $version = 'v3.9.1';
 private $userAgent = 'getSeoSitemap ver. by John';
 private $url = null; // an aboslute URL ( ex. https://www.example.com/test/test1.php )
 private $size = null; // size of file in Kb
@@ -132,6 +136,9 @@ private $priorityArr = ['1.0', '0.9', '0.8', '0.7', '0.6', '0.5', '0.4', '0.3', 
 private $exec = 'n'; // execution value (could be y or n)
 private $errCounter = 0; // error counter
 private $maxErr = 20; // max number of errors to stop execution
+private $getWarn = true; // print mysql warnings when true
+private $warnCounter = 0; // warning counter
+private $maxWarn = 100; // max number of warnings to print to prevent too long log
 private $errMsg = [
 'C01' => 'cURL error for multiple choices server response'
 ];
@@ -248,13 +255,14 @@ return;
 private function openMysqliConn(){
 
 $this->mysqli = new mysqli(DBHOST, DBUSER, DBPASS, DBNAME);
-if ($this->mysqli->connect_errno) {
+
+if ($this->mysqli->connect_errno !== 0) {
 $this->writeLog('Execution has been stopped because of MySQL database connection error: '
 .$this->mysqli->connect_error.$this->txtToAddOnMysqliErr);   
 exit();
 }
 
-if (!$this->mysqli->set_charset('utf8')) {
+if ($this->mysqli->set_charset('utf8') === false) {
 $this->writeLog('Execution has been stopped because of MySQL error loading character set utf8: '.lcfirst($this->mysqli->error));  
 
 $this->stopExec();
@@ -274,17 +282,6 @@ $this->writeLog('Execution has been stopped because of MySQL error. Error ('.$th
 exit();
 }
 
-if ($this->mysqli->warning_count > 0) {
-if ($warnRes = $this->mysqli->query("SHOW WARNINGS")) {
-$warnRow = $warnRes->fetch_row();
-
-$warnMsg = sprintf("%s (%d): %s", $warnRow[0], $warnRow[1], lcfirst($warnRow[2]));
-$this->writeLog($warnMsg.' - query: "'.$this->query.'"');   
-        
-$warnRes->close();
-}
-}
-
 // if query is select....
 if (strpos($this->query, 'SELECT') === 0) {
 
@@ -294,9 +291,10 @@ $row = $result->fetch_assoc();
 $this->count = $row['count'];
 }
 else {
-// the while below is faster than the equivalent for
 $i = 0;
-while ($row = $result->fetch_assoc()) {
+
+// this while is faster than the equivalent for
+while (($row = $result->fetch_assoc()) !== null) {
 $this->row[$i] = $row;
 $i++;
 }
@@ -313,40 +311,30 @@ $this->rowNum = $result->num_rows;
 $result->free_result();
 }
 
+$this->showWarnings();
+
 }
 ################################################################################
 ################################################################################
 private function execMultiQuery(){
 
-if ($this->mysqli->multi_query($this->query)) {
+if ($this->mysqli->multi_query($this->query) !== false) {
 do {
-if ($result = $this->mysqli->store_result()) {
+if (($result = $this->mysqli->store_result()) !== false) {
 $result->free_result();
 }
 } 
-while ($this->mysqli->next_result());
+while ($this->mysqli->next_result() === true);
 }
-else {$this->writeLog('Execution has been stopped because of MySQL multi_query error. Error ('
-.$this->mysqli->errno.'): '.lcfirst($this->mysqli->error).' - query: '.$this->query.$this->txtToAddOnMysqliErr);   
-exit();
+else {
+$this->writeLogMultiQueryErr();
 }
 
 if ($this->mysqli->errno) {
-$this->writeLog('Execution has been stopped because of MySQL multi_query error. Error ('
-.$this->mysqli->errno.'): '.lcfirst($this->mysqli->error).' - query: '.$this->query.$this->txtToAddOnMysqliErr);   
-exit();
+$this->writeLogMultiQueryErr();
 }
 
-if ($this->mysqli->warning_count > 0) {
-if ($warnRes = $this->mysqli->query("SHOW WARNINGS")) {
-$warnRow = $warnRes->fetch_row();
-
-$warnMsg = sprintf("%s (%d): %s", $warnRow[0], $warnRow[1], lcfirst($warnRow[2]));
-$this->writeLog($warnMsg.' - query: "'.$this->query.'"');   
-        
-$warnRes->close();
-}
-}
+$this->showWarnings();
 
 }
 ################################################################################
@@ -403,7 +391,6 @@ private function update(){
 
 // to prevent error on empty page
 if ($this->row[0]['size'] > 0) { 
-$sizeDiff = abs($this->size - $this->row[0]['size']);
 
 if ($this->row[0]['md5'] !== $this->md5) {
 $newLastmod = $this->lastmod;
@@ -463,33 +450,8 @@ if (@$dom->loadHTML($html) === false) {
 $this->writeLog('DOMDocument parse error on URL '.$url);
 }
 
-// get all as
-$as = $dom->getElementsByTagName('a'); 
-
-// get all imgs
-$imgs = $dom->getElementsByTagName('img'); 
-
- // get all scripts
-$scripts = $dom->getElementsByTagName('script');
-
-// get all links
-$links = $dom->getElementsByTagName('link');
-
-// get all iframes
-$iframes = $dom->getElementsByTagName('iframe');
-
-// get all videos
-$videos = $dom->getElementsByTagName('video'); 
-
- // get all audios
-$audios = $dom->getElementsByTagName('audio');
-
- // get all h1s
-$h1Arr = $dom->getElementsByTagName('h1');
-$h1Count = $h1Arr->length;
-
- // get all forms
-$forms = $dom->getElementsByTagName('form');
+// count h1
+$h1Count = $dom->getElementsByTagName('h1')->length;
 
 if ($h1Count > 1) {
 $this->writeLog('There are '.$h1Count.' h1 (SEO: h1 should be single) - URL '.$url);
@@ -501,22 +463,18 @@ $this->countUrlWithoutH1++;
 }
 
 if ($this->checkH2 === true){
- // get all h2s
-$h2Arr = $dom->getElementsByTagName('h2');
-$h2Count = $h2Arr->length;
 
-if ($h2Count === 0) {
+// count h2
+if ($dom->getElementsByTagName('h2')->length === 0) {
 $this->writeLog('H2 does not exist (SEO: h2 should be present) - URL '.$url);
 $this->countUrlWithoutH2++;
 }
 }
 
 if ($this->checkH3 === true){
- // get all h3s
-$h3Arr = $dom->getElementsByTagName('h3');
-$h3Count = $h3Arr->length;
 
-if ($h3Count === 0) {
+// count h3
+if ($dom->getElementsByTagName('h3')->length === 0) {
 $this->writeLog('H3 does not exist (SEO: h3 should be present) - URL '.$url);
 $this->countUrlWithoutH3++;
 }
@@ -546,11 +504,10 @@ $title = null;
 $this->countUrlWithoutTitle++;
 }
 
-$metaArr = $dom->getElementsByTagName('meta');
-
 $descriptionCount = 0;
 
-foreach ($metaArr as $val) {
+foreach ($dom->getElementsByTagName('meta') as $val) {
+
 if (strtolower($val->getAttribute('name')) == 'description') {
 $description = $val->getAttribute('content');
 $descriptionCount++;
@@ -594,7 +551,7 @@ $this->stopExec();
 $this->skipCallerUrl = $url;
 
 // iterate over extracted links and display their URLs
-foreach ($as as $a){
+foreach ($dom->getElementsByTagName('a') as $a){
 
 // get absolute URL of href
 $absHref = $this->getAbsoluteUrl($a->getAttribute('href'), $url);
@@ -608,7 +565,8 @@ $this->pageLinks[] = $absHref;
 }
 
 // iterate over extracted imgs and display their URLs
-foreach ($imgs as $img){
+foreach ($dom->getElementsByTagName('img') as $img){
+
 // get absolute URL of image
 $absImg = $this->getAbsoluteUrl($img->getAttribute('src'), $url);
 
@@ -626,7 +584,8 @@ $this->insSkipUrl($absImg);
 }
 
 // iterate over extracted scripts and display their URLs
-foreach ($scripts as $script){
+foreach ($dom->getElementsByTagName('script') as $script){
+
 $scriptSrc = $script->getAttribute('src');
 
 // get absolute URL script src if src exits only (this is to prevent error when script does not have src)
@@ -638,35 +597,35 @@ $this->insSkipUrl($this->getAbsoluteUrl($scriptSrc, $url));
 }
 
 // iterate over extracted links and display their URLs
-foreach ($links as $link){
+foreach ($dom->getElementsByTagName('link') as $link){
 
 // insert link URL as skipped...in that way the class will check http response code
 $this->insSkipUrl($this->getAbsoluteUrl($link->getAttribute('href'), $url));
 }
 
 // iterate over extracted iframes and display their URLs
-foreach ($iframes as $iframe){
+foreach ($dom->getElementsByTagName('iframe') as $iframe){
 
 // insert iframe URL as skipped...in that way the class will check http response code
 $this->insSkipUrl($this->getAbsoluteUrl($iframe->getAttribute('src'), $url));
 }
 
 // iterate over extracted video and display their URLs
-foreach ($videos as $video){
+foreach ($dom->getElementsByTagName('video') as $video){
 
 // insert video URL as skipped...in that way the class will check http response code
 $this->insSkipUrl($this->getAbsoluteUrl($video->getAttribute('src'), $url));
 }
 
 // iterate over extracted audios and display their URLs
-foreach ($audios as $audio){
+foreach ($dom->getElementsByTagName('audio') as $audio){
 
 // insert audio URL as skipped...in that way the class will check http response code
 $this->insSkipUrl($this->getAbsoluteUrl($audio->getAttribute('src'), $url));
 }
 
 // iterate over extracted forms and get their action URLs
-foreach ($forms as $form){
+foreach ($dom->getElementsByTagName('form') as $form){
 
 // check and scan form with get method only
 if ($form->getAttribute('method') === 'get'){
@@ -857,9 +816,8 @@ $this->getMalfList();
 $this->optimTables();
 
 $endTime = time();
-$execTime = gmdate('H:i:s', $endTime - $this->startTime);
 
-$this->writeLog('Total execution time '.$execTime);
+$this->writeLog('Total execution time '.gmdate('H:i:s', $endTime - $this->startTime));
 $this->writeLog('##### Execution end'.PHP_EOL.PHP_EOL);
 
 // update last execution time and set exec to n (a full scan has been successfully done) plus write version of getSeoSitemap
@@ -1000,7 +958,6 @@ if (PRINTSKIPURLS === true) {
 $this->writeLog('##### URLs out of domain out of sitemap');
 
 if ($this->rowNum > 0) {
-// sort ascending
 asort($this->row);
 
 foreach ($this->row as $value) {
@@ -1085,6 +1042,7 @@ $this->writeLog('Execution has been stopped because of MySQL execute error: '.$t
 $this->stopExec();
 }
 
+$this->showWarnings();
 }
 ################################################################################
 ################################################################################
@@ -1160,6 +1118,7 @@ $this->writeLog('##### URLs with '.$value.' change frequency into sitemap');
 
 if ($this->rowNum > 0) {
 asort($this->row);
+
 foreach ($this->row as $v) {
 $this->writeLog($v['url']);
 }
@@ -1181,7 +1140,9 @@ $this->execQuery();
 $this->writeLog('##### URLs with '.$value.' priority into sitemap');
 
 if ($this->rowNum > 0) {
+
 asort($this->row);
+
 foreach ($this->row as $v) {
 $this->writeLog($v['url']);
 }
@@ -1205,14 +1166,17 @@ $this->writeLog('##### URLs with size > '.$kbBingMaxSize.' Kb into sitemap (SEO:
 .$kbBingMaxSize.' Kb)');
 
 $i = 0;
+
 if ($this->rowNum > 0) {
 asort($this->row);
+
 foreach ($this->row as $v) {
 foreach ($this->seoExclusion as $value) {
 $fileExt = $this->getUrlExt($v['url']);
 
 if ($value !== $fileExt) {
 $this->writeLog('Size: '.$this->getKb($v['size']).' Kb - URL: '.$v['url']);
+
 $i++;
 }
 }
@@ -1240,16 +1204,17 @@ $this->query = "SELECT url, CHAR_LENGTH(title) AS titleLength FROM getSeoSitemap
 $this->execQuery();
 
 $i = 0;
+
 if ($this->rowNum > 0){
 $this->writeLog('##### URLs with title length < '.$this->titleLength[0]
 .' characters into sitemap (SEO: page title length should be higher than '.$this->titleLength[0].' characters)');
 
 asort($this->row);
+
 foreach ($this->row as $v){
 foreach ($this->seoExclusion as $value){
-$fileExt = $this->getUrlExt($v['url']);
 
-if ($value !== $fileExt) {
+if ($value !== $this->getUrlExt($v['url'])) {
 $this->writeLog('Title length: '.$v['titleLength'].' characters - URL: '.$v['url']);
 $i++;
 }
@@ -1271,16 +1236,17 @@ $this->query = "SELECT url, CHAR_LENGTH(title) AS titleLength FROM getSeoSitemap
 $this->execQuery();
 
 $i = 0;
+
 if ($this->rowNum > 0){
 $this->writeLog('##### URLs with title length > '.$this->titleLength[1]
 .' characters into sitemap (SEO: page title length should be lower than '.$this->titleLength[1].' characters)');
 
 asort($this->row);
+
 foreach ($this->row as $v){
 foreach ($this->seoExclusion as $value) {
-$fileExt = $this->getUrlExt($v['url']);
 
-if ($value !== $fileExt) {
+if ($value !== $this->getUrlExt($v['url'])) {
 $this->writeLog('Title length: '.$v['titleLength'].' characters - URL: '.$v['url']);
 $i++;
 }
@@ -1301,12 +1267,11 @@ $this->query = "SELECT title FROM getSeoSitemap WHERE state != 'skip' AND state 
 ." title IS NOT NULL GROUP BY title HAVING COUNT(*) > 1";
 $this->execQuery();
 
-$rowNum = $this->rowNum;
 $row = $this->row;
 
 $i = 0;
 
-if ($rowNum > 0){
+if ($this->rowNum > 0){
 $this->writeLog('##### URLs with duplicate title into sitemap (SEO: URLs should have unique title into the website)');
 
 asort($row);
@@ -1337,16 +1302,17 @@ $this->query = "SELECT url, CHAR_LENGTH(description) AS descriptionLength FROM g
 $this->execQuery();
 
 $i = 0;
+
 if ($this->rowNum > 0){
 $this->writeLog('##### URLs with description length < '.$this->descriptionLength[0]
 .' characters into sitemap (SEO: page description length should be higher than '.$this->descriptionLength[0].' characters)');
 
 asort($this->row);
+
 foreach ($this->row as $v){
 foreach ($this->seoExclusion as $value){
-$fileExt = $this->getUrlExt($v['url']);
 
-if ($value !== $fileExt) {
+if ($value !== $this->getUrlExt($v['url'])) {
 $this->writeLog('Description length: '.$v['descriptionLength'].' characters - URL: '.$v['url']);
 $i++;
 }
@@ -1368,11 +1334,13 @@ $this->query = "SELECT url, CHAR_LENGTH(description) AS descriptionLength FROM g
 $this->execQuery();
 
 $i = 0;
+
 if ($this->rowNum > 0){
 $this->writeLog('##### URLs with description length > '.$this->descriptionLength[1]
 .' characters into sitemap (SEO: page description length should be lower than '.$this->descriptionLength[1].' characters)');
 
 asort($this->row);
+
 foreach ($this->row as $v){
 foreach ($this->seoExclusion as $value) {
 $fileExt = $this->getUrlExt($v['url']);
@@ -1398,12 +1366,11 @@ $this->query = "SELECT description FROM getSeoSitemap WHERE state != 'skip' AND 
 ." title IS NOT NULL GROUP BY title HAVING COUNT(*) > 1";
 $this->execQuery();
 
-$rowNum = $this->rowNum;
 $row = $this->row;
 
 $i = 0;
 
-if ($rowNum > 0){
+if ($this->rowNum > 0){
 $this->writeLog('##### URLs with duplicate description into sitemap (SEO: URLs should have unique description into the website)');
 
 asort($row);
@@ -1437,6 +1404,7 @@ $this->writeLog('##### All URLs into sitemap');
 
 if ($this->rowNum > 0) {
 asort($this->row);
+
 foreach ($this->row as $v) {
 $this->writeLog($v['url']);
 }
@@ -1644,9 +1612,7 @@ $this->stopExec();
 $this->writeLog('Saved '.$sitemapFile);
 $this->sitemapNameArr[] = SITEMAPPATH.$sitemapFile;
 
-$utf8Enc = $this->detectUtf8Enc($txt);
-
-if ($utf8Enc !== true) {
+if ($this->detectUtf8Enc($txt) !== true) {
 $this->writeLog('Execution has been stopped because of '.$sitemapFile.' is not UTF-8 encoded');  
 
 $this->stopExec();
@@ -1691,9 +1657,7 @@ $this->stopExec();
 // get file name without the rest of path
 private function getFileName($filePath){
 
-$fileName = str_replace(SITEMAPPATH, '', $filePath);
-
-return $fileName;
+return str_replace(SITEMAPPATH, '', $filePath);
 
 }
 ################################################################################
@@ -1742,6 +1706,7 @@ exit();
 private function checkUrlLength($url){
 
 $urlLength = strlen($url);
+
 if ($urlLength > $this->maxUrlLength) {
 $this->writeLog('Execution has been stopped because of length is > '.$this->maxUrlLength.' characters for URL: '.$url); 
 
@@ -1890,16 +1855,16 @@ if ($this->rowNum === 0) {
 $this->query = "CREATE TABLE `getSeoSitemap` (
  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
  `url` varbinary(767) NOT NULL,
- `callerUrl` varbinary(767),
- `size` int(10) unsigned NOT NULL COMMENT 'byte',
+ `callerUrl` varbinary(767) DEFAULT NULL,
+ `size` int(10) unsigned NOT NULL DEFAULT '0' COMMENT 'byte',
  `title` text COLLATE utf8_unicode_ci,
  `description` text COLLATE utf8_unicode_ci,
- `md5` char(32) COLLATE utf8_unicode_ci NOT NULL,
- `lastmod` int(10) unsigned NOT NULL,
+ `md5` char(32) COLLATE utf8_unicode_ci DEFAULT NULL,
+ `lastmod` int(10) unsigned NOT NULL DEFAULT '0',
  `changefreq` enum('daily','weekly','monthly','yearly') COLLATE utf8_unicode_ci NOT NULL,
  `priority` enum('0.1','0.2','0.3','0.4','0.5','0.6','0.7','0.8','0.9','1.0') COLLATE utf8_unicode_ci DEFAULT NULL,
  `state` enum('new','scan','skip','rSkip','old') COLLATE utf8_unicode_ci NOT NULL,
- `httpCode` char(3) COLLATE utf8_unicode_ci NOT NULL,
+ `httpCode` char(3) COLLATE utf8_unicode_ci DEFAULT NULL,
  PRIMARY KEY (`id`),
  UNIQUE KEY `url` (`url`),
  KEY `state` (`state`),
@@ -1926,6 +1891,14 @@ $this->execQuery();
 if ($this->dBaseVerNum < 380) {
 $this->query = "ALTER TABLE getSeoSitemap CHANGE state state enum('new','scan','skip','rSkip','old') COLLATE utf8_unicode_ci NOT NULL";
 $this->execQuery();
+}
+
+if ($this->dBaseVerNum < 391) {
+$this->query = "ALTER TABLE getSeoSitemap CHANGE size size int(10) unsigned NOT NULL DEFAULT '0' COMMENT 'byte'; 
+ALTER TABLE getSeoSitemap CHANGE md5 md5 char(32) COLLATE utf8_unicode_ci DEFAULT NULL; 
+ALTER TABLE getSeoSitemap CHANGE lastmod lastmod int(10) unsigned NOT NULL DEFAULT '0'; 
+ALTER TABLE getSeoSitemap CHANGE httpCode httpCode char(3) COLLATE utf8_unicode_ci DEFAULT NULL;";
+$this->execMultiQuery();
 }
 }
 
@@ -1962,6 +1935,7 @@ if ($this->rowNum > 0) {
 $this->writeLog("##### URLs with '$value' malformed character into domain (good pratice: do not use that character in URL address)");
 
 asort($this->row);
+
 foreach ($this->row as $v) {
 $this->writeLog($v['url']);
 
@@ -1989,18 +1963,14 @@ $this->writeLog("Execution has been stopped because of filter_var cannot filter 
 $this->stopExec();
 }
 
-$mainNo = substr($ver, 1, 2);
-
-if (ctype_digit($mainNo) === true) {
+if (ctype_digit(substr($ver, 1, 2)) === true) {
 $digits = 4;
 }
 else{
 $digits = 3;
 }
 
-$verNum = str_pad($verNum, $digits, '0');
-
-return $verNum;
+return str_pad($verNum, $digits, '0');
 
 }
 ################################################################################
@@ -2373,6 +2343,51 @@ break 1;
 }
 
 $this->writeLog('Setted URLs to skip following robots.txt rules');
+
+}
+################################################################################
+################################################################################
+// print mysqli warnings
+private function showWarnings(){
+
+if ($this->mysqli->warning_count > 0) {
+if ($this->getWarn === true) {
+if (($warnRes = $this->mysqli->query("SHOW WARNINGS")) !== false) {
+$warnRow = $warnRes->fetch_row();
+
+$warnMsg = sprintf("%s (%d): %s", $warnRow[0], $warnRow[1], lcfirst($warnRow[2]));
+$this->writeLog($warnMsg.' - query: "'.$this->query.'"');   
+        
+$warnRes->close();
+}
+
+$this->getWarnCounter();
+}
+}
+
+}
+################################################################################
+################################################################################
+// update warning counter
+private function getWarnCounter(){
+
+$this->warnCounter++;
+
+if ($this->warnCounter >= $this->maxWarn) {
+$this->writeLog('Warnings are not longer printed because of they are more than '.$this->maxWarn);  
+$this->getWarn = false;
+}
+
+}
+################################################################################
+################################################################################
+// write multiquery error into log
+private function writeLogMultiQueryErr(){
+
+$this->writeLog('Execution has been stopped because of MySQL multi_query error. Error ('
+.$this->mysqli->errno.'): '.lcfirst($this->mysqli->error).' - query: '.$this->query.$this->txtToAddOnMysqliErr); 
+
+exit();
 
 }
 ################################################################################
