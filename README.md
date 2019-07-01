@@ -1,4 +1,4 @@
-# getSeoSitemap v3.9.0 (2019-05-18)
+# getSeoSitemap v3.9.1 (2019-07-02)
 Php library to get sitemap.<br>
 It crawls a whole domain checking all links.<br>
 It crawls all sources (inside and outside domain) to give a partial Search Engine Optimization.<br>
@@ -6,8 +6,7 @@ It makes a full Search Engine Optimization of URLs into sitemap only.<br>
 
 [![donate via paypal](https://img.shields.io/badge/donate-paypal-87ceeb.svg)](https://www.paypal.me/johnbe4)<br>
 ![donate via bitcoin](https://img.shields.io/badge/donate-bitcoin-orange.svg)<br>
-**Please support this project by making a donation via [PayPal](https://www.paypal.me/johnbe4) or via BTC bitcoin to the address 19928gKpqdyN6CHUh4Tae1GW9NAMT6SfQH<br><br>
-Please star this package to support!**<br>
+**Please support this project by making a donation via [PayPal](https://www.paypal.me/johnbe4) or via BTC bitcoin to the address 19928gKpqdyN6CHUh4Tae1GW9NAMT6SfQH**<br>
 
 * **category**    Library
 * **author**      Giovanni Bertone <red@redracingparts.com>
@@ -18,13 +17,14 @@ Please star this package to support!**<br>
 It requires PHP 5.5 and MySQL 5.5.
 
 This script creates a full gzip sitemap or multiple gzip sitemaps plus a gzip sitemap index.<br>
-It includes change frequency, last modification date and priority all setted following your own rules.<br>
+It includes change frequency, last modification date and priority setted following your own rules.<br>
 Change frequency will be automatically selected between daily, weekly, monthly and yearly.<br>
 Max URL lenght must be 767 characters, otherwise the script will fail.<br>
 URLs with http response code different from 200 or with size = 0 will not be included into sitemap.<br>
 It checks all internal and external links (href URLs into 'a' tag plus form action URLs if method is get) and sources.<br>
 Mailto URLs with will not be included into sitemap.<br>
 URLs inside pdf files will not be scanned and will not be included into sitemap.<br>
+URLs inside javascript will not be scanned and will not be included into sitemap.<br>
 
 To improve SEO, it checks:<br>
 - http response code of all internal and external sources into domain (images, scripts, links, iframes, videos, audios)<br>
@@ -39,7 +39,7 @@ To improve SEO, it checks:<br>
 You can use absolute or relative URLs inside the site.<br>
 Robots.txt file must be present into the main directory of the site otherwise getSeoSitemap will fail.<br>
 This script will set automatically all URLs to skip and to allow into sitemap following the robots.txt rules of "User-agent: *".<br>
-There is not any automatic function to submit updated sitemap to google or bing.<br>
+There is not any automatic function to submit updated sitemap to search engines.<br>
 It rewrites robots.txt adding updated sitemap informations.<br>
 Maximum limit of URLs to insert into sitemap is 2.5T.<br>
 
