@@ -1,5 +1,10 @@
 getSeoSitemap CHANGELOG
 
+v3.9.1 (2019-07-02)
+- Fixed bug to print all MySQL warnings.
+- Increased script speed.
+- Small changes.
+
 v3.9.0 (2019-05-18)
 - Fixed bug to scan all internal and external sources correctly (images, scripts, links, iframes, 
 videos, audios).
@@ -18,7 +23,7 @@ v3.8.0 (2019-05-04)
 - Removed PRINTCONTAINEROFSKIPPED user constant.
 - Removed PRINTINTSKIPURLS user constant.
 - Removed STARTURL user constant.
-- It will print MySQL warnings always: $printMysqlWarn user constant has been removed.
+- It prints MySQL warnings always: $printMysqlWarn user constant has been removed.
 - Added PRINTSKIPURLS user constant.
 - Added rSkip state.
 - Small changes.
