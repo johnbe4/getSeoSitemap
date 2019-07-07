@@ -42,10 +42,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # with BTC bitcoin to the address 19928gKpqdyN6CHUh4Tae1GW9NAMT6SfQH                              #
 ###################################################################################################
 
-
-
-// inserire indirizzo BTC kraken
-
 ##### start of user constants
 const DOMAINURL = 'https://www.example.com'; // domain URL: value must be absolute - every URL must include it at the beginning
 const DEFAULTPRIORITY = '0.5'; // default priority for URLs not included in $fullUrlPriority and $partialUrlPriority
