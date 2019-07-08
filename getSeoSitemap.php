@@ -1,9 +1,9 @@
 <?php
 
 /*
-getSeoSitemap v3.9.1 LICENSE (2019-07-02)
+getSeoSitemap v3.9.2 LICENSE (2019-07-09)
 
-getSeoSitemap v3.9.1 is distributed under the following BSD-style license: 
+getSeoSitemap v3.9.2 is distributed under the following BSD-style license: 
 
 Copyright (c) 2017-2019
 Giovanni Bertone (RED Racing Parts)
@@ -43,14 +43,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ###################################################################################################
 
 ##### start of user constants
-const DOMAINURL = 'https://www.example.com'; // domain URL: value must be absolute - every URL must include it at the beginning
+const DOMAINURL = 'https://www.example.com'; // domain URL: every URL must include it at the beginning - value must be absolute and cannot end with /
 const DEFAULTPRIORITY = '0.5'; // default priority for URLs not included in $fullUrlPriority and $partialUrlPriority
 const DBHOST = '***'; // database host
 const DBUSER = '***'; // database user (warning: user must have permissions to create / alter table)
 const DBPASS = '***'; // database password
 const DBNAME = '***'; // database name
 const GETSITEMAPPATH = '/example/getSeoSitemap/'; // getSeoSitemap path into server
-const SITEMAPPATH = '/example/web/'; // sitemap path inside server
+const SITEMAPPATH = '/example/'; // sitemap path into server (must be the same path of robots.txt)
 const PRINTSKIPURLS = false; // set to true to print the list of URLs out of sitemap into log file
 ##### end of user constants
 
@@ -63,18 +63,18 @@ private $fullUrlPriority = [ // set priority of particular URLs that are equal t
 'https://www.example.com'
 ],
 '0.9' => [
-'https://www.example.com/example/introducingpages/11/22/hotproducts.php',
-'https://www.example.com/example/pagineintroduttive/11/22/hotproducts.php'
+'https://www.example.com/english/example/hotproducts.php',
+'https://www.example.com/italiano/example/hotproducts.php'
 ],
 ];
 private $partialUrlPriority = [ // set priority of particular URLs that start with these values (values must be absolute)
 '0.8' => [
-'https://www.example.com/example/introducingpages/11/22/',
-'https://www.example.com/example/pagineintroduttive/11/22/',
+'https://www.example.com/english/example/',
+'https://www.example.com/italiano/example/',
 ],
 '0.7' => [
-'https://www.example.com/example/prodottiecomponenti/generale/intro/',
-'https://www.example.com/example/productsandcomponents/general/intro/',
+'https://www.example.com/italiano/example/intro/',
+'https://www.example.com/english/example/intro/',
 ],
 '0.6' => [
 'https://www.example.com/catalog.php?p=',
@@ -94,7 +94,7 @@ private $checkH3 = true; // set to true to check if h3 is present in all pages
 ##### WARNING: DO NOT CHANGE ANYTHING BELOW #####
 #################################################
 
-private $version = 'v3.9.1';
+private $version = 'v3.9.2';
 private $userAgent = 'getSeoSitemap ver. by John';
 private $url = null; // an aboslute URL ( ex. https://www.example.com/test/test1.php )
 private $size = null; // size of file in Kb
@@ -503,11 +503,35 @@ $this->countUrlWithoutTitle++;
 $descriptionCount = 0;
 
 foreach ($dom->getElementsByTagName('meta') as $val) {
+$valGetAttName = strtolower($val->getAttribute('name'));
 
-if (strtolower($val->getAttribute('name')) == 'description') {
+if ($valGetAttName === 'description') {
 $description = $val->getAttribute('content');
 $descriptionCount++;
 }
+
+####
+elseif ($valGetAttName === 'robots') {
+
+switch (strtolower($val->getAttribute('content'))) {
+case 'noindex':
+//$this->writeLog('Noindex - URL '.$url);
+break;
+
+case 'nofollow':
+//$this->writeLog('Nofollow - URL '.$url);
+break;
+
+case 'none':
+//$this->writeLog('None - URL '.$url);
+break;
+
+case 'noindex, nofollow':
+//$this->writeLog('Noindex, nofollow - URL '.$url);
+break;
+}
+}
+###
 }
 
 if ($descriptionCount === 1) {
@@ -538,7 +562,7 @@ $this->stopExec();
 }
 
 if ($this->stmt5->execute() !== true) {  
-$this->writeLog('Execution has been stopped because of MySQL execute error: '.lcfirst($this->stmt5->error)); 
+$this->writeLog('Execution has been stopped because of MySQL stmt5 execute error: '.lcfirst($this->stmt5->error)); 
 
 $this->stopExec();
 }
@@ -996,7 +1020,7 @@ $this->stopExec();
 }
 
 if ($this->stmt->execute() !== true) {  
-$this->writeLog('Execution has been stopped because of MySQL execute error: '.lcfirst($this->stmt->error)); 
+$this->writeLog('Execution has been stopped because of MySQL stmt execute error: '.lcfirst($this->stmt->error)); 
 
 $this->stopExec();
 }
@@ -1033,7 +1057,7 @@ $this->stopExec();
 }
 
 if ($this->stmt2->execute() !== true) {  
-$this->writeLog('Execution has been stopped because of MySQL execute error: '.$this->stmt2->error); 
+$this->writeLog('Execution has been stopped because of MySQL stmt2 execute error: '.$this->stmt2->error); 
 
 $this->stopExec();
 }
@@ -1074,7 +1098,7 @@ $this->stopExec();
 }
 
 if ($this->stmt3->execute() !== true) {  
-$this->writeLog('Execution has been stopped because of MySQL execute error: '.lcfirst($this->stmt3->error)); 
+$this->writeLog('Execution has been stopped because of MySQL stmt3 execute error: '.lcfirst($this->stmt3->error)); 
 
 $this->stopExec();
 }
@@ -1095,7 +1119,7 @@ $this->stopExec();
 }
 
 if ($this->stmt4->execute() !== true) {  
-$this->writeLog('Execution has been stopped because of MySQL execute error: '.lcfirst($this->stmt4->error));  
+$this->writeLog('Execution has been stopped because of MySQL stmt4 execute error: '.lcfirst($this->stmt4->error));  
 
 $this->stopExec();
 }
@@ -1815,7 +1839,7 @@ if ($this->rowNum === 0) {
 $this->query = "CREATE TABLE `getSeoSitemapExec` (
  `id` int(1) NOT NULL AUTO_INCREMENT,
  `func` varchar(20) COLLATE utf8_unicode_ci DEFAULT NULL,
- `version` varchar(10) COLLATE utf8_unicode_ci DEFAULT NULL,
+ `version` varchar(10) COLLATE utf8_unicode_ci 'v0.0.0',
  `mDate` int(10) DEFAULT NULL COMMENT 'timestamp of last mod',
  `exec` varchar(1) COLLATE utf8_unicode_ci DEFAULT NULL,
  `step` int(2) NOT NULL DEFAULT '0' COMMENT 'passed step',
@@ -2008,12 +2032,11 @@ $this->stopExec();
 }
 
 if ($this->stmt->execute() !== true) {  
-$this->writeLog('Execution has been stopped because of MySQL execute error: '.$this->stmt->error); 
+$this->writeLog('Execution has been stopped because of MySQL stmt execute error: '.$this->stmt->error); 
 
 $this->stopExec();
 }
 }
-
 }
 while ($rowNum === 1);
 
@@ -2036,14 +2059,17 @@ $this->startTime = $time;
 // set version in userAgent
 $this->userAgent = str_replace('ver.', $this->version, $this->userAgent);
 
+// open mysqli connection
+$this->openMysqliConn();
+
+// check tables into dbase
+$this->checkTables();
+
 // read robots.txt
 $this->readRobots();
 
 // set $skipUrl
 $this->getRobotsData();
-
-// open mysqli connection
-$this->openMysqliConn();
 
 $this->query = "SELECT exec FROM getSeoSitemapExec WHERE func = 'getSeoSitemap' LIMIT 1";
 $this->execQuery();
@@ -2070,9 +2096,6 @@ exit();
 // set execution of function to y
 $this->exec = 'y';
 $this->updateExec();
-
-// check tables into dbase
-$this->checkTables();
 
 // update all states to old to be ready for the new full scan
 $this->query = "UPDATE getSeoSitemap SET state = 'old'";
