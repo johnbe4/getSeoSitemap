@@ -1,39 +1,60 @@
-getSeoSitemap v3.9.2 LICENSE (2019-07-09)
+# getSeoSitemap v3.9.2 (2019-07-09)
+Php library to get sitemap.<br>
+It crawls a whole domain checking all links.<br>
+It crawls all sources (inside and outside domain) to give a partial Search Engine Optimization.<br>
+It makes a full Search Engine Optimization of URLs into sitemap only.<br>
 
-getSeoSitemap v3.9.2 is distributed under the following BSD-style license: 
+[![donate via paypal](https://img.shields.io/badge/donate-paypal-87ceeb.svg)](https://www.paypal.me/johnbe4)<br>
+![donate via bitcoin](https://img.shields.io/badge/donate-bitcoin-orange.svg)<br>
+**Please support this project by making a donation via [PayPal](https://www.paypal.me/johnbe4) or via BTC bitcoin to the address 19928gKpqdyN6CHUh4Tae1GW9NAMT6SfQH**<br>
 
-Copyright (c) 2017-2019
-Giovanni Bertone (RED Racing Parts)
-https://www.redracingparts.com
-red@redracingparts.com
-All rights reserved.
+* **category**    Library
+* **author**      Giovanni Bertone <red@redracingparts.com>
+* **copyright**   2017-2019 Giovanni Bertone - RED Racing Parts
+* **link**        https://www.redracingparts.com
+* **source**      https://github.com/johnbe4/getSeoSitemap
 
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are met:
-1. Redistributions of source code must retain the above copyright
-   notice, this list of conditions and the following disclaimer.
-2. Redistributions in binary form must reproduce the above copyright
-   notice, this list of conditions and the following disclaimer in the
-   documentation and/or other materials provided with the distribution.
-3. All advertising materials mentioning features or use of this software
-   must display the following acknowledgement:
-   This product includes software developed by the RED Racing Parts.
-4. Neither the name of the RED Racing Parts nor the
-   names of its contributors may be used to endorse or promote products
-   derived from this software without specific prior written permission.
+It requires PHP 5.5 and MySQL 5.5.
 
-THIS SOFTWARE IS PROVIDED BY GIOVANNI BERTONE ''AS IS'' AND ANY
-EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED. IN NO EVENT SHALL GIOVANNI BERTONE BE LIABLE FOR ANY
-DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
-ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+This script creates a full gzip sitemap or multiple gzip sitemaps plus a gzip sitemap index.<br>
+It includes change frequency, last modification date and priority setted following your own rules.<br>
+Change frequency will be automatically selected between daily, weekly, monthly and yearly.<br>
+Max URL lenght must be 767 characters, otherwise the script will fail.<br>
+URLs with http response code different from 200 or with size = 0 will not be included into sitemap.<br>
+It checks all internal and external links (href URLs into 'a' tag plus form action URLs if method is get) and sources.<br>
+Mailto URLs with will not be included into sitemap.<br>
+URLs inside pdf files will not be scanned and will not be included into sitemap.<br>
+URLs inside javascript will not be scanned and will not be included into sitemap.<br>
 
-###################################################################################################
-# Please support this project by making a donation via PayPal to https://www.paypal.me/johnbe4 or #
-# with BTC bitcoin to the address 19928gKpqdyN6CHUh4Tae1GW9NAMT6SfQH                              #
-###################################################################################################
+To improve SEO, it checks:<br>
+- http response code of all internal and external sources into domain (images, scripts, links, iframes, videos, audios)<br>
+- malformed URLs into domain<br>
+- page title of URLs into domain<br>
+- page description of URLs into domain<br>
+- page h1/h2/h3 of URLs into domain<br>
+- page size of URLs into sitemap<br>
+- image alt of URLs into domain<br>
+- image title of URLs into domain.<br>
+
+You can use absolute or relative URLs inside the site.<br>
+Robots.txt file must be present into the main directory of the site otherwise getSeoSitemap will fail.<br>
+This script will set automatically all URLs to skip and to allow into sitemap following the robots.txt rules of "User-agent: *".<br>
+There is not any automatic function to submit updated sitemap to search engines.<br>
+It rewrites robots.txt adding updated sitemap informations.<br>
+Maximum limit of URLs to insert into sitemap is 2.5T.<br>
+
+Using getSeoSitemap, you will be able to give a better surfing experience to your clients.<br>
+
+**Instructions<br>**
+1 - copy getSeoSitemap folder in a protected zone of your server.<br>
+2 - set all user constants and parameters.<br>
+3 - on your server cronotab schedule the script once each day preferable when your server is not too much busy.<br>
+    A command line example to schedule the script every day at 7:45:00 AM is:<br>
+    45 7  *    *    *    php /example/example/example/example/example/getSeoSitemap/getSeoSitemap.php<br>
+    When you know how long it takes to execute all the script, you could add a cronotab timeout.
+
+**Warning<br>**
+To run getSeoSitemap faster, using a script like Geoplugin you should exclude geoSeoSitemap user-agent from that.<br>
+**Before moving from releases lower than 3.0 to 3.0 or higher, you must drop getSeoSitemap and getSeoSitemapExec tables into your dBase.<br>
+Do not save any file with name that starts with sitemap in the same folder of sitemaps, otherwise getSeoSitemap script could cancel it.<br>**
+**The robots.txt file must be present into the main directory of the site otherwise getSeoSitemap will fail.**
