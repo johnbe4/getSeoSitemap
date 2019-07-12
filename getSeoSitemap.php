@@ -1839,7 +1839,7 @@ if ($this->rowNum === 0) {
 $this->query = "CREATE TABLE `getSeoSitemapExec` (
  `id` int(1) NOT NULL AUTO_INCREMENT,
  `func` varchar(20) COLLATE utf8_unicode_ci DEFAULT NULL,
- `version` varchar(10) COLLATE utf8_unicode_ci 'v0.0.0',
+ `version` varchar(10) COLLATE utf8_unicode_ci DEFAULT 'v0.0.0',
  `mDate` int(10) DEFAULT NULL COMMENT 'timestamp of last mod',
  `exec` varchar(1) COLLATE utf8_unicode_ci DEFAULT NULL,
  `step` int(2) NOT NULL DEFAULT '0' COMMENT 'passed step',
