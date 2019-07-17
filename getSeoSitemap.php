@@ -1,9 +1,9 @@
 <?php
 
 /*
-getSeoSitemap v3.9.2 LICENSE (2019-07-09)
+getSeoSitemap v3.9.3 LICENSE (2019-07-18)
 
-getSeoSitemap v3.9.2 is distributed under the following BSD-style license: 
+getSeoSitemap v3.9.3 is distributed under the following BSD-style license: 
 
 Copyright (c) 2017-2019
 Giovanni Bertone (RED Racing Parts)
@@ -42,69 +42,35 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # with BTC bitcoin to the address 19928gKpqdyN6CHUh4Tae1GW9NAMT6SfQH                              #
 ###################################################################################################
 
-##### start of user constants
-const DOMAINURL = 'https://www.example.com'; // domain URL: every URL must include it at the beginning - value must be absolute and cannot end with /
-const DEFAULTPRIORITY = '0.5'; // default priority for URLs not included in $fullUrlPriority and $partialUrlPriority
-const DBHOST = '***'; // database host
-const DBUSER = '***'; // database user (warning: user must have permissions to create / alter table)
-const DBPASS = '***'; // database password
-const DBNAME = '***'; // database name
-const GETSITEMAPPATH = '/example/getSeoSitemap/'; // getSeoSitemap path into server
-const SITEMAPPATH = '/example/'; // sitemap path into server (must be the same path of robots.txt)
-const PRINTSKIPURLS = false; // set to true to print the list of URLs out of sitemap into log file
-##### end of user constants
-
-class getSeoSitemap {
-
-##### start of user parameters
-// priority values must be 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0. other values are not accepted.
-private $fullUrlPriority = [ // set priority of particular URLs that are equal these values (values must be absolute)
-'1.0' => [
-'https://www.example.com'
-],
-'0.9' => [
-'https://www.example.com/english/example/hotproducts.php',
-'https://www.example.com/italiano/example/hotproducts.php'
-],
-];
-private $partialUrlPriority = [ // set priority of particular URLs that start with these values (values must be absolute)
-'0.8' => [
-'https://www.example.com/english/example/',
-'https://www.example.com/italiano/example/',
-],
-'0.7' => [
-'https://www.example.com/italiano/example/intro/',
-'https://www.example.com/english/example/intro/',
-],
-'0.6' => [
-'https://www.example.com/catalog.php?p=',
-],
-];
-private $printChangefreqList = false; // set to true to print URLs list following changefreq
-private $printPriorityList = false; // set to true to print URLs list following priority
-private $printTypeList = false; // set to true to print URLs list following type                                                                                                             
-private $extUrlsTest = true; // set to false to skip external URLs test (default value is true)
-private $printSitemapSizeList = false; // set to true to print a size list of all sitemaps   
-private $printMalfUrls = true; // set to true to print a malformed URL list following a standard good practice
-private $checkH2 = true; // set to true to check if h2 is present in all pages
-private $checkH3 = true; // set to true to check if h3 is present in all pages
-##### end of user parameters
-
 #################################################
 ##### WARNING: DO NOT CHANGE ANYTHING BELOW #####
 #################################################
 
-private $version = 'v3.9.2';
+require 'config.php';
+
+class getSeoSitemap {
+
+private $version = 'v3.9.3';
 private $userAgent = 'getSeoSitemap ver. by John';
 private $url = null; // an aboslute URL ( ex. https://www.example.com/test/test1.php )
 private $size = null; // size of file in Kb
-private $titleLength = [5, 101]; // min, max title length
+private $titleLength = [5, 100]; // min, max title length
 private $descriptionLength = [50, 160]; // min, max description length
 private $md5 = null; // md5 of string (hexadecimal)
 private $changefreq = null; // change frequency of file (values: daily, weekly, monthly, yearly)
 private $lastmod = null; // timestamp of last modified date of URL
-private $state = null; // state of URL (values: old = URL of previous scan, new = new URL to scan, 
-// scan = new URL already scanned, skip = new skipped URL, rSkip = new skipped URL because of robots.txt rules)
+private $state = null; // state of URL
+/*
+state values:
+old = URL of previous scan
+new = new URL to scan
+scan = new URL already scanned
+skip = new skipped URL
+rSkip = new skipped URL cause of robots.txt rules, 
+niSkip = new no-index URL cause of robots meta rules
+nfSkip = new no-follow URL cause of robots meta rules
+noSkip = new no-index / no-follow URL cause of robots meta rules
+*/
 private $insUrl = null;
 private $mysqli = null; // mysqli connection
 private $ch = null; // curl connection
@@ -254,7 +220,8 @@ $this->mysqli = new mysqli(DBHOST, DBUSER, DBPASS, DBNAME);
 
 if ($this->mysqli->connect_errno !== 0) {
 $this->writeLog('Execution has been stopped because of MySQL database connection error: '
-.$this->mysqli->connect_error.$this->txtToAddOnMysqliErr);   
+.$this->mysqli->connect_error);
+
 exit();
 }
 
@@ -458,7 +425,7 @@ $this->writeLog('H1 does not exist (SEO: h1 should be present) - URL '.$url);
 $this->countUrlWithoutH1++;
 }
 
-if ($this->checkH2 === true){
+if (CHECKH2 === true){
 
 // count h2
 if ($dom->getElementsByTagName('h2')->length === 0) {
@@ -467,7 +434,7 @@ $this->countUrlWithoutH2++;
 }
 }
 
-if ($this->checkH3 === true){
+if (CHECKH3 === true){
 
 // count h3
 if ($dom->getElementsByTagName('h3')->length === 0) {
@@ -510,10 +477,13 @@ $description = $val->getAttribute('content');
 $descriptionCount++;
 }
 
-####
+###
 elseif ($valGetAttName === 'robots') {
 
-switch (strtolower($val->getAttribute('content'))) {
+$valGetAttContent = $val->getAttribute('content');
+
+switch (strtolower($valGetAttContent)) {
+
 case 'noindex':
 //$this->writeLog('Noindex - URL '.$url);
 break;
@@ -529,6 +499,9 @@ break;
 case 'noindex, nofollow':
 //$this->writeLog('Noindex, nofollow - URL '.$url);
 break;
+
+default:
+$this->writeLog('Content of tag robots is not included in the list: content '.$valGetAttContent.' - URL '.$url);
 }
 }
 ###
@@ -556,7 +529,7 @@ $this->countUrlWithoutDesc++;
 }
 
 if ($this->stmt5->bind_param('sss', $title, $description, $url) !== true) {  
-$this->writeLog('Execution has been stopped because of MySQL error binding parameters: '.lcfirst($this->stmt5->error));  
+$this->writeLog('Execution has been stopped because of MySQL stmt5 bind_param error: '.lcfirst($this->stmt5->error));  
 
 $this->stopExec();
 }
@@ -689,15 +662,15 @@ $this->writeLog($this->countUrlWithMultiDesc.' URLs with multiple description in
 $this->writeLog($this->countUrlWithoutH1.' URLs without h1 into domain (SEO: h1 should be present)');
 $this->writeLog($this->countUrlWithMultiH1.' URLs with multiple h1 into domain (SEO: h1 should be single)');
 
-if ($this->checkH2 === true){
+if (CHECKH2 === true){
 $this->writeLog($this->countUrlWithoutH2.' URLs without h2 into domain (SEO: h2 should be present)');
 }
 
-if ($this->checkH3 === true){
+if (CHECKH3 === true){
 $this->writeLog($this->countUrlWithoutH3.' URLs without h3 into domain (SEO: h3 should be present)');
 }
 
-if ($this->extUrlsTest === true) {
+if (EXTURLTEST === true) {
 $this->openCurlConn();
 $this->checkSkipUrls();
 $this->closeCurlConn();
@@ -748,7 +721,8 @@ $this->setPriority();
 // write changefreq into log
 foreach ($this->changefreqArr as $value) {
 $this->query = "SELECT COUNT(*) AS count FROM getSeoSitemap "
-."WHERE changefreq = '$value' AND state != 'skip' AND state != 'rSkip' AND httpCode = '200' AND size != 0";
+."WHERE changefreq = '$value' AND state NOT IN ('skip', 'rSkip', 'niSkip', 'noSkip') AND httpCode = '200' AND size != 0";
+
 $this->execQuery();
 
 $this->writeLog('Setted '.$value.' change frequency to '.$this->count.' URLs into sitemap');
@@ -756,7 +730,7 @@ $this->writeLog('Setted '.$value.' change frequency to '.$this->count.' URLs int
 
 // write lastmod min and max values into log
 $this->query = "SELECT MIN(lastmod) AS minLastmod, MAX(lastmod) AS maxLastmod FROM getSeoSitemap "
-."WHERE state != 'skip' AND state != 'rSkip' AND httpCode = '200' AND size != 0";
+."WHERE state NOT IN ('skip', 'rSkip', 'niSkip', 'noSkip') AND httpCode = '200' AND size != 0";
 $this->execQuery();
 
 $minLastmodDate = date('Y.m.d H:i:s', $this->row[0]['minLastmod']);
@@ -813,22 +787,22 @@ $this->getTotalUrls();
 $this->getExtUrls();
 
 // print type list if setted to true
-if ($this->printTypeList === true) {
+if (PRINTTYPELIST === true) {
 $this->getTypeList();
 }
 
 // print changefreq list if setted to true
-if ($this->printChangefreqList === true) {
+if (PRINTCHANGEFREQLIST === true) {
 $this->getChangefreqList();
 }
 
 // print priority list if setted to true
-if ($this->printPriorityList === true) {
+if (PRINTPRIORITYLIST === true) {
 $this->getPriorityList();
 }
 
 // print malformed list if setted to true
-if ($this->printMalfUrls === true) {
+if (PRINTMALFURLS === true) {
 $this->getMalfList();
 }
 
@@ -893,31 +867,31 @@ private function setPriority(){
 $this->query = "UPDATE getSeoSitemap SET priority = '".DEFAULTPRIORITY."' WHERE state != 'skip' AND state != 'rSkip'";
 $this->execQuery();
 
-foreach ($this->partialUrlPriority as $key => $value) {
+foreach ($GLOBALS['partialUrlPriority'] as $key => $value) {
 foreach ($value as $v) {
 $this->query = "UPDATE getSeoSitemap SET priority = '".$key."' "
-."WHERE url LIKE '".$v."%' AND state != 'skip' AND state != 'rSkip' AND httpCode = '200' AND size != 0";
+."WHERE url LIKE '".$v."%' AND state NOT IN ('skip', 'rSkip', 'niSkip', 'noSkip') AND httpCode = '200' AND size != 0";
 $this->execQuery();
 }
 }
 
-foreach ($this->fullUrlPriority as $key => $value) {
+foreach ($GLOBALS['fullUrlPriority'] as $key => $value) {
 foreach ($value as $v) {
 $this->query = "UPDATE getSeoSitemap SET priority = '".$key."' "
-."WHERE url = '".$v."' AND state != 'skip' AND state != 'rSkip' AND httpCode = '200' AND size != 0 LIMIT 1";
+."WHERE url = '".$v."' AND state NOT IN ('skip', 'rSkip', 'niSkip', 'noSkip') AND httpCode = '200' AND size != 0 LIMIT 1";
 $this->execQuery();
 }
 }
 
 // $priority includes all priority values
 $priority = [];
-$priority = array_merge(array_keys($this->partialUrlPriority), array_keys($this->fullUrlPriority));
+$priority = array_merge(array_keys($GLOBALS['partialUrlPriority']), array_keys($GLOBALS['fullUrlPriority']));
 $priority[] = DEFAULTPRIORITY;
 rsort($priority);
 
 foreach ($priority as $value) {
 $this->query = "SELECT COUNT(*) AS count FROM getSeoSitemap "
-."WHERE priority = '".$value."' AND state != 'skip' AND state != 'rSkip' AND httpCode = '200' AND size != 0";
+."WHERE priority = '".$value."' AND state NOT IN ('skip', 'rSkip', 'niSkip', 'noSkip') AND httpCode = '200' AND size != 0";
 $this->execQuery();
 
 $this->writeLog("Setted priority ".$value." to ".$this->count." URLs into sitemap");
@@ -945,7 +919,7 @@ $this->execQuery();
 ################################################################################
 private function getIntUrls() {
 
-$this->query = "SELECT url, callerUrl FROM getSeoSitemap WHERE state IN ('skip', 'rSkip') AND url LIKE '".DOMAINURL."%'";
+$this->query = "SELECT url, callerUrl FROM getSeoSitemap WHERE state IN ('skip', 'rSkip', 'niSkip', 'noSkip') AND url LIKE '".DOMAINURL."%'";
 $this->execQuery();
 
 // print list of URLs into domain out of sitemap if PRINTSKIPURLS === true
@@ -995,7 +969,7 @@ $this->writeLog($this->rowNum.' URLs out of domain out of sitemap');
 ################################################################################
 private function checkSkipUrls() {
 
-$this->query = "SELECT url FROM getSeoSitemap WHERE state IN ('skip', 'rSkip') AND url NOT LIKE 'mailto:%'";
+$this->query = "SELECT url FROM getSeoSitemap WHERE state IN ('skip', 'rSkip', 'niSkip', 'noSkip') AND url NOT LIKE 'mailto:%'";
 $this->execQuery();
 
 if ($this->rowNum > 0) {
@@ -1004,7 +978,7 @@ $this->stmt = $this->mysqli->prepare("UPDATE getSeoSitemap SET "
 . "httpCode = ? "
 . "WHERE url = ? LIMIT 1");
 if ($this->stmt === false) {  
-$this->writeLog('Execution has been stopped because of MySQL prepare error: '.lcfirst($this->mysqli->error)); 
+$this->writeLog('Execution has been stopped because of MySQL stmt prepare error: '.lcfirst($this->mysqli->error)); 
 
 $this->stopExec();
 }
@@ -1014,7 +988,7 @@ $url = $value['url'];
 $this->getPage($url);
 
 if ($this->stmt->bind_param('sss', $this->size, $this->httpCode, $url) !== true) {  
-$this->writeLog('Execution has been stopped because of MySQL error binding parameters: '.lcfirst($this->stmt->error));    
+$this->writeLog('Execution has been stopped because of MySQL stmt bind_param error: '.lcfirst($this->stmt->error));    
 
 $this->stopExec();
 }
@@ -1051,7 +1025,7 @@ private function insUpdNewUrlQuery($url){
 $this->checkUrlLength($url);
  
 if ($this->stmt2->bind_param('sss', $url, $this->callerUrl, $this->callerUrl) !== true) {  
-$this->writeLog('Execution has been stopped because of MySQL error binding parameters: '.$this->stmt2->error); 
+$this->writeLog('Execution has been stopped because of MySQL stmt2 bind_param error: '.$this->stmt2->error); 
 
 $this->stopExec();
 }
@@ -1092,7 +1066,7 @@ $this->update();
 
 if (
 $this->stmt3->bind_param('ssssss', $this->size, $this->md5, $this->lastmod, $this->changefreq, $this->httpCode, $url) !== true) {  
-$this->writeLog('Execution has been stopped because of MySQL error binding parameters: '.lcfirst($this->stmt3->error)); 
+$this->writeLog('Execution has been stopped because of MySQL stmt3 bind_param error: '.lcfirst($this->stmt3->error)); 
 
 $this->stopExec();
 }
@@ -1113,7 +1087,7 @@ $this->checkUrlLength($url);
  
 if ($this->stmt4->bind_param('sssssss', $url, $this->skipCallerUrl, $this->size, $this->httpCode, $this->skipCallerUrl, $this->size, $this->httpCode) !== true) { 
 
-$this->writeLog('Execution has been stopped because of MySQL error binding parameters: '.lcfirst($this->stmt4->error)); 
+$this->writeLog('Execution has been stopped because of MySQL stmt4 bind_param error: '.lcfirst($this->stmt4->error)); 
 
 $this->stopExec();
 }
@@ -1131,7 +1105,7 @@ private function getChangefreqList(){
 
 foreach ($this->changefreqArr as $value) {
 $this->query = "SELECT url FROM getSeoSitemap "
-. "WHERE changefreq = '$value' AND state != 'skip' AND state != 'rSkip' AND httpCode = '200' AND size != 0";
+. "WHERE changefreq = '$value' AND state NOT IN ('skip', 'rSkip', 'niSkip', 'noSkip') AND httpCode = '200' AND size != 0";
 $this->execQuery();
 
 $this->writeLog('##### URLs with '.$value.' change frequency into sitemap');
@@ -1154,7 +1128,7 @@ private function getPriorityList(){
 
 foreach ($this->priorityArr as $value) {
 $this->query = "SELECT url FROM getSeoSitemap WHERE priority = '".$value
-."' AND state != 'skip' AND state != 'rSkip' AND httpCode = '200' AND size != 0";
+."' AND state NOT IN ('skip', 'rSkip', 'niSkip', 'noSkip') AND httpCode = '200' AND size != 0";
 $this->execQuery();
 
 $this->writeLog('##### URLs with '.$value.' priority into sitemap');
@@ -1179,7 +1153,7 @@ private function getSizeList(){
 $kbBingMaxSize = $this->getKb($this->pageMaxSize);
 
 $this->query = "SELECT url, size FROM getSeoSitemap WHERE size > '".$this->pageMaxSize
-."' AND state != 'skip' AND state != 'rSkip' AND httpCode = '200'";
+."' AND state NOT IN ('skip', 'rSkip', 'niSkip', 'noSkip') AND httpCode = '200'";
 $this->execQuery();
 
 $this->writeLog('##### URLs with size > '.$kbBingMaxSize.' Kb into sitemap (SEO: page size should be lower than '
@@ -1220,7 +1194,7 @@ return sprintf('%0.2f', round($byte / 1024, 2));
 private function getMinTitleLengthList(){
 
 $this->query = "SELECT url, CHAR_LENGTH(title) AS titleLength FROM getSeoSitemap WHERE CHAR_LENGTH(title) < "
-.$this->titleLength[0]." AND state != 'skip' AND state != 'rSkip' AND httpCode = '200' AND title IS NOT NULL";
+.$this->titleLength[0]." AND state NOT IN ('skip', 'rSkip', 'niSkip', 'noSkip') AND httpCode = '200' AND title IS NOT NULL";
 $this->execQuery();
 
 $i = 0;
@@ -1252,7 +1226,7 @@ $this->writeLog($i.' URLs with title length < '.$this->titleLength[0].' characte
 private function getMaxTitleLengthList(){
 
 $this->query = "SELECT url, CHAR_LENGTH(title) AS titleLength FROM getSeoSitemap WHERE CHAR_LENGTH(title) > "
-.$this->titleLength[1]." AND state != 'skip' AND state != 'rSkip' AND httpCode = '200' AND title IS NOT NULL";
+.$this->titleLength[1]." AND state NOT IN ('skip', 'rSkip', 'niSkip', 'noSkip') AND httpCode = '200' AND title IS NOT NULL";
 $this->execQuery();
 
 $i = 0;
@@ -1283,7 +1257,7 @@ $this->writeLog($i.' URLs with title length > '.$this->titleLength[1].' characte
 ################################################################################
 private function getDuplicateTitle(){
 
-$this->query = "SELECT title FROM getSeoSitemap WHERE state != 'skip' AND state != 'rSkip' AND httpCode = '200' AND"
+$this->query = "SELECT title FROM getSeoSitemap WHERE state NOT IN ('skip', 'rSkip', 'niSkip', 'noSkip') AND httpCode = '200' AND"
 ." title IS NOT NULL GROUP BY title HAVING COUNT(*) > 1";
 $this->execQuery();
 
@@ -1298,7 +1272,7 @@ asort($row);
 
 foreach ($row as $v){
 $this->query = "SELECT url, title FROM getSeoSitemap WHERE title = '"
-.$v['title']."' AND state != 'skip' AND state != 'rSkip' AND httpCode = '200'";
+.$v['title']."' AND state NOT IN ('skip', 'rSkip', 'niSkip', 'noSkip') AND httpCode = '200'";
 $this->execQuery();
 
 foreach ($this->row as $v2){
@@ -1318,7 +1292,7 @@ $this->writeLog($i.' URLs with duplicate title into sitemap');
 private function getMinDescriptionLengthList(){
 
 $this->query = "SELECT url, CHAR_LENGTH(description) AS descriptionLength FROM getSeoSitemap WHERE CHAR_LENGTH(description) < "
-.$this->descriptionLength[0]." AND state != 'skip' AND state != 'rSkip' AND httpCode = '200' AND title IS NOT NULL";
+.$this->descriptionLength[0]." AND state NOT IN ('skip', 'rSkip', 'niSkip', 'noSkip') AND httpCode = '200' AND title IS NOT NULL";
 $this->execQuery();
 
 $i = 0;
@@ -1350,7 +1324,7 @@ $this->writeLog($i.' URLs with description length < '.$this->descriptionLength[0
 private function getMaxDescriptionLengthList(){
 
 $this->query = "SELECT url, CHAR_LENGTH(description) AS descriptionLength FROM getSeoSitemap WHERE CHAR_LENGTH(description) > "
-.$this->descriptionLength[1]." AND state != 'skip' AND state != 'rSkip' AND httpCode = '200' AND description IS NOT NULL";
+.$this->descriptionLength[1]." AND state NOT IN ('skip', 'rSkip', 'niSkip', 'noSkip') AND httpCode = '200' AND description IS NOT NULL";
 $this->execQuery();
 
 $i = 0;
@@ -1382,8 +1356,8 @@ $this->writeLog($i.' URLs with description length > '.$this->descriptionLength[1
 ################################################################################
 private function getDuplicateDescription(){
 
-$this->query = "SELECT description FROM getSeoSitemap WHERE state != 'skip' AND state != 'rSkip' AND httpCode = '200' AND"
-." title IS NOT NULL GROUP BY title HAVING COUNT(*) > 1";
+$this->query = "SELECT description FROM getSeoSitemap WHERE state NOT IN ('skip', 'rSkip', 'niSkip', 'noSkip') AND httpCode = '200' AND"
+." description IS NOT NULL GROUP BY description HAVING COUNT(*) > 1";
 $this->execQuery();
 
 $row = $this->row;
@@ -1397,7 +1371,7 @@ asort($row);
 
 foreach ($row as $v){
 $this->query = "SELECT url, description FROM getSeoSitemap WHERE description = '"
-.$v['description']."' AND state != 'skip' AND state != 'rSkip' AND httpCode = '200'";
+.$v['description']."' AND state NOT IN ('skip', 'rSkip', 'niSkip', 'noSkip') AND httpCode = '200'";
 $this->execQuery();
 
 foreach ($this->row as $v2){
@@ -1758,7 +1732,7 @@ return $fileExt;
 // check all sitemap sizes. they must be non larger than $sitemapMaxSize
 private function checkSitemapSize(){
 
-if ($this->printSitemapSizeList === true) {
+if (PRINTSITEMAPSIZELIST === true) {
 $this->writeLog('##### Sitemap sizes');
 }
 
@@ -1776,12 +1750,12 @@ elseif ($size > $this->sitemapMaxSize) {
 $this->writeLog('Warnuing: size of '.$fileName.' is larger than '.$this->sitemapMaxSize.' - double-check that file to fix it!');
 }
 
-if ($this->printSitemapSizeList === true) {
+if (PRINTSITEMAPSIZELIST === true) {
 $this->writeLog('Size: '.round($size * 0.0009765625, 2).' Kb - sitemap: '.$fileName);
 }
 }
 
-if ($this->printSitemapSizeList === true) {
+if (PRINTSITEMAPSIZELIST === true) {
 $this->writeLog('##########'.PHP_EOL);
 }
 
@@ -1872,18 +1846,19 @@ $this->query = "SHOW TABLES LIKE 'getSeoSitemap'";
 $this->execQuery();
 
 if ($this->rowNum === 0) {
+
 $this->query = "CREATE TABLE `getSeoSitemap` (
  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
  `url` varbinary(767) NOT NULL,
  `callerUrl` varbinary(767) DEFAULT NULL,
- `size` int(10) unsigned NOT NULL DEFAULT '0' COMMENT 'byte',
+ `size` int(10) unsigned NOT NULL DEFAULT 0 COMMENT 'byte',
  `title` text COLLATE utf8_unicode_ci,
  `description` text COLLATE utf8_unicode_ci,
  `md5` char(32) COLLATE utf8_unicode_ci DEFAULT NULL,
- `lastmod` int(10) unsigned NOT NULL DEFAULT '0',
+ `lastmod` int(10) unsigned NOT NULL DEFAULT 0,
  `changefreq` enum('daily','weekly','monthly','yearly') COLLATE utf8_unicode_ci NOT NULL,
  `priority` enum('0.1','0.2','0.3','0.4','0.5','0.6','0.7','0.8','0.9','1.0') COLLATE utf8_unicode_ci DEFAULT NULL,
- `state` enum('new','scan','skip','rSkip','old') COLLATE utf8_unicode_ci NOT NULL,
+ `state` enum('new','scan','skip','rSkip','old','niSkip','nfSkip','noSkip') COLLATE utf8_unicode_ci NOT NULL,
  `httpCode` char(3) COLLATE utf8_unicode_ci DEFAULT NULL,
  PRIMARY KEY (`id`),
  UNIQUE KEY `url` (`url`),
@@ -1908,16 +1883,12 @@ $this->execQuery();
 }
 }
 
-if ($this->dBaseVerNum < 380) {
-$this->query = "ALTER TABLE getSeoSitemap CHANGE state state enum('new','scan','skip','rSkip','old') COLLATE utf8_unicode_ci NOT NULL";
-$this->execQuery();
-}
-
-if ($this->dBaseVerNum < 391) {
-$this->query = "ALTER TABLE getSeoSitemap CHANGE size size int(10) unsigned NOT NULL DEFAULT '0' COMMENT 'byte'; 
+if ($this->dBaseVerNum < 393) {
+$this->query = "ALTER TABLE getSeoSitemap CHANGE size size int(10) unsigned NOT NULL DEFAULT 0 COMMENT 'byte'; 
 ALTER TABLE getSeoSitemap CHANGE md5 md5 char(32) COLLATE utf8_unicode_ci DEFAULT NULL; 
-ALTER TABLE getSeoSitemap CHANGE lastmod lastmod int(10) unsigned NOT NULL DEFAULT '0'; 
-ALTER TABLE getSeoSitemap CHANGE httpCode httpCode char(3) COLLATE utf8_unicode_ci DEFAULT NULL;";
+ALTER TABLE getSeoSitemap CHANGE lastmod lastmod int(10) unsigned NOT NULL DEFAULT 0; 
+ALTER TABLE getSeoSitemap CHANGE httpCode httpCode char(3) COLLATE utf8_unicode_ci DEFAULT NULL;
+ALTER TABLE getSeoSitemap CHANGE state state enum('new','scan','skip','rSkip','old','niSkip','nfSkip','noSkip') COLLATE utf8_unicode_ci NOT NULL;";
 $this->execMultiQuery();
 }
 }
@@ -2026,7 +1997,7 @@ $this->callerUrl = $url;
 $this->linksScan();
 
 if ($this->stmt->bind_param('s', $url) !== true) {  
-$this->writeLog('Execution has been stopped because of MySQL error binding parameters: '.$this->stmt->error); 
+$this->writeLog('Execution has been stopped because of MySQL stmt bind_param error: '.$this->stmt->error); 
 
 $this->stopExec();
 }
@@ -2119,7 +2090,7 @@ private function prepMysqliStmt(){
 
 $this->stmt = $this->mysqli->prepare("UPDATE getSeoSitemap SET state = 'scan' WHERE url = ? LIMIT 1");
 if ($this->stmt === false) {  
-$this->writeLog('Execution has been stopped because of MySQL prepare error: '.lcfirst($this->mysqli->error));  
+$this->writeLog('Execution has been stopped because of MySQL stmt prepare error: '.lcfirst($this->mysqli->error));  
 
 $this->stopExec();
 }
@@ -2128,7 +2099,7 @@ $this->stmt2 = $this->mysqli->prepare("INSERT INTO getSeoSitemap (url, callerUrl
 ."ON DUPLICATE KEY UPDATE state = IF(state = 'old', 'new', state), callerUrl = ?");
 
 if ($this->stmt2 === false) {  
-$this->writeLog('Execution has been stopped because of MySQL prepare error: '.lcfirst($this->mysqli->error)); 
+$this->writeLog('Execution has been stopped because of MySQL stmt2 prepare error: '.lcfirst($this->mysqli->error)); 
 
 $this->stopExec();
 }
@@ -2141,7 +2112,7 @@ $this->stmt3 = $this->mysqli->prepare("UPDATE getSeoSitemap SET "
 . "httpCode = ? "
 . "WHERE url = ? LIMIT 1");
 if ($this->stmt3 === false) {  
-$this->writeLog('Execution has been stopped because of MySQL prepare error: '.lcfirst($this->mysqli->error));
+$this->writeLog('Execution has been stopped because of MySQL stmt3 prepare error: '.lcfirst($this->mysqli->error));
 
 $this->stopExec();
 }
@@ -2150,34 +2121,22 @@ $this->stmt4 = $this->mysqli->prepare("INSERT INTO getSeoSitemap ("
 . "url, "
 . "callerUrl, "
 . "size, "
-. "md5, "
-. "lastmod, "
-. "changefreq, "
-. "priority, "
 . "state, "
 . "httpCode) "
 . "VALUES ("
 . "?, "
 . "?, "
 . "?, "
-. "'', "
-. "'', "
-. "'', "
-. "NULL, "
 . "'skip', "
 . "?) "
 . "ON DUPLICATE KEY UPDATE "
 . "callerUrl = ?, "
 . "size = ?, "
-. "md5 = '', "
-. "lastmod = 0, "
-. "changefreq = '', "
-. "priority = NULL, "
 . "state = 'skip', "
 . "httpCode = ?");
 
 if ($this->stmt4 === false) {  
-$this->writeLog('Execution has been stopped because of MySQL prepare error: '.lcfirst($this->mysqli->error));   
+$this->writeLog('Execution has been stopped because of MySQL stmt4 prepare error: '.lcfirst($this->mysqli->error));   
 
 $this->stopExec();
 }
@@ -2187,7 +2146,7 @@ $this->stmt5 = $this->mysqli->prepare("UPDATE getSeoSitemap SET "
 . "description = ? "
 . "WHERE url = ? LIMIT 1");
 if ($this->stmt5 === false) {  
-$this->writeLog('Execution has been stopped because of MySQL prepare error: '.lcfirst($this->mysqli->error));
+$this->writeLog('Execution has been stopped because of MySQL stmt5 prepare error: '.lcfirst($this->mysqli->error));
 
 $this->stopExec();
 }
