@@ -1,5 +1,17 @@
 getSeoSitemap CHANGELOG
 
+v3.9.3 (2019-07-18)
+- Fixed error to create getSeoSitemapExec.
+- Fixed bug of default values creating getSeoSitemap.
+- Fixed bug of lastmod.
+- Fixed bug of duplicate description count.
+- Added niSkip, nfSkip and noSkip states.
+- Updated variable $titleLength to respect new Bing rules.
+- Added config.php (moved all user parameters from getSeoSitemap.php to config.php).
+- Increased script speed.
+- Improved error log.
+- Small changes.
+
 v3.9.2 (2019-07-09)
 - Fixed bug of readRobots function.
 - Improved debug of MySQL prepared statement errors.
