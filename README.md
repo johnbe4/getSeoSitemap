@@ -1,4 +1,4 @@
-# getSeoSitemap v3.9.2 (2019-07-09)
+# getSeoSitemap v3.9.3 (2019-07-18)
 Php library to get sitemap.<br>
 It crawls a whole domain checking all links.<br>
 It crawls all sources (inside and outside domain) to give a partial Search Engine Optimization.<br>
@@ -37,9 +37,9 @@ To improve SEO, it checks:<br>
 - image title of URLs into domain.<br>
 
 You can use absolute or relative URLs inside the site.<br>
-Robots.txt file must be present into the main directory of the site otherwise getSeoSitemap will fail.<br>
 This script will set automatically all URLs to skip and to allow into sitemap following the robots.txt rules of "User-agent: *".<br>
 There is not any automatic function to submit updated sitemap to search engines.<br>
+Sitemap will be saved in the main directory of the domain.<br>
 It rewrites robots.txt adding updated sitemap informations.<br>
 Maximum limit of URLs to insert into sitemap is 2.5T.<br>
 
@@ -47,7 +47,7 @@ Using getSeoSitemap, you will be able to give a better surfing experience to you
 
 **Instructions<br>**
 1 - copy getSeoSitemap folder in a protected zone of your server.<br>
-2 - set all user constants and parameters.<br>
+2 - set all user parameters into config.php.<br>
 3 - on your server cronotab schedule the script once each day preferable when your server is not too much busy.<br>
     A command line example to schedule the script every day at 7:45:00 AM is:<br>
     45 7  *    *    *    php /example/example/example/example/example/getSeoSitemap/getSeoSitemap.php<br>
@@ -56,5 +56,5 @@ Using getSeoSitemap, you will be able to give a better surfing experience to you
 **Warning<br>**
 To run getSeoSitemap faster, using a script like Geoplugin you should exclude geoSeoSitemap user-agent from that.<br>
 **Before moving from releases lower than 3.0 to 3.0 or higher, you must drop getSeoSitemap and getSeoSitemapExec tables into your dBase.<br>
-Do not save any file with name that starts with sitemap in the same folder of sitemaps, otherwise getSeoSitemap script could cancel it.<br>**
+Do not save any file with name that starts with sitemap in the main directory, otherwise getSeoSitemap script could cancel it.<br>**
 **The robots.txt file must be present into the main directory of the site otherwise getSeoSitemap will fail.**
