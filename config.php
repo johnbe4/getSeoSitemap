@@ -1,9 +1,9 @@
 <?php
 
 /*
-getSeoSitemap v3.9.3 LICENSE (2019-07-18)
+getSeoSitemap v3.9.4 LICENSE (2019-09-08)
 
-getSeoSitemap v3.9.3 is distributed under the following BSD-style license: 
+getSeoSitemap v3.9.4 is distributed under the following BSD-style license: 
 
 Copyright (c) 2017-2019
 Giovanni Bertone (RED Racing Parts)
@@ -49,17 +49,16 @@ DOMAINURL value must be absolute and cannot end with /
 value could be https://www.example.com for a domain or https://www.example1.example.com for a subdomain
 */
 const DEFAULTPRIORITY = '0.5'; // default priority for URLs not included in $fullUrlPriority and $partialUrlPriority
-const DBHOST = '*****'; // database host
-const DBUSER = '*****'; // database user (warning: user must have permissions to create / alter table)
-const DBPASS = '*****'; // database password
-const DBNAME = '*****'; // database name
-const GETSITEMAPPATH = '/example/example/getSeoSitemap/'; // getSeoSitemap path into server
-const SITEMAPPATH = '/example/example/example/'; // sitemap path into server (must be the same path of robots.txt)
+const DBHOST = DATABASE_HOST_I; // database host
+const DBUSER = DATABASE_USER_I; // database user (warning: user must have permissions to create / alter table)
+const DBPASS = DATABASE_PASSWORD_I; // database password
+const DBNAME = DATABASE_NAME_I; // database name
+const GETSEOSITEMAPPATH = '/example/getSeoSitemap/'; // getSeoSitemap path into server
+const SITEMAPPATH = '/example/'; // sitemap path into server (must be the same path of robots.txt)
 const PRINTSKIPURLS = false; // set to true to print the list of URLs out of sitemap into log file
 const PRINTCHANGEFREQLIST = false; // set to true to print URLs list following changefreq
 const PRINTPRIORITYLIST = false; // set to true to print URLs list following priority
 const PRINTTYPELIST = false; // set to true to print URLs list following type                                                                                                             
-const EXTURLTEST = true; // set to false to skip external URLs test (default value is true)
 const PRINTSITEMAPSIZELIST = false; // set to true to print a size list of all sitemaps   
 const PRINTMALFURLS = true; // set to true to print a malformed URL list following a standard good practice
 const CHECKH2 = true; // set to true to check if h2 is present in all pages
@@ -70,21 +69,21 @@ $GLOBALS['fullUrlPriority'] = [ // set priority of particular URLs that are equa
 'https://www.example.com'
 ],
 '0.9' => [
-'https://www.example.com/english/example/hotproducts.php',
-'https://www.example.com/italiano/example/hotproducts.php'
+'https://www.example.com/example.php',
+'https://www.example.com/example.php'
 ],
 ];
 $GLOBALS['partialUrlPriority'] = [ // set priority of particular URLs that start with these values (values must be absolute)
 '0.8' => [
-'https://www.example.com/english/example/',
-'https://www.example.com/italiano/example/',
+'https://www.example.com/example/',
+'https://www.example.com/example/',
 ],
 '0.7' => [
-'https://www.example.com/italiano/example/generale/intro/',
-'https://www.example.com/english/example/general/intro/',
+'https://www.example.com/example/',
+'https://www.example.com/example/',
 ],
 '0.6' => [
-'https://www.example.com/catalog.php?p=',
+'https://www.example.com/example.php?p=',
 ],
 ];
 ##### end of user parameters
