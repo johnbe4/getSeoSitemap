@@ -1,5 +1,14 @@
 getSeoSitemap CHANGELOG
 
+v3.9.4 (2019-09-08)
+- Added function to detect URLs inside js files.
+- Added function to follow robots tag into page head.
+- Fixed seoExclusion bug.
+- Added mSkip state.
+- Renamed user constant: GETSITEMAPPATH -> GETSEOSITEMAPPATH.
+- Removed EXTURLTEST user constant.
+- Small changes.
+
 v3.9.3 (2019-07-18)
 - Fixed error to create getSeoSitemapExec.
 - Fixed bug of default values creating getSeoSitemap.
@@ -102,7 +111,7 @@ v3.1 (2018-04-16)
 
 v3.0 (2018-03-06)
 - Added function to detect if sitemap is UTF-8 encoded.
-- Removed BINGMAXSIZE from user constants.
+- Removed BINGMAXSIZE user constant.
 - Added $bingMaxSize variable.
 - Changed unit measure of size into getSeoSitemap table from Kb to byte.
 - Fixed bug of id value into getSeoSitemap table: id could be up to 4294967295 instead of 32767.
