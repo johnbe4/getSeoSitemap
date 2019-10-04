@@ -1,9 +1,9 @@
 <?php
 
 /*
-getSeoSitemap v3.9.4 LICENSE (2019-09-08)
+getSeoSitemap v3.9.5 LICENSE (2019-10-04)
 
-getSeoSitemap v3.9.4 is distributed under the following BSD-style license: 
+getSeoSitemap v3.9.5 is distributed under the following BSD-style license: 
 
 Copyright (c) 2017-2019
 Giovanni Bertone (RED Racing Parts)
@@ -50,7 +50,7 @@ require 'config.php';
 
 class getSeoSitemap {
 
-private $version = 'v3.9.4';
+private $version = 'v3.9.5';
 private $userAgent = 'getSeoSitemap ver. by John';
 private $url = null; // an aboslute URL ( ex. https://www.example.com/test/test1.php )
 private $size = 0; // size of file in Kb
@@ -85,8 +85,9 @@ private $query = null; // query
 private $stmt = null; // statement for prepared query
 private $stmt2 = null; // statement 2 for prepared query
 private $stmt3 = null; // statement 3 for prepared query
-private $stmt4 = null; // statement 4b for prepared query
+private $stmt4 = null; // statement 4 for prepared query
 private $stmt5 = null; // statement 5 for prepared query
+private $stmt6 = null; // statement 6 for prepared query
 private $startTime = null; // start timestamp
 private $followExclusion = [ // do not follow links inside these file types
 'pdf',
@@ -338,6 +339,11 @@ $this->writeLog('Execution has been stopped because of MySQL stmt5 close error: 
 $this->stopExec();
 }
 
+if ($this->stmt6->close() !== true) {  
+$this->writeLog('Execution has been stopped because of MySQL stmt6 close error: '.lcfirst($this->mysqli->error));   
+$this->stopExec();
+}
+
 }
 ################################################################################
 ################################################################################
@@ -429,30 +435,20 @@ $valGetAttContent = $val->getAttribute('content');
 switch (strtolower($valGetAttContent)) {
 
 case 'noindex':
-###
 $index = false;
-// to test
-###
 break;
 
 case 'nofollow':
-###
 $follow = false;
-// to test
-###
 break;
 
 case 'none':
-###
-// to test
 $index = $follow = $seo = false;
-###
+break;
 
 case 'noindex, nofollow':
-###
-// to test
 $index = $follow = $seo = false;
-###
+break;
 
 default:
 $this->writeLog('Content of robots tag is not included in the list: content '.$valGetAttContent.' - URL '.$url);
@@ -595,9 +591,6 @@ $skipUrl[] = $this->getAbsoluteUrl($link->getAttribute('href'), $url, 'link-href
 // iterate over extracted iframes and display their URLs
 foreach ($dom->getElementsByTagName('iframe') as $iframe){
 $skipUrl[] = $this->getAbsoluteUrl($iframe->getAttribute('src'), $url, 'iframe-src');
-###
-### to test
-###
 }
 
 // iterate over extracted video and display their URLs
@@ -636,13 +629,10 @@ foreach ($dom->getElementsByTagName('form') as $form){
 // check and scan form with get method only
 if ($form->getAttribute('method') === 'get'){
 $this->pageLinks[] = $this->getAbsoluteUrl($form->getAttribute('action'), $url, 'get-method-action');
-###
-### to test
-###
 }
 }
 
-### start: iterate over extracted scripts and display their URLs
+// iterate over extracted scripts and display their URLs
 foreach ($dom->getElementsByTagName('script') as $script){
 $scriptSrc = $script->getAttribute('src');
 
@@ -652,7 +642,6 @@ $absScript = $this->getAbsoluteUrl($scriptSrc, $url, 'script-src');
 $this->pageLinks[] = $absScript;
 }
 }
-### end: iterate over extracted scripts and display their URLs
 
 $this->pageLinks = array_unique(array_filter($this->pageLinks));
 }
@@ -985,13 +974,13 @@ $this->query = "SELECT url FROM getSeoSitemap WHERE state IN ('skip', 'rSkip', '
 $this->execQuery();
 
 if ($this->rowNum > 0) {
-$this->stmt = $this->mysqli->prepare("UPDATE getSeoSitemap SET "
+$this->stmt6 = $this->mysqli->prepare("UPDATE getSeoSitemap SET "
 . "size = ?, "
 . "httpCode = ? "
 . "WHERE url = ? LIMIT 1");
 
-if ($this->stmt === false) {  
-$this->writeLog('Execution has been stopped because of MySQL stmt prepare error: '.lcfirst($this->mysqli->error)); 
+if ($this->stmt6 === false) {  
+$this->writeLog('Execution has been stopped because of MySQL stmt6 prepare error: '.lcfirst($this->mysqli->error)); 
 $this->stopExec();
 }
 
@@ -999,13 +988,13 @@ foreach ($this->row as $value) {
 $url = $value['url'];
 $this->getPage($url);
 
-if ($this->stmt->bind_param('sss', $this->size, $this->httpCode, $url) !== true) {  
-$this->writeLog('Execution has been stopped because of MySQL stmt bind_param error: '.lcfirst($this->stmt->error));    
+if ($this->stmt6->bind_param('sss', $this->size, $this->httpCode, $url) !== true) {  
+$this->writeLog('Execution has been stopped because of MySQL stmt6 bind_param error: '.lcfirst($this->stmt6->error));    
 $this->stopExec();
 }
 
-if ($this->stmt->execute() !== true) {  
-$this->writeLog('Execution has been stopped because of MySQL stmt execute error: '.lcfirst($this->stmt->error)); 
+if ($this->stmt6->execute() !== true) {  
+$this->writeLog('Execution has been stopped because of MySQL stmt6 execute error: '.lcfirst($this->stmt6->error)); 
 $this->stopExec();
 }
 }
@@ -1045,6 +1034,7 @@ $this->stopExec();
 }
 
 $this->showWarnings();
+
 }
 ################################################################################
 ################################################################################
@@ -1959,12 +1949,9 @@ $rowNum = $this->rowNum;
 if ($rowNum === 1){ 
 $this->url = $this->row[0]['url'];
 $url = $this->url;
-
 $this->scan($url);
 $this->getIndexFollowSeo($url);
-
 $this->callerUrl = $url;
-
 $this->linksScan();
 
 if ($this->stmt->bind_param('s', $url) !== true) {  
@@ -2057,7 +2044,7 @@ $this->openCurlConn();
 // prepare mysqli statements
 private function prepMysqliStmt(){
 
-$this->stmt = $this->mysqli->prepare("UPDATE getSeoSitemap SET state = 'scan' WHERE url = ? LIMIT 1");
+$this->stmt = $this->mysqli->prepare("UPDATE getSeoSitemap SET state = IF(state = 'new', 'scan', state) WHERE url = ? LIMIT 1");
 if ($this->stmt === false) {  
 $this->writeLog('Execution has been stopped because of MySQL stmt prepare error: '.lcfirst($this->mysqli->error));  
 $this->stopExec();
@@ -2340,6 +2327,22 @@ return true;
 }
 
 return false;
+
+}
+################################################################################
+################################################################################
+// select single url: to be used for debug (step = position into the script)
+private function selectUrl($step, $url){
+
+$this->query = "SELECT * FROM getSeoSitemap WHERE url = '$url' LIMIT 1";
+$this->execQuery();
+
+if ($this->rowNum === 1) {
+$this->writeLog("Step: $step - URL $url - data: ".print_r($this->row, true));
+}
+else {
+$this->writeLog("Step: $step - URL $url - data: zero record");
+}
 
 }
 ################################################################################
