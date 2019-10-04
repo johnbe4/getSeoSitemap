@@ -1,5 +1,9 @@
 getSeoSitemap CHANGELOG
 
+v3.9.5 (2019-10-04)
+- Fixed bug of robots tag.
+- Small changes.
+
 v3.9.4 (2019-09-08)
 - Added function to detect URLs inside js files.
 - Added function to follow robots tag into page head.
