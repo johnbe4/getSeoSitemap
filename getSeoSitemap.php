@@ -1,9 +1,9 @@
 <?php
 
 /*
-getSeoSitemap v3.9.5 LICENSE (2019-10-04)
+getSeoSitemap v3.9.6 LICENSE (2019-12-02)
 
-getSeoSitemap v3.9.5 is distributed under the following BSD-style license: 
+getSeoSitemap v3.9.6 is distributed under the following BSD-style license: 
 
 Copyright (c) 2017-2019
 Giovanni Bertone (RED Racing Parts)
@@ -50,7 +50,7 @@ require 'config.php';
 
 class getSeoSitemap {
 
-private $version = 'v3.9.5';
+private $version = 'v3.9.6';
 private $userAgent = 'getSeoSitemap ver. by John';
 private $url = null; // an aboslute URL ( ex. https://www.example.com/test/test1.php )
 private $size = 0; // size of file in Kb
@@ -79,6 +79,7 @@ private $row = []; // array that includes row from query
 private $pageLinks = []; // it includes all links inside a page
 private $pageBody = null; // the page including header
 private $httpCode = null; // the http response code
+private $contentType = null; // the header content-type
 private $rowNum = null; // number of rows into dbase
 private $count = null; // count of rows (ex. 125)
 private $query = null; // query
@@ -89,15 +90,17 @@ private $stmt4 = null; // statement 4 for prepared query
 private $stmt5 = null; // statement 5 for prepared query
 private $stmt6 = null; // statement 6 for prepared query
 private $startTime = null; // start timestamp
-private $followExclusion = [ // do not follow links inside these file types
-'pdf',
+private $followExclusion = [ // do not follow links inside these file content types
+'application/pdf',
 ];
-private $seoExclusion = [ // file types out of seo
-'pdf',
-'js'
+private $seoExclusion = [ // file content types out of seo
+'application/pdf',
+'application/javascript',
+'text/javascript'
 ];
-private $indexExclusion = [ // file types out of sitemap
-'js'
+private $indexExclusion = [ // file content types out of sitemap
+'application/javascript',
+'text/javascript'
 ];
 private $changefreqArr = ['daily', 'weekly', 'monthly', 'yearly']; // changefreq accepted values
 private $priorityArr = ['1.0', '0.9', '0.8', '0.7', '0.6', '0.5', '0.4', '0.3', '0.2', '0.1']; // priority accepted values
@@ -177,19 +180,16 @@ $this->lastmod = time();
 return;
 }
 
-$this->httpCode = curl_getinfo($this->ch, CURLINFO_HTTP_CODE);
-if ($this->httpCode === false) {  
+$header = curl_getinfo($this->ch);
+
+if ($header === false) {  
 $this->writeLog('Execution has been stopped because of curl_getinfo failed calling URL '.$url);  
 $this->stopExec();
 }
 
-$this->size = mb_strlen($this->pageBody, '8bit');
-
-if ($this->size === false) {  
-$this->writeLog('Execution has been stopped because of mb_strlen failed calling URL '.$url);  
-$this->stopExec();
-}
-
+$this->httpCode = $header['http_code'];
+$this->contentType = $header['content_type'];
+$this->size = $header['size_download'];
 $this->md5 = md5($this->pageBody);
 $this->lastmod = time();
 
@@ -401,20 +401,9 @@ if ($this->httpCode !== 200 || empty($this->pageBody) === true) {
 return;
 }
 
-$urlExtension = $this->getUrlExt($url);
-$index = $follow = $seo = true;
-
-if (in_array($urlExtension, $this->indexExclusion) === true) {
-$index = false;
-}
-
-if (in_array($urlExtension, $this->followExclusion) === true) {
-$follow = false;
-}
-
-if (in_array($urlExtension, $this->seoExclusion) === true) {
-$seo = false;
-}
+$index = $this->getExclusion($this->contentType, $this->indexExclusion);
+$follow = $this->getExclusion($this->contentType, $this->followExclusion);
+$seo = $this->getExclusion($this->contentType, $this->seoExclusion);
 
 $dom = new DOMDocument;
 
@@ -1144,11 +1133,9 @@ if ($this->rowNum > 0) {
 asort($this->row);
 
 foreach ($this->row as $v) {
-if (in_array($this->getUrlExt($v['url']), $this->seoExclusion) === false) {
 $this->writeLog('Size: '.$this->getKb($v['size']).' Kb - URL: '.$v['url']);
 
 $i++;
-}
 }
 }
 
@@ -1181,11 +1168,9 @@ $this->writeLog('##### URLs with title length < '.$this->titleLength[0]
 asort($this->row);
 
 foreach ($this->row as $v){
-if (in_array($this->getUrlExt($v['url']), $this->seoExclusion) === false) {
 $this->writeLog('Title length: '.$v['titleLength'].' characters - URL: '.$v['url']);
 
 $i++;
-}
 }
 
 $this->writeLog('##########');
@@ -1210,12 +1195,10 @@ $this->writeLog('##### URLs with title length > '.$this->titleLength[1]
 
 asort($this->row);
 
-foreach ($this->row as $v){
-if (in_array($this->getUrlExt($v['url']), $this->seoExclusion) === false) {
+foreach ($this->row as $v) {
 $this->writeLog('Title length: '.$v['titleLength'].' characters - URL: '.$v['url']);
 
 $i++;
-}
 }
 
 $this->writeLog('##########');
@@ -1274,12 +1257,10 @@ $this->writeLog('##### URLs with description length < '.$this->descriptionLength
 
 asort($this->row);
 
-foreach ($this->row as $v){
-if (in_array($this->getUrlExt($v['url']), $this->seoExclusion) === false) {
+foreach ($this->row as $v) {
 $this->writeLog('Description length: '.$v['descriptionLength'].' characters - URL: '.$v['url']);
 
 $i++;
-}
 }
 
 $this->writeLog('##########');
@@ -1304,12 +1285,10 @@ $this->writeLog('##### URLs with description length > '.$this->descriptionLength
 
 asort($this->row);
 
-foreach ($this->row as $v){
-if (in_array($this->getUrlExt($v['url']), $this->seoExclusion) === false) {
+foreach ($this->row as $v) {
 $this->writeLog('Description length: '.$v['descriptionLength'].' characters - URL: '.$v['url']);
 
 $i++;
-}
 }
 
 $this->writeLog('##########');
@@ -1378,9 +1357,20 @@ $this->writeLog('##########'.PHP_EOL);
 // open curl connection
 private function openCurlConn(){
 
-$this->ch = curl_init();
-curl_setopt($this->ch, CURLOPT_RETURNTRANSFER, 1);
-curl_setopt($this->ch, CURLOPT_USERAGENT, $this->userAgent);
+if (($this->ch = curl_init()) === false) {
+$this->writeLog('Execution has been stopped because of curl_init error'); 
+$this->stopExec();
+}
+
+if (curl_setopt($this->ch, CURLOPT_RETURNTRANSFER, 1) === false) {
+$this->writeLog('Execution has been stopped because of curl_setopt CURLOPT_RETURNTRANSFER error'); 
+$this->stopExec();
+}
+
+if (curl_setopt($this->ch, CURLOPT_USERAGENT, $this->userAgent) === false) {
+$this->writeLog('Execution has been stopped because of curl_setopt CURLOPT_USERAGENT error'); 
+$this->stopExec();
+}
 
 }
 ################################################################################
@@ -1409,7 +1399,6 @@ $this->errCounter++;
 
 if ($this->errCounter >= $this->maxErr) {
 $this->writeLog('Execution has been stopped because of errors are more than '.$this->maxErr);  
-
 $this->stopExec();
 }
 
@@ -1421,7 +1410,6 @@ private function delete($fileName){
 
 if (unlink($fileName) === false){
 $this->writeLog('Execution has been stopped because of unlink cannot delete sitemap.xml'); 
-
 $this->stopExec();
 }
 
@@ -1665,25 +1653,6 @@ $this->stopExec();
 }
 ################################################################################
 ################################################################################
-// get URL extension
-private function getUrlExt($url){
-
-$fileExt = '';
-
-$parse = parse_url($url);
-
-if ($parse !== false) {
-if (isset($parse['path']) === true) {
-$path = $parse['path'];
-$fileExt = pathinfo($path, PATHINFO_EXTENSION);
-}
-
-return $fileExt;
-}
-
-}
-################################################################################
-################################################################################
 // check all sitemap sizes. they must be non larger than $sitemapMaxSize
 private function checkSitemapSize(){
 
@@ -1866,8 +1835,12 @@ $this->execMultiQuery();
 // optimize getSeoSitemap
 $this->query = "OPTIMIZE TABLE getSeoSitemap";
 $this->execQuery();
+$this->writeLog('Optimized getSeoSitemap table'); 
 
-$this->writeLog('Optimized getSeoSitemap table');  
+// defrag getSeoSitemap
+$this->query = "ALTER TABLE getSeoSitemap ENGINE=InnoDB";
+$this->execQuery();
+$this->writeLog('Defragged getSeoSitemap table'); 
 
 }
 ################################################################################
@@ -2331,18 +2304,19 @@ return false;
 }
 ################################################################################
 ################################################################################
-// select single url: to be used for debug (step = position into the script)
-private function selectUrl($step, $url){
+// get exclusion
+private function getExclusion($contentType, $exclusion){
 
-$this->query = "SELECT * FROM getSeoSitemap WHERE url = '$url' LIMIT 1";
-$this->execQuery();
+$include = true;
 
-if ($this->rowNum === 1) {
-$this->writeLog("Step: $step - URL $url - data: ".print_r($this->row, true));
+foreach ($exclusion as $v) {
+if (strpos($contentType, $v) !== false) {
+$include = false;
+break;
 }
-else {
-$this->writeLog("Step: $step - URL $url - data: zero record");
 }
+
+return $include;
 
 }
 ################################################################################
