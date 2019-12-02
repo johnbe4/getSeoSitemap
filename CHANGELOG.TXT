@@ -1,5 +1,13 @@
 getSeoSitemap CHANGELOG
 
+v3.9.6 (2019-12-02)
+- Added function to get page type content from header instead of file extension.
+- Added defrag getSeoSitemap table to increase performance.
+- Fixed bug SEO exclusion.
+- Improved error check into openCurlConn function.
+- Increased script speed.
+- Small changes.
+
 v3.9.5 (2019-10-04)
 - Fixed bug of robots tag.
 - Small changes.
