@@ -1,9 +1,9 @@
 <?php
 
 /*
-getSeoSitemap v3.9.5 LICENSE (2019-10-04)
+getSeoSitemap v3.9.6 LICENSE (2019-12-02)
 
-getSeoSitemap v3.9.5 is distributed under the following BSD-style license: 
+getSeoSitemap v3.9.6 is distributed under the following BSD-style license: 
 
 Copyright (c) 2017-2019
 Giovanni Bertone (RED Racing Parts)
@@ -49,12 +49,12 @@ DOMAINURL value must be absolute and cannot end with /
 value could be https://www.example.com for a domain or https://www.example1.example.com for a subdomain
 */
 const DEFAULTPRIORITY = '0.5'; // default priority for URLs not included in $fullUrlPriority and $partialUrlPriority
-const DBHOST = "*****"; // database host
-const DBUSER = "*****"; // database user (warning: user must have permissions to create / alter table)
-const DBPASS = "*****"; // database password
-const DBNAME = "*****"; // database name
+const DBHOST = DBHOST2; // database host
+const DBUSER = DBUSER2; // database user (warning: user must have permissions to create / alter table)
+const DBPASS = DBPASS2; // database password
+const DBNAME = DBNAME2; // database name
 const GETSEOSITEMAPPATH = '/example/example/getSeoSitemap/'; // getSeoSitemap path into server
-const SITEMAPPATH = '/example/example/'; // sitemap path into server (must be the same path of robots.txt)
+const SITEMAPPATH = '/example/web/'; // sitemap path into server (must be the same path of robots.txt)
 const PRINTSKIPURLS = false; // set to true to print the list of URLs out of sitemap into log file
 const PRINTCHANGEFREQLIST = false; // set to true to print URLs list following changefreq
 const PRINTPRIORITYLIST = false; // set to true to print URLs list following priority
@@ -69,18 +69,18 @@ $GLOBALS['fullUrlPriority'] = [ // set priority of particular URLs that are equa
 'https://www.example.com'
 ],
 '0.9' => [
-'https://www.example.com/english/example/hotproducts.php',
-'https://www.example.com/italiano/example/hotproducts.php'
+'https://www.example.com/english/example.php',
+'https://www.example.com/italiano/example.php'
 ],
 ];
 $GLOBALS['partialUrlPriority'] = [ // set priority of particular URLs that start with these values (values must be absolute)
 '0.8' => [
-'https://www.example.com/english/example/',
-'https://www.example.com/italiano/example/',
+'https://www.example.com/english/example/introducingpages/11/22/',
+'https://www.example.com/italiano/example/pagineintroduttive/11/22/',
 ],
 '0.7' => [
-'https://www.example.com/italiano/example/generale/intro/',
-'https://www.example.com/english/example/general/intro/',
+'https://www.example.com/italianoexample/prodottiecomponenti/generale/intro/',
+'https://www.example.com/english/example/productsandcomponents/general/intro/',
 ],
 '0.6' => [
 'https://www.example.com/catalog.php?p=',
