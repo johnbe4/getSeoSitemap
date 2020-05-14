@@ -9,7 +9,7 @@ It makes a full Search Engine Optimization of URLs into sitemap only.<br>
 
 * **category**    Library
 * **author**      Giovanni Bertone <red@redracingparts.com>
-* **copyright**   2017-2019 Giovanni Bertone - RED Racing Parts
+* **copyright**   2017-2020 Giovanni Bertone - RED Racing Parts
 * **link**        https://www.redracingparts.com
 * **source**      https://github.com/johnbe4/getSeoSitemap
 
