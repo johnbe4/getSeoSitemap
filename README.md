@@ -14,7 +14,7 @@ It makes a full Search Engine Optimization of URLs into sitemap only.<br>
 * **source**      https://github.com/johnbe4/getSeoSitemap
 
 # Warning
-**Before moving from releases lower than 4.0.0 to 4.0.0 or higher, you must drop getSeoSitemap and getSeoSitemapExec tables into your dBase.**
+# Before moving from releases lower than 4.0.0 to 4.0.0 or higher, you must drop getSeoSitemap and getSeoSitemapExec tables into your dBase.
 
 **Overview<br>**
 This script creates a full gzip sitemap or multiple gzip sitemaps plus a gzip sitemap index.<br>
