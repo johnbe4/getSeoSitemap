@@ -1,27 +1,37 @@
 getSeoSitemap CHANGELOG
 
-v3.9.6 (2019-12-02)
+v4.0.0 | 2020-08-31
+- It requires Php 7.3.18 or higher and MariaDb 10.4.13 or higher.
+- Changed getSeoSitemap and getSeoSitemapExec table engine from InnoDB to Aria.
+- Changed charset from utf8 to utf8mb4.
+- Increased max Url length from 767 to 1000 characters ($maxUrlLength variable).
+- Improved print of priority list removing duplicated keys.
+- Added version on config.php.
+- Increased script speed (you will notice that after 2 or 3 full scans).
+- Other small changes.
+
+v3.9.6 | 2019-12-02
 - Added function to get page type content from header instead of file extension.
 - Added defrag getSeoSitemap table to increase performance.
 - Fixed bug SEO exclusion.
 - Improved error check into openCurlConn function.
 - Increased script speed.
-- Small changes.
+- Other small changes.
 
-v3.9.5 (2019-10-04)
+v3.9.5 | 2019-10-04
 - Fixed bug of robots tag.
-- Small changes.
+- Other small changes.
 
-v3.9.4 (2019-09-08)
+v3.9.4 | 2019-09-08
 - Added function to detect URLs inside js files.
 - Added function to follow robots tag into page head.
 - Fixed seoExclusion bug.
 - Added mSkip state.
 - Renamed user constant: GETSITEMAPPATH -> GETSEOSITEMAPPATH.
 - Removed EXTURLTEST user constant.
-- Small changes.
+- Other small changes.
 
-v3.9.3 (2019-07-18)
+v3.9.3 | 2019-07-18
 - Fixed error to create getSeoSitemapExec.
 - Fixed bug of default values creating getSeoSitemap.
 - Fixed bug of lastmod.
@@ -31,27 +41,27 @@ v3.9.3 (2019-07-18)
 - Added config.php (moved all user parameters from getSeoSitemap.php to config.php).
 - Increased script speed.
 - Improved error log.
-- Small changes.
+- Other small changes.
 
-v3.9.2 (2019-07-09)
+v3.9.2 | 2019-07-09
 - Fixed bug of readRobots function.
 - Improved debug of MySQL prepared statement errors.
 - Increased script speed.
-- Small changes.
+- Other small changes.
 
-v3.9.1 (2019-07-02)
+v3.9.1 | 2019-07-02
 - Fixed bug to print all MySQL warnings.
 - Increased script speed.
-- Small changes.
+- Other small changes.
 
-v3.9.0 (2019-05-18)
+v3.9.0 | 2019-05-18
 - Fixed bug to scan all internal and external sources correctly (images, scripts, links, iframes, 
 videos, audios).
 - Added function to scan form action URLs if method is get.
 - Increased script speed.
-- Small changes.
+- Other small changes.
 
-v3.8.0 (2019-05-04)
+v3.8.0 | 2019-05-04
 - From this release robots.txt must be present, otherwise getSeoSitemap will fail.
 - Removed $skipUrl and $fileToAdd from user parameters: $skipUrl will be setted following robots.txt rules on 
   "User-agent: *".
@@ -65,63 +75,63 @@ v3.8.0 (2019-05-04)
 - It prints MySQL warnings always: $printMysqlWarn user constant has been removed.
 - Added PRINTSKIPURLS user constant.
 - Added rSkip state.
-- Small changes.
+- Other small changes.
 
-v3.7.0 (2019-02-18)
+v3.7.0 | 2019-02-18
 - Added feature to check if h1 is present and single in all pages.
 - Added feature to check if h2 and h3 are present in all pages (added user parameters $checkH2 and $checkH3).
 - Fixed bug of file to add total counter: updated getTotalUrls function.
-- Updated variable $titleLength to respect new search engines rules.
+- Updated $titleLength variable to respect new search engines rules.
 
-v3.6.0 (2019-01-11)
+v3.6.0 | 2019-01-11
 - Added function to check if title and alt are present in images.
-- Updated variable $pageMaxSize to respect new search engines rules.
-- Updated variable $titleLength to respect new search engines rules.
+- Updated $pageMaxSize variable to respect new search engines rules.
+- Updated $titleLength variable to respect new search engines rules.
 
-v3.5.0 (2018-11-28)
+v3.5.0 | 2018-11-28
 - Added functions to check http response code of all internal and external sources (images, scripts, links, iframes, 
 videos, audios).
-- Updated variable $pageMaxSize to respect new search engines rules.
+- Updated $pageMaxSize variable to respect new search engines rules.
 
-v3.4.0 (2018-10-18)
+v3.4.0 | 2018-10-18
 - Added functions to manage relative URLs.
 - Improved script speed.
 - Updated variable $pageMaxSize to respect new search engines rules.
 
-v3.3.0 (2018-10-04)
+v3.3.0 | 2018-10-04
 - Added callerUrl column into getSeoSitemap table to show in printing lists.
 - Updated variables $titleLength and $bingMaxSize to respect new search engines rules.
-- Renamed variable $bingMaxSize to $pageMaxSize.
+- Renamed $bingMaxSize variable to $pageMaxSize.
 - Improved printing lists.
 
-v3.2.2 (2018-08-21)
+v3.2.2 | 2018-08-21
 - removed composer.json.
 
-v3.2.1 (2018-08-18)
-- Updated variable $descriptionLength to respect Google rules.
+v3.2.1 | 2018-08-18
+- Updated $descriptionLength variable to respect Google rules.
 - Added VERSION.
 - Added composer.json.
 - Removed readme.txt.
 - Renamed changelog.txt to CHANGELOG.TXT.
 - Renamed license.txt to LICENSE.TXT.
 
-v3.2 (2018-08-08)
-- It requires PHP 5.5.
+v3.2 |(2018-08-08
+- It requires Php 5.5 or higher.
 - Added functions to check page description.
 - Improved list of title errors.
 - Improved getHref function to prevent checking of failed pages.
-- Small changes.
+- Other small changes.
 
-v3.1 (2018-04-16)
+v3.1 | 2018-04-16
 - Added function to print MySQL warnings (added variable $printMysqlWarn).
 - Added function to print a list of malformed URL addresses (added variable $printMalfUrls).
 - Added max limit of URLs to insert into sitemap (2.5T).
 - Added function to rewrite robots.txt adding updated sitemap infos (added variable $rewriteRobots).
 - Fixed bug of log path: now it will remain the same from the start to the end of execution.
 - Increased speed of writeLog function using file_put_contents.
-- Small changes.
+- Other small changes.
 
-v3.0 (2018-03-06)
+v3.0 | 2018-03-06
 - Added function to detect if sitemap is UTF-8 encoded.
 - Removed BINGMAXSIZE user constant.
 - Added $bingMaxSize variable.
@@ -133,9 +143,9 @@ v3.0 (2018-03-06)
 - Added function to check URL length.
 - Added more info to SEO lists.
 - Fixed bug of parse_url if response is false or path is not setted.
-- Small changes.
+- Other small changes.
 
-v2.3.1 (2018-01-31)
+v2.3.1 | 2018-01-31
 - Added function to check all sitemap sizes that must be no larger than 50 Mb.
 - Added variable $printSitemapSizeList to print a list of all sitemap sizes.
 - Added execution stop if total sitemaps are more than 50000.
@@ -143,23 +153,23 @@ v2.3.1 (2018-01-31)
 - Fixed bug of sitemap index head.
 - Fixed bug of sitemap URLs listed into sitemap index.
 
-v2.3 (2018-01-30)
+v2.3 | 2018-01-30
 - Added feature to create sitemap index and multiple sitemaps when total URLs are more than 50000.
 - Fixed bug that created an infinite loop on some mysqli errors.
-- Removed constant SITEMAPURL.
+- Removed SITEMAPURL constant.
 - Removed function to save sitemap.back.xml.gz.
 
-v2.2 (2018-01-23)
+v2.2 | (2018-01-23
 - Added entity escaping function to clean URLs before saving into sitemap.
 - Added function to delete sitemap.xml: it exists only sitemap.xml.gz from now.
-- Small changes.
+- Other small changes.
 
-v2.1 (2018-01-18)
+v2.1 | 2018-01-18
 - Modified $fileToAdd user constant to add and follow all kind of URLs.
 - Updated pageTest function to prevent skipping URLs with GET section if the file extension is a value of $fileToAdd.
 - Added $extUrls user parameter to skip external URLs test.
 
-v2.0 (2018-01-09)
+v2.0 | 2018-01-09
 - Added list of URLs with size > 125.00 Kb (bing SEO).
 - Added function to set execution equal n on error.
 - Added function to count errors preventing stop.
@@ -167,7 +177,7 @@ v2.0 (2018-01-09)
 - Added functions to check page title (bing SEO and google SEO).
 - Removed LASTMODCHANGE and SIZEDIFF constants.
 
-v1.1 (2017-02-25)
+v1.1 | 2017-02-25
 - Added checkTables function to auto-create the tables into dBase (getSeoSitemap and getSeoSitemapExec).
 - Added prepared statements to increase security and speed.
 - Added check on cURL functions.
@@ -177,5 +187,5 @@ v1.1 (2017-02-25)
 - Updated error messages.
 - Fixed errors in printing lists.
 
-v1.0 (2017-01-22)
+v1.0 | 2017-01-22
 - First stable release.
