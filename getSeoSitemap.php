@@ -1,12 +1,12 @@
 <?php
 
 /*
-getSeoSitemap v3.9.6 LICENSE (2019-12-02)
+getSeoSitemap v4.0.0 LICENSE | 2020-08-31
 
-getSeoSitemap v3.9.6 is distributed under the following BSD-style license: 
+getSeoSitemap v4.0.0 is distributed under the following BSD-style license: 
 
 Copyright (c) 2017-2020
-Giovanni Bertone (RED Racing Parts)
+Giovanni Bertone | RED Racing Parts
 https://www.redracingparts.com
 red@redracingparts.com
 All rights reserved.
@@ -50,7 +50,7 @@ require 'config.php';
 
 class getSeoSitemap {
 
-private $version = 'v3.9.6';
+private $version = 'v4.0.0';
 private $userAgent = 'getSeoSitemap ver. by John';
 private $url = null; // an aboslute URL ( ex. https://www.example.com/test/test1.php )
 private $size = 0; // size of file in Kb
@@ -127,7 +127,7 @@ private $sitemapMaxSize = 52428800; // max sitemap size (bytes)
 private $sitemapNameArr = []; // includes names of all saved sitemaps at the end of the process
 private $txtToAddOnMysqliErr = ' - fix it remembering to set exec to n in getSeoSitemapExec table.'; // additional error text
 private $pageMaxSize = 135168; // page max file size in byte. this param is only for SEO
-private $maxUrlLength = 767; // max URL length
+private $maxUrlLength = 1000; // max URL length
 private $malfChars = [' ']; // list of characters to detect malformed URLs following a standard good practice
 private $multipleSitemaps = null; // when multiple sitemaps are avaialble is true
 private $logPath = null; // log path
@@ -135,7 +135,6 @@ private $skipUrl = []; // URLs to skip
 private $allowUrl = []; // URLs to allow
 private $robotsPath = null; // robots.txt path
 private $robotsLines = []; // robots.txt lines
-private $dBaseVerNum = null; // version number of database
 private $countUrlWithoutDesc = 0; // counter of URLs without description
 private $countUrlWithMultiDesc = 0; // counter of URLs with multiple description
 private $countUrlWithoutTitle = 0; // counter of URLs without title
@@ -236,7 +235,7 @@ $this->writeLog('Execution has been stopped because of MySQL database connection
 exit();
 }
 
-if ($this->mysqli->set_charset('utf8') === false) {
+if ($this->mysqli->set_charset('utf8mb4') === false) {
 $this->writeLog('Execution has been stopped because of MySQL error loading character set utf8: '.lcfirst($this->mysqli->error));  
 $this->stopExec();
 } 
@@ -281,29 +280,6 @@ $result->free_result();
 elseif (strpos($this->query, 'SHOW') === 0) {
 $this->rowNum = $result->num_rows;
 $result->free_result();
-}
-
-$this->showWarnings();
-
-}
-################################################################################
-################################################################################
-private function execMultiQuery(){
-
-if ($this->mysqli->multi_query($this->query) !== false) {
-do {
-if (($result = $this->mysqli->store_result()) !== false) {
-$result->free_result();
-}
-} 
-while ($this->mysqli->next_result() === true);
-}
-else {
-$this->writeLogMultiQueryErr();
-}
-
-if ($this->mysqli->errno) {
-$this->writeLogMultiQueryErr();
 }
 
 $this->showWarnings();
@@ -876,6 +852,7 @@ $this->execQuery();
 $priority = [];
 $priority = array_merge(array_keys($GLOBALS['partialUrlPriority']), array_keys($GLOBALS['fullUrlPriority']));
 $priority[] = DEFAULTPRIORITY;
+$priority = array_unique($priority);
 rsort($priority);
 
 foreach ($priority as $value) {
@@ -1731,18 +1708,17 @@ $this->query = "SHOW TABLES LIKE 'getSeoSitemapExec'";
 $this->execQuery();
 
 if ($this->rowNum === 0) {
-
 $this->query = "CREATE TABLE `getSeoSitemapExec` (
  `id` int(1) NOT NULL AUTO_INCREMENT,
- `func` varchar(20) COLLATE utf8_unicode_ci DEFAULT NULL,
- `version` varchar(10) COLLATE utf8_unicode_ci DEFAULT 'v0.0.0',
+ `func` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+ `version` varchar(10) COLLATE utf8mb4_unicode_ci DEFAULT 'v0.0.0',
  `mDate` int(10) DEFAULT NULL COMMENT 'timestamp of last mod',
- `exec` varchar(1) COLLATE utf8_unicode_ci DEFAULT NULL,
+ `exec` varchar(1) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
  `step` int(2) NOT NULL DEFAULT '0' COMMENT 'passed step',
- `newData` varchar(1) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'n' COMMENT 'set to y when new data are avaialble',
+ `newData` varchar(1) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'n' COMMENT 'set to y when new data are avaialble',
  UNIQUE KEY `id` (`id`),
  UNIQUE KEY `func` (`func`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT='execution of getSeoSitemap functions'";
+) ENGINE=Aria AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='execution of getSeoSitemap functions'";
 $this->execQuery();
 
 $this->query = "INSERT INTO getSeoSitemapExec (func, mDate, exec, newData) 
@@ -1750,38 +1726,24 @@ SELECT 'getSeoSitemap', 0, 'n', 'n' FROM DUAL WHERE NOT EXISTS
 (SELECT func FROM getSeoSitemapExec WHERE func='getSeoSitemap')";
 $this->execQuery();
 }
-elseif ($this->rowNum === 1) {
-$this->getDbaseVerNum();
-
-if ($this->dBaseVerNum < 310) {
-$this->query = "SHOW COLUMNS FROM getSeoSitemapExec WHERE FIELD = 'step'";
-$this->execQuery();
-
-if ($this->rowNum === 0) {
-$this->query = "ALTER TABLE getSeoSitemapExec ADD COLUMN step int(2) NOT NULL DEFAULT '0' COMMENT 'passed step' AFTER exec";
-$this->execQuery();
-}
-}
-}
 
 $this->query = "SHOW TABLES LIKE 'getSeoSitemap'";
 $this->execQuery();
 
 if ($this->rowNum === 0) {
-
 $this->query = "CREATE TABLE `getSeoSitemap` (
  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
- `url` varbinary(767) NOT NULL,
- `callerUrl` varbinary(767) DEFAULT NULL,
+ `url` varbinary(1000) NOT NULL,
+ `callerUrl` varbinary(1000) DEFAULT NULL,
  `size` int(10) unsigned NOT NULL DEFAULT 0 COMMENT 'byte',
- `title` text COLLATE utf8_unicode_ci,
- `description` text COLLATE utf8_unicode_ci,
- `md5` char(32) COLLATE utf8_unicode_ci DEFAULT NULL,
+ `title` text COLLATE utf8mb4_unicode_ci,
+ `description` text COLLATE utf8mb4_unicode_ci,
+ `md5` char(32) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
  `lastmod` int(10) unsigned NOT NULL DEFAULT 0,
- `changefreq` enum('daily','weekly','monthly','yearly') COLLATE utf8_unicode_ci NOT NULL,
- `priority` enum('0.1','0.2','0.3','0.4','0.5','0.6','0.7','0.8','0.9','1.0') COLLATE utf8_unicode_ci DEFAULT NULL,
- `state` enum('new','scan','skip','mSkip','rSkip','old','niSkip','nfSkip','noSkip') COLLATE utf8_unicode_ci NOT NULL,
- `httpCode` char(3) COLLATE utf8_unicode_ci DEFAULT NULL,
+ `changefreq` enum('daily','weekly','monthly','yearly') COLLATE utf8mb4_unicode_ci NOT NULL,
+ `priority` enum('0.1','0.2','0.3','0.4','0.5','0.6','0.7','0.8','0.9','1.0') COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+ `state` enum('new','scan','skip','mSkip','rSkip','old','niSkip','nfSkip','noSkip') COLLATE utf8mb4_unicode_ci NOT NULL,
+ `httpCode` char(3) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
  PRIMARY KEY (`id`),
  UNIQUE KEY `url` (`url`),
  KEY `state` (`state`),
@@ -1789,36 +1751,8 @@ $this->query = "CREATE TABLE `getSeoSitemap` (
  KEY `size` (`size`),
  KEY `changefreq` (`changefreq`),
  KEY `priority` (`priority`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
+) ENGINE=Aria AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
 $this->execQuery();
-}
-elseif ($this->rowNum === 1) {
-$this->getDbaseVerNum();
-
-if ($this->dBaseVerNum < 330) {
-$this->query = "SHOW COLUMNS FROM getSeoSitemap WHERE FIELD = 'callerUrl'";
-$this->execQuery();
-
-if ($this->rowNum === 0) {
-$this->query = "ALTER TABLE getSeoSitemap ADD COLUMN callerUrl varbinary(767) AFTER url";
-$this->execQuery();
-}
-}
-
-if ($this->dBaseVerNum < 393) {
-$this->query = "ALTER TABLE getSeoSitemap CHANGE size size int(10) unsigned NOT NULL DEFAULT 0 COMMENT 'byte'; 
-ALTER TABLE getSeoSitemap CHANGE md5 md5 char(32) COLLATE utf8_unicode_ci DEFAULT NULL; 
-ALTER TABLE getSeoSitemap CHANGE lastmod lastmod int(10) unsigned NOT NULL DEFAULT 0; 
-ALTER TABLE getSeoSitemap CHANGE httpCode httpCode char(3) COLLATE utf8_unicode_ci DEFAULT NULL;
-ALTER TABLE getSeoSitemap CHANGE state state enum('new','scan','skip','rSkip','old','niSkip','nfSkip','noSkip') COLLATE utf8_unicode_ci NOT NULL;";
-$this->execMultiQuery();
-}
-
-if ($this->dBaseVerNum < 394) {
-$this->query = "ALTER TABLE getSeoSitemap CHANGE state state enum('new','scan','skip','mSkip','rSkip','old','niSkip','nfSkip','noSkip') COLLATE utf8_unicode_ci NOT NULL;";
-$this->execMultiQuery();
-}
-
 }
 
 }
@@ -1827,18 +1761,13 @@ $this->execMultiQuery();
 // optimize tables
 private function optimTables(){
 
-// remove gaps in id primary key of getSeoSitemap
-$this->query = "SET @count = 0; "
-. "UPDATE getSeoSitemap SET id = @count := @count + 1";
-$this->execMultiQuery();
-
 // optimize getSeoSitemap
 $this->query = "OPTIMIZE TABLE getSeoSitemap";
 $this->execQuery();
 $this->writeLog('Optimized getSeoSitemap table'); 
 
 // defrag getSeoSitemap
-$this->query = "ALTER TABLE getSeoSitemap ENGINE=InnoDB";
+$this->query = "ALTER TABLE getSeoSitemap ENGINE=Aria";
 $this->execQuery();
 $this->writeLog('Defragged getSeoSitemap table'); 
 
@@ -1872,41 +1801,6 @@ $this->writeLog('##########');
 
 $this->writeLog($i.' URLs with malformed characters into domain out of sitemap'.PHP_EOL);
 }
-
-}
-################################################################################
-################################################################################
-// get number from version (examples: v12.2 => 1220, v11.2.2 => 1122, v3.1.1 => 311, v3.1 => 310)
-private function getVerNum($ver){
-
-// return digits only
-$verNum = filter_var($ver, FILTER_SANITIZE_NUMBER_INT);
-
-if ($verNum === false) {
-$this->writeLog("Execution has been stopped because of filter_var cannot filter value '".$ver."'"); 
-
-$this->stopExec();
-}
-
-if (ctype_digit(substr($ver, 1, 2)) === true) {
-$digits = 4;
-}
-else {
-$digits = 3;
-}
-
-return str_pad($verNum, $digits, '0');
-
-}
-################################################################################
-################################################################################
-// get version number of database
-private function getDbaseVerNum(){
-
-$this->query = "SELECT version FROM getSeoSitemapExec WHERE func = 'getSeoSitemap' LIMIT 1";
-$this->execQuery();
-
-$this->dBaseVerNum = $this->getVerNum($this->row[0]['version']);
 
 }
 ################################################################################
@@ -2233,17 +2127,6 @@ if ($this->warnCounter >= $this->maxWarn) {
 $this->writeLog('Warnings are not longer printed because of they are more than '.$this->maxWarn);  
 $this->getWarn = false;
 }
-
-}
-################################################################################
-################################################################################
-// write multiquery error into log
-private function writeLogMultiQueryErr(){
-
-$this->writeLog('Execution has been stopped because of MySQL multi_query error. Error ('
-.$this->mysqli->errno.'): '.lcfirst($this->mysqli->error).' - query: '.$this->query.$this->txtToAddOnMysqliErr); 
-
-exit();
 
 }
 ################################################################################
