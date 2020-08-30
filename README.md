@@ -13,7 +13,7 @@ It makes a full Search Engine Optimization of URLs into sitemap only.<br>
 * **link**        https://www.redracingparts.com
 * **source**      https://github.com/johnbe4/getSeoSitemap
 
-**Warning<br>**
+# Warning
 **Before moving from releases lower than 4.0.0 to 4.0.0 or higher, you must drop getSeoSitemap and getSeoSitemapExec tables into your dBase.**
 
 **Overview<br>**
