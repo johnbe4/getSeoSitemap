@@ -59,7 +59,7 @@ Using getSeoSitemap, you will be able to give a better surfing experience to you
     When you know how long it takes to execute all the script, you could add a cronotab timeout.
 
 **Warning<br>**
-**Before moving from releases lower than 4.0.0 to 4.0.0 or higher, you must drop getSeoSitemap and getSeoSitemapExec tables into your dBase.**
-**Do not save any file with name that starts with sitemap in the main directory, otherwise getSeoSitemap script could cancel it.**
-**The robots.txt file must be present into the main directory of the site otherwise getSeoSitemap will fail.**
+**Before moving from releases lower than 4.0.0 to 4.0.0 or higher, you must drop getSeoSitemap and getSeoSitemapExec tables into your dBase.<br>**
+**Do not save any file with name that starts with sitemap in the main directory, otherwise getSeoSitemap script could cancel it.<br>**
+**The robots.txt file must be present into the main directory of the site otherwise getSeoSitemap will fail.<br>**
 To run getSeoSitemap faster, using a script like Geoplugin you should exclude geoSeoSitemap user-agent from that.
