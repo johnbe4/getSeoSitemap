@@ -1,12 +1,12 @@
 <?php
 
 /*
-getSeoSitemap v3.9.6 LICENSE (2019-12-02)
+getSeoSitemap v4.0.0 LICENSE | 2020-08-31
 
-getSeoSitemap v3.9.6 is distributed under the following BSD-style license: 
+getSeoSitemap v4.0.0 is distributed under the following BSD-style license: 
 
 Copyright (c) 2017-2020
-Giovanni Bertone (RED Racing Parts)
+Giovanni Bertone | RED Racing Parts
 https://www.redracingparts.com
 red@redracingparts.com
 All rights reserved.
@@ -41,6 +41,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # Please support this project by making a donation via PayPal to https://www.paypal.me/johnbe4 or #
 # with BTC bitcoin to the address 19928gKpqdyN6CHUh4Tae1GW9NAMT6SfQH                              #
 ###################################################################################################
+
+/*
+config v1.0.1 | 2020-05-10
+*/
 
 ##### start of user parameters
 const DOMAINURL = 'https://www.example.com'; // domain (or subdomain) URL: every URL must include it at the beginning
