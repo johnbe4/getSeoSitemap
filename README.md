@@ -1,5 +1,5 @@
 # getSeoSitemap v4.0.0 | 2020-08-31
-Php library to get sitemap.<br>
+PHP library to get sitemap.<br>
 It crawls a whole domain checking all URLs.<br>
 It makes a full Search Engine Optimization of URLs into sitemap only.<br>
 
