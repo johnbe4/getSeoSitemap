@@ -1,9 +1,9 @@
 <?php
 
 /*
-getSeoSitemap v4.0.0 LICENSE | 2020-08-31
+getSeoSitemap v4.1.0 LICENSE | 2020-11-29
 
-getSeoSitemap v4.0.0 is distributed under the following BSD-style license: 
+getSeoSitemap v4.1.0 is distributed under the following BSD-style license: 
 
 Copyright (c) 2017-2020
 Giovanni Bertone | RED Racing Parts
@@ -43,10 +43,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ###################################################################################################
 
 /*
-config v1.0.1 | 2020-05-10
+config v1.0.1 | 2020-11-29
 */
 
-##### start of user parameters
 const DOMAINURL = 'https://www.example.com'; // domain (or subdomain) URL: every URL must include it at the beginning
 /*
 DOMAINURL value must be absolute and cannot end with /
@@ -57,8 +56,8 @@ const DBHOST = DBHOST2; // database host
 const DBUSER = DBUSER2; // database user (warning: user must have permissions to create / alter table)
 const DBPASS = DBPASS2; // database password
 const DBNAME = DBNAME2; // database name
-const GETSEOSITEMAPPATH = '/example/example/getSeoSitemap/'; // getSeoSitemap path into server
-const SITEMAPPATH = '/example/web/'; // sitemap path into server (must be the same path of robots.txt)
+const GETSEOSITEMAPPATH = '/example10/getSeoSitemap/'; // getSeoSitemap path into server
+const SITEMAPPATH = '/example11/'; // sitemap path into server (must be the same path of robots.txt)
 const PRINTSKIPURLS = false; // set to true to print the list of URLs out of sitemap into log file
 const PRINTCHANGEFREQLIST = false; // set to true to print URLs list following changefreq
 const PRINTPRIORITYLIST = false; // set to true to print URLs list following priority
@@ -66,28 +65,30 @@ const PRINTTYPELIST = false; // set to true to print URLs list following type
 const PRINTSITEMAPSIZELIST = false; // set to true to print a size list of all sitemaps   
 const PRINTMALFURLS = true; // set to true to print a malformed URL list following a standard good practice
 const CHECKH2 = true; // set to true to check if h2 is present in all pages
-const CHECKH3 = true; // set to true to check if h3 is present in all pages
+const CHECKH3 = true; // set to true to check if h3 is present in all pages 
+const MAXPERCTOTURLSDIFF = 2; // max percentage total urls difference from previous successful exec | default is 2
 // priority values must be 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0. other values are not accepted.
-$GLOBALS['fullUrlPriority'] = [ // set priority of particular URLs that are equal these values (values must be absolute)
+const FULLURLPRIORITY = [ // set priority of particular URLs that are equal these values (values must be absolute)
 '1.0' => [
 'https://www.example.com'
 ],
 '0.9' => [
-'https://www.example.com/english/example.php',
-'https://www.example.com/italiano/example.php'
-],
-];
-$GLOBALS['partialUrlPriority'] = [ // set priority of particular URLs that start with these values (values must be absolute)
-'0.8' => [
-'https://www.example.com/english/example/introducingpages/11/22/',
-'https://www.example.com/italiano/example/pagineintroduttive/11/22/',
+'https://www.example.com/example.php',
+'https://www.example.com/example1.php'
 ],
 '0.7' => [
-'https://www.example.com/italianoexample/prodottiecomponenti/generale/intro/',
-'https://www.example.com/english/example/productsandcomponents/general/intro/',
-],
-'0.6' => [
-'https://www.example.com/catalog.php?p=',
-],
+'https://www.example.com/example3.php',
+'https://www.example.com/example4.php'
+]
 ];
-##### end of user parameters
+const PARTIALURLPRIORITY = [ // set priority of particular URLs that start with these values (values must be absolute)
+'0.8' => [
+'https://www.example.com/example5/',
+'https://www.example.com/example6/',
+],
+'0.7' => [
+'https://www.example.com/example7/',
+'https://www.example.com/example8/'
+]
+];
+const LOGPATH = GETSEOSITEMAPPATH.'log/'; // getSeoSitemap log path into server
