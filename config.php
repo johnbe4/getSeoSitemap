@@ -52,10 +52,10 @@ DOMAINURL value must be absolute and cannot end with /
 value could be https://www.example.com for a domain or https://www.example1.example.com for a subdomain
 */
 const DEFAULTPRIORITY = '0.5'; // default priority for URLs not included in $fullUrlPriority and $partialUrlPriority
-const DBHOST = DBHOST2; // database host
-const DBUSER = DBUSER2; // database user (warning: user must have permissions to create / alter table)
-const DBPASS = DBPASS2; // database password
-const DBNAME = DBNAME2; // database name
+const DBHOST = '*****'; // database host
+const DBUSER = '*****'; // database user (warning: user must have permissions to create / alter table)
+const DBPASS = '*****'; // database password
+const DBNAME = '*****'; // database name
 const GETSEOSITEMAPPATH = '/example10/getSeoSitemap/'; // getSeoSitemap path into server
 const SITEMAPPATH = '/example11/'; // sitemap path into server (must be the same path of robots.txt)
 const PRINTSKIPURLS = false; // set to true to print the list of URLs out of sitemap into log file
