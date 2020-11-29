@@ -1,13 +1,31 @@
 getSeoSitemap CHANGELOG
 
+v4.1.0 | 2020-11-29
+- Changed getSeoSitemap and getSeoSitemapExec table engine from Aria to InnoDB.
+- Changed max Url length from 1000 to 767 characters ($maxUrlLength variable).
+- Added backup feature: it saves previous sitemap automatically into the new bak folder.
+- Added feature to repeat getPage once after 5 sec in case of http response code is different from 200 (curlExec and 
+getPage functions).
+- Added const MAXPERCTOTURLSDIFF to prevent saving sitemap if total URLs percentage difference from previous successful 
+exec is more than that const value.
+- Added microseconds to the date into log.
+- Added const LOGPATH to set your own log path.
+- Added description and lastmod indexes into getSeoSitemap table.
+- Fixed bug of URL caller.
+- Renamed $GLOBALS['fullUrlPriority'] to FULLURLPRIORITY.
+- Renamed $GLOBALS['partialUrlPriority'] to PARTIALURLPRIORITY.
+- Updated $userAgent var.
+- Added indexes on getSeoSitemap table.
+- Other small changes.
+
 v4.0.0 | 2020-08-31
-- It requires Php 7.3.18 or higher and MariaDb 10.4.13 or higher.
+- It requires PHP 7.3 and MariaDB 10.4.
 - Changed getSeoSitemap and getSeoSitemapExec table engine from InnoDB to Aria.
 - Changed charset from utf8 to utf8mb4.
 - Increased max Url length from 767 to 1000 characters ($maxUrlLength variable).
 - Improved print of priority list removing duplicated keys.
 - Added version on config.php.
-- Increased script speed (you will notice that after 2 or 3 full scans).
+- Increased script speed.
 - Other small changes.
 
 v3.9.6 | 2019-12-02
@@ -116,7 +134,7 @@ v3.2.1 | 2018-08-18
 - Renamed license.txt to LICENSE.TXT.
 
 v3.2 |(2018-08-08
-- It requires Php 5.5 or higher.
+- It requires PHP 5.5 or higher.
 - Added functions to check page description.
 - Improved list of title errors.
 - Improved getHref function to prevent checking of failed pages.
