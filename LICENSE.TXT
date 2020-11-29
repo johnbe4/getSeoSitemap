@@ -1,6 +1,6 @@
-getSeoSitemap v4.0.0 LICENSE | 2020-08-31
+getSeoSitemap v4.1.0 LICENSE | 2020-10-29
 
-getSeoSitemap v4.0.0 is distributed under the following BSD-style license: 
+getSeoSitemap v4.1.0 is distributed under the following BSD-style license: 
 
 Copyright (c) 2017-2020
 Giovanni Bertone | RED Racing Parts
