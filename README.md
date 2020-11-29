@@ -20,7 +20,7 @@ It makes Search Engine Optimization of URLs into sitemap only.<br>
 This script creates a full gzip sitemap or multiple gzip sitemaps plus a gzip sitemap index.<br>
 It includes change frequency, last modification date and priority setted following your own rules.<br>
 Change frequency will be automatically selected between daily, weekly, monthly and yearly.<br>
-Max URL lenght must be 1000 characters, otherwise the script will fail.<br>
+Max URL lenght must be 767 characters, otherwise the script will fail.<br>
 URLs with http response code different from 200 or with size = 0 will not be included into sitemap.<br>
 It checks all internal and external links inside html pages and js sources (href URLs into 'a' tag plus form action URLs if method is get).<br>
 It checks all internal and external sources.<br>
