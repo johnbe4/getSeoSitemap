@@ -726,7 +726,7 @@ $this->query = "SELECT COUNT(*) AS count FROM getSeoSitemap "
 . "WHERE changefreq = '$value' AND state NOT IN ('skip', 'mSkip', 'rSkip', 'niSkip', 'noSkip') AND httpCode = '200'";
 $this->execQuery();
 
-$this->writeLog('Setted '.$value.' change frequency to '.$this->count.' URLs into sitemap');
+$this->writeLog('Set '.$value.' change frequency to '.$this->count.' URLs into sitemap');
 }
 
 // write lastmod min and max values into log
@@ -909,7 +909,7 @@ $this->query = "SELECT COUNT(*) AS count FROM getSeoSitemap "
 . "WHERE priority = '".$value."' AND state NOT IN ('skip', 'mSkip', 'rSkip', 'niSkip', 'noSkip') AND httpCode = '200'";
 $this->execQuery();
 
-$this->writeLog("Setted priority ".$value." to ".$this->count." URLs into sitemap");
+$this->writeLog("Set priority ".$value." to ".$this->count." URLs into sitemap");
 }
 
 }
