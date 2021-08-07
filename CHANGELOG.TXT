@@ -1,5 +1,17 @@
 getSeoSitemap CHANGELOG
 
+v4.1.1 | 2021-08-08
+- Fixed stmt6->close bug.
+- Fixed page max size to 16777215 bytes.
+- Fixed totUrls field bug into getSeoSitemapExec table.
+- Added // at the beginning of all comments (to be ready for PHP 8.0).
+- Improved performance.
+- Improved bak function.
+- Updated curlExec function.
+- Optimized queries.
+- Improved dbase warnings.
+- Improved printing list.
+
 v4.1.0 | 2020-11-29
 - Changed getSeoSitemap and getSeoSitemapExec table engine from Aria to InnoDB.
 - Changed max Url length from 1000 to 767 characters ($maxUrlLength variable).
