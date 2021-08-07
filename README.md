@@ -1,4 +1,4 @@
-# getSeoSitemap v4.1.0 | 2020-11-29
+# getSeoSitemap v4.1.1 | 2021-08-08
 PHP library to get sitemap.<br>
 It crawls a whole domain checking all URLs.<br>
 It makes Search Engine Optimization of URLs into sitemap only.<br>
@@ -9,18 +9,19 @@ It makes Search Engine Optimization of URLs into sitemap only.<br>
 
 * **category**    Library
 * **author**      Giovanni Bertone <red@redracingparts.com>
-* **copyright**   2017-2020 Giovanni Bertone | RED Racing Parts
+* **copyright**   2017-2021 Giovanni Bertone | RED Racing Parts
 * **link**        https://www.redracingparts.com
 * **source**      https://github.com/johnbe4/getSeoSitemap
 
 # Warning
-# Before moving from releases lower than 4.1.0 to 4.1.0 or higher, you must drop getSeoSitemap and getSeoSitemapExec tables into your dBase.
+# Before moving from releases lower than 4.1.1 to 4.1.1 or higher, you must drop getSeoSitemap and getSeoSitemapExec tables into your dBase.
 
 **Overview<br>**
 This script creates a full gzip sitemap or multiple gzip sitemaps plus a gzip sitemap index.<br>
 It includes change frequency, last modification date and priority setted following your own rules.<br>
 Change frequency will be automatically selected between daily, weekly, monthly and yearly.<br>
 Max URL lenght must be 767 characters, otherwise the script will fail.<br>
+Max page size must be 16777215 bytes, otherwise the script will fail.<br>
 URLs with http response code different from 200 or with size = 0 will not be included into sitemap.<br>
 It checks all internal and external links inside html pages and js sources (href URLs into 'a' tag plus form action URLs if method is get).<br>
 It checks all internal and external sources.<br>
@@ -65,7 +66,8 @@ Using getSeoSitemap, you will be able to give a better surfing experience to you
     When you know how long it takes to execute all the script, you could add a cronotab timeout.
 
 **Warning<br>**
-**Before moving from releases lower than 4.1.0 to 4.1.0 or higher, you must drop getSeoSitemap and getSeoSitemapExec tables into your dBase.<br>**
+**Before moving from releases lower than 4.1.1 to 4.1.1 or higher, you must drop getSeoSitemap and getSeoSitemapExec tables into your dBase.<br>**
 **Do not save any file with name that starts with sitemap in the main directory, otherwise getSeoSitemap script could cancel it.<br>**
 **The robots.txt file must be present into the main directory of the site otherwise getSeoSitemap will fail.<br>**
+**In case of FPM timeout errors, you should fix setting pm.process_idle_timeout to 30s or higher.<br>**
 To run getSeoSitemap faster, using a script like Geoplugin you should exclude geoSeoSitemapBot user-agent from that.
