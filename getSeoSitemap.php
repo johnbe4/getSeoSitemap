@@ -1,11 +1,11 @@
 <?php
 
 /*
-getSeoSitemap v4.1.0 LICENSE | 2020-11-29
+getSeoSitemap v4.1.1 LICENSE | 2021-08-08
 
-getSeoSitemap v4.1.0 is distributed under the following BSD-style license: 
+getSeoSitemap v4.1.1 is distributed under the following BSD-style license: 
 
-Copyright (c) 2017-2020
+Copyright (c) 2017-2021
 Giovanni Bertone (RED Racing Parts)
 https://www.redracingparts.com
 red@redracingparts.com
@@ -37,20 +37,20 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-###################################################################################################
-# Please support this project by making a donation via PayPal to https://www.paypal.me/johnbe4 or #
-# with BTC bitcoin to the address 19928gKpqdyN6CHUh4Tae1GW9NAMT6SfQH                              #
-###################################################################################################
+//###################################################################################################
+//# Please support this project by making a donation via PayPal to https://www.paypal.me/johnbe4 or #
+//# with BTC bitcoin to the address 19928gKpqdyN6CHUh4Tae1GW9NAMT6SfQH                              #
+//###################################################################################################
 
-#################################################
-##### WARNING: DO NOT CHANGE ANYTHING BELOW #####
-#################################################
+//#################################################
+//##### WARNING: DO NOT CHANGE ANYTHING BELOW #####
+//#################################################
 
 require 'config.php';
 
 class getSeoSitemap {
 
-private $version = 'v4.1.0';
+private $version = 'v4.1.1';
 private $userAgent = 'getSeoSitemapBot/ver.';
 private $scriptTitle = 'getSeoSitemap ver. by John';
 private $url = null; // an aboslute URL ( ex. https://www.example.com/test/test1.php )
@@ -126,9 +126,10 @@ private $maxTotalUrls = 2500000000; // max total number of URLs
 private $totUrls = null; // total URLs at the end 
 private $sitemapMaxSize = 52428800; // max sitemap size (bytes)
 private $sitemapNameArr = []; // includes names of all saved sitemaps at the end of the process
-private $txtToAddOnMysqliErr = ' - fix it remembering to set exec to n in getSeoSitemapExec table.'; // additional error text
-private $pageMaxSize = 135168; // page max file size in byte. this param is only for SEO
+private $txtToAddOnMysqliErr = ' - fix it remembering to set exec => n on getSeoSitemapExec table.'; // additional error text
 private $maxUrlLength = 767; // max URL length
+private $maxPageSize = 16777215; // max page size | bytes
+private $seoMaxPageSize = 135168; // page max file size in byte. this param is only for SEO
 private $malfChars = [' ']; // list of characters to detect malformed URLs following a standard good practice
 private $multipleSitemaps = null; // when multiple sitemaps are avaialble is true
 private $logPath = null; // log path
@@ -136,7 +137,6 @@ private $skipUrl = []; // URLs to skip
 private $allowUrl = []; // URLs to allow
 private $robotsPath = null; // robots.txt path
 private $robotsLines = []; // robots.txt lines
-private $dBaseVerNum = null; // version number of database
 private $countUrlWithoutDesc = 0; // counter of URLs without description
 private $countUrlWithMultiDesc = 0; // counter of URLs with multiple description
 private $countUrlWithoutTitle = 0; // counter of URLs without title
@@ -147,26 +147,29 @@ private $countUrlWithoutH2 = 0; // counter of URLs without h2
 private $countUrlWithoutH3 = 0; // counter of URL without h3
 private $callerUrl = null; // caller URL of normal URL
 private $skipCallerUrl = null; // caller URL of skipped URL
+private $countQuery = 0; // counter of query
+private $optimTimes = 10000; // exec optimize of getSeoSitemap table every x queries
+private $titDesLen = 250; // max title / description length to save (characters)
 
-################################################################################
-################################################################################
+//################################################################################
+//################################################################################
 public function start(){
 
 $this->prep();
 $this->fullScan();
 $this->closeCurlConn();
-$this->writeLog('## Scan end'.PHP_EOL);
+$this->writeLog('Scan end'.PHP_EOL);
 $this->end();
 
 }
-################################################################################
-################################################################################
-private function curlExec($url){
+//################################################################################
+//################################################################################
+private function curlExec($url, $att){
 
 $this->pageBody = curl_exec($this->ch);
 
 if ($this->pageBody === false) {  
-$this->writeLog('curl_exec failed (cURL error: '.curl_error($this->ch).') calling URL '.$url);  
+$this->writeLog('curl_exec failed on '.$att.'° attempt - cURL error: '.curl_error($this->ch).' - URL: '.$url);  
 
 $this->getErrCounter();
 
@@ -182,7 +185,7 @@ return;
 $header = curl_getinfo($this->ch);
 
 if ($header === false) {  
-$this->writeLog('Execution has been stopped because of curl_getinfo failed calling URL '.$url);  
+$this->writeLog('Execution has been stopped because of curl_getinfo failed - URL: '.$url);  
 $this->stopExec();
 }
 
@@ -193,22 +196,22 @@ $this->md5 = md5($this->pageBody);
 $this->lastmod = time();
 
 }
-################################################################################
-################################################################################
+//################################################################################
+//################################################################################
 private function getPage($url){
 
 curl_setopt($this->ch, CURLOPT_URL, $url);
 
-$this->curlExec($url);
+$this->curlExec($url, 1);
 
 if ($this->httpCode !== 200){
 usleep(5000000); // 5 sec
-$this->curlExec($url);
+$this->curlExec($url, 2);
 }
 
 }
-################################################################################
-################################################################################
+//################################################################################
+//################################################################################
 private function pageTest($url){
 
 $this->insUrl = true;
@@ -221,7 +224,7 @@ $this->insUrl = false;
 return;
 }
 
-### the 'if elseif below' is faster than two 'if + return'
+//### the 'if elseif below' is faster than two 'if + return'
 
 // if out of domain URL
 if (strpos($url, DOMAINURL) !== 0) {
@@ -235,8 +238,8 @@ $this->insUrl = false;
 }
 
 }
-################################################################################
-################################################################################
+//################################################################################
+//################################################################################
 // open mysqli connection
 private function openMysqliConn(){
 
@@ -255,9 +258,15 @@ $this->stopExec();
 } 
 
 }
-################################################################################
-################################################################################
+//################################################################################
+//################################################################################
 private function execQuery(){
+
+$this->countQuery++;
+
+if (is_int($this->countQuery / $this->optimTimes) === true) {
+$this->optim('getSeoSitemap');
+}
 
 // reset row
 $this->row = [];
@@ -299,31 +308,8 @@ $result->free_result();
 $this->showWarnings();
 
 }
-################################################################################
-################################################################################
-private function execMultiQuery(){
-
-if ($this->mysqli->multi_query($this->query) !== false) {
-do {
-if (($result = $this->mysqli->store_result()) !== false) {
-$result->free_result();
-}
-} 
-while ($this->mysqli->next_result() === true);
-}
-else {
-$this->writeLogMultiQueryErr();
-}
-
-if ($this->mysqli->errno) {
-$this->writeLogMultiQueryErr();
-}
-
-$this->showWarnings();
-
-}
-################################################################################
-################################################################################
+//################################################################################
+//################################################################################
 // close mysqli statements
 private function closeMysqliStmt(){
 
@@ -352,14 +338,9 @@ $this->writeLog('Execution has been stopped because of MySQL stmt5 close error: 
 $this->stopExec();
 }
 
-if ($this->stmt6->close() !== true) {  
-$this->writeLog('Execution has been stopped because of MySQL stmt6 close error: '.lcfirst($this->mysqli->error));   
-$this->stopExec();
 }
-
-}
-################################################################################
-################################################################################
+//################################################################################
+//################################################################################
 // close mysqli connection
 private function closeMysqliConn(){
 
@@ -371,8 +352,8 @@ exit();
 }
 
 }
-################################################################################
-################################################################################
+//################################################################################
+//################################################################################
 private function update(){
 
 // to prevent error on empty page
@@ -404,8 +385,8 @@ $this->lastmod = $newLastmod;
 }
 
 }
-################################################################################
-################################################################################
+//################################################################################
+//################################################################################
 private function getIndexFollowSeo($url){
 
 // return if httpCode !== 200 (to prevent checking of failed pages) or 
@@ -478,7 +459,7 @@ elseif ($follow === false) {
 $this->insSkipUrl($url, 'nfSkip'); 
 }
 
-### seo start
+//### seo start
 if ($seo === true) {
 $skipUrl = [];
 
@@ -517,9 +498,9 @@ if ($titleCount === 1) {
 $title = $titleArr->item(0)->textContent;
 $titleLength = strlen($title);
 
-if ($titleLength > 300) {
+if ($titleLength > $this->titDesLen) {
 $this->writeLog('Title length: '.$titleLength
-.' characters (title has not been registered into dBase because of its length is more than 300 characters) - URL '.$url);
+.' characters (title has not been registered into dBase because of its length is more than '.$this->titDesLen.' characters) - URL '.$url);
 $title = null;
 }
 }
@@ -537,9 +518,9 @@ $this->countUrlWithoutTitle++;
 if ($descriptionCount === 1) {
 $descriptionLength = strlen($description);
 
-if ($descriptionLength > 300) {
+if ($descriptionLength > $this->titDesLen) {
 $this->writeLog('Description length: '.$descriptionLength
-.' characters (description has not been registered into dBase because of its length is more than 300 characters) - URL '.$url);
+.' characters (description has not been registered into dBase because of its length is more than '.$this->titDesLen.' characters) - URL '.$url);
 $description = null;
 }
 }
@@ -564,9 +545,10 @@ $this->stopExec();
 
 if ($this->stmt5->execute() !== true) {  
 $this->writeLog('Execution has been stopped because of MySQL stmt5 execute error: '.lcfirst($this->stmt5->error)); 
-
 $this->stopExec();
 }
+
+$this->showWarnings();
 
 // iterate over extracted imgs and display their URLs
 foreach ($dom->getElementsByTagName('img') as $img){
@@ -613,9 +595,9 @@ foreach (array_filter($skipUrl) as $v) {
 $this->insSkipUrl($v, 'skip');
 }
 }
-### seo end
+//### seo end
 
-### follow start
+//### follow start
 if ($follow === true){
 // reset pageLinks
 $this->pageLinks = [];
@@ -647,11 +629,11 @@ $this->pageLinks[] = $absScript;
 
 $this->pageLinks = array_unique(array_filter($this->pageLinks));
 }
-### follow end
+//### follow end
 
 }
-################################################################################
-################################################################################
+//################################################################################
+//################################################################################
 private function end(){
 
 // delete old records of previous full scan
@@ -664,19 +646,19 @@ $this->query = "SELECT COUNT(*) AS count FROM getSeoSitemap";
 $this->execQuery();
 
 $this->writeLog($this->count.' scanned URLs');
-$this->writeLog($this->countUrlWithoutTitle.' URLs without title into domain (SEO: title should be present)');
-$this->writeLog($this->countUrlWithMultiTitle.' URLs with multiple title into domain (SEO: title should be single)');
-$this->writeLog($this->countUrlWithoutDesc.' URLs without description into domain (SEO: description should be present)');
-$this->writeLog($this->countUrlWithMultiDesc.' URLs with multiple description into domain (SEO: description should be single)');
-$this->writeLog($this->countUrlWithoutH1.' URLs without h1 into domain (SEO: h1 should be present)');
-$this->writeLog($this->countUrlWithMultiH1.' URLs with multiple h1 into domain (SEO: h1 should be single)');
+$this->writeLog($this->countUrlWithoutTitle.' URLs without title into domain | SEO: title should be present');
+$this->writeLog($this->countUrlWithMultiTitle.' URLs with multiple title into domain | SEO: title should be single');
+$this->writeLog($this->countUrlWithoutDesc.' URLs without description into domain | SEO: description should be present');
+$this->writeLog($this->countUrlWithMultiDesc.' URLs with multiple description into domain | SEO: description should be single');
+$this->writeLog($this->countUrlWithoutH1.' URLs without h1 into domain | SEO: h1 should be present');
+$this->writeLog($this->countUrlWithMultiH1.' URLs with multiple h1 into domain | SEO: h1 should be single');
 
 if (CHECKH2 === true){
-$this->writeLog($this->countUrlWithoutH2.' URLs without h2 into domain (SEO: h2 should be present)');
+$this->writeLog($this->countUrlWithoutH2.' URLs without h2 into domain | SEO: h2 should be present');
 }
 
 if (CHECKH3 === true){
-$this->writeLog($this->countUrlWithoutH3.' URLs without h3 into domain (SEO: h3 should be present)');
+$this->writeLog($this->countUrlWithoutH3.' URLs without h3 into domain | SEO: h3 should be present');
 }
 
 $this->openCurlConn();
@@ -690,7 +672,7 @@ $this->query = "SELECT * FROM getSeoSitemap WHERE httpCode != '200' AND state !=
 $this->execQuery();
 
 if ($this->rowNum > 0) {
-$this->writeLog('##### Failed URLs (they are not included into sitemap)');
+$this->writeLog('##### Failed URLs | They are not included into sitemap');
 
 foreach ($this->row as $value) {
 if (array_key_exists($value['httpCode'], $this->errMsg) === true) {
@@ -706,7 +688,10 @@ $this->writeLog($logMsg);
 $this->writeLog('##########');
 }
 
-$this->writeLog($this->rowNum.' failed URLs (they are not included into sitemap)'.PHP_EOL);
+$this->writeLog($this->rowNum.' failed URLs | They are not included into sitemap'.PHP_EOL);
+
+$this->setPriority();
+$this->optimTables();
 
 $this->writeLog('##### SEO');
 $this->getSizeList();
@@ -717,7 +702,7 @@ $this->getMinDescriptionLengthList();
 $this->getMaxDescriptionLengthList();
 $this->getDuplicateDescription();
 $this->getIntUrls();
-$this->setPriority();
+$this->getPriority();
 
 // write changefreq into log
 foreach ($this->changefreqArr as $value) {
@@ -805,9 +790,6 @@ if (PRINTMALFURLS === true) {
 $this->getMalfList();
 }
 
-// optimize tables
-$this->optimTables();
-
 $endTime = time();
 
 $this->writeLog('Total execution time '.gmdate('H:i:s', $endTime - $this->startTime));
@@ -815,15 +797,15 @@ $this->writeLog('##### Execution end'.PHP_EOL.PHP_EOL);
 
 // update last execution params on getSeoSitemapExec
 $this->query = "UPDATE getSeoSitemapExec "
-. "SET version = '$this->version', mDate = '$endTime', exec = 'n', totUrls = '$this->totUrls' WHERE func = 'getSeoSitemap' LIMIT 1";
+. "SET version = '$this->version', mDate = '$endTime', exec = 'n', totUrls = '$this->totUrls' WHERE func = 'getSeoSitemap'";
 $this->execQuery();
 
 // close msqli connection
 $this->closeMysqliConn();
 
 }
-################################################################################
-################################################################################
+//################################################################################
+//################################################################################
 private function resetVars(){
 
 $this->resetVars2();
@@ -832,8 +814,8 @@ $this->resetVars2();
 $this->row = [];
 
 }
-################################################################################
-################################################################################
+//################################################################################
+//################################################################################
 private function resetVars2(){
 
 $this->size = 0;
@@ -846,8 +828,8 @@ $this->insUrl = null;
 $this->pageBody = null; 
 
 }
-################################################################################
-################################################################################
+//################################################################################
+//################################################################################
 private function writeLog($logMsg) {
 
 if (($ob = DateTime::createFromFormat('U.u', microtime(true))) === false){
@@ -871,8 +853,8 @@ $this->stopExec();
 }
 
 }
-################################################################################
-################################################################################
+//################################################################################
+//################################################################################
 private function setPriority(){
 
 $this->query = "UPDATE getSeoSitemap SET priority = '".DEFAULTPRIORITY."' WHERE state != 'skip' AND state != 'rSkip'";
@@ -893,10 +875,17 @@ foreach (FULLURLPRIORITY as $key => $value) {
 foreach ($value as $v) {
 
 $this->query = "UPDATE getSeoSitemap SET priority = '".$key."' "
-. "WHERE url = '".$v."' AND state NOT IN ('skip', 'mSkip', 'rSkip', 'niSkip', 'noSkip') AND httpCode = '200' LIMIT 1";
+. "WHERE url = '".$v."' AND state NOT IN ('skip', 'mSkip', 'rSkip', 'niSkip', 'noSkip') AND httpCode = '200'";
 $this->execQuery();
 }
 }
+
+$this->writeLog('Set priority');
+
+}
+//################################################################################
+//################################################################################
+private function getPriority(){
 
 $priority = array_merge(array_keys(PARTIALURLPRIORITY), array_keys(FULLURLPRIORITY));
 $priority[] = DEFAULTPRIORITY;
@@ -913,8 +902,8 @@ $this->writeLog("Set priority ".$value." to ".$this->count." URLs into sitemap")
 }
 
 }
-################################################################################
-################################################################################
+//################################################################################
+//################################################################################
 private function getTotalUrls() {
 
 $this->writeLog('################################');
@@ -922,16 +911,16 @@ $this->writeLog('Included '.$this->totUrls.' URLs into sitemap');
 $this->writeLog('################################'.PHP_EOL);
 
 }
-################################################################################
-################################################################################
+//################################################################################
+//################################################################################
 private function newSitemapAvailable(){
 
-$this->query = "UPDATE getSeoSitemapExec SET newData = 'y' WHERE func = 'getSeoSitemap' LIMIT 1";
+$this->query = "UPDATE getSeoSitemapExec SET newData = 'y' WHERE func = 'getSeoSitemap'";
 $this->execQuery();
 
 }
-################################################################################
-################################################################################
+//################################################################################
+//################################################################################
 private function getIntUrls() {
 
 $this->query = "SELECT url, callerUrl FROM getSeoSitemap WHERE state IN ('skip', 'rSkip', 'niSkip', 'noSkip') AND url LIKE '".DOMAINURL."%'";
@@ -955,8 +944,8 @@ $this->writeLog('##########');
 $this->writeLog($this->rowNum.' URLs into domain out of sitemap'.PHP_EOL);
 
 }
-################################################################################
-################################################################################
+//################################################################################
+//################################################################################
 private function getExtUrls() {
 
 $this->query = "SELECT url, callerUrl FROM getSeoSitemap WHERE state = 'skip' AND url NOT LIKE '".DOMAINURL."%'";
@@ -980,18 +969,19 @@ $this->writeLog('##########');
 $this->writeLog($this->rowNum.' URLs out of domain out of sitemap');
 
 }
-################################################################################
-################################################################################
+//################################################################################
+//################################################################################
 private function checkSkipUrls() {
 
 $this->query = "SELECT url FROM getSeoSitemap WHERE state IN ('skip', 'rSkip', 'niSkip', 'noSkip')";
 $this->execQuery();
 
 if ($this->rowNum > 0) {
+
 $this->stmt6 = $this->mysqli->prepare("UPDATE getSeoSitemap SET "
 . "size = ?, "
 . "httpCode = ? "
-. "WHERE url = ? LIMIT 1");
+. "WHERE url = ?");
 
 if ($this->stmt6 === false) {  
 $this->writeLog('Execution has been stopped because of MySQL stmt6 prepare error: '.lcfirst($this->mysqli->error)); 
@@ -1001,6 +991,7 @@ $this->stopExec();
 foreach ($this->row as $value) {
 $url = $value['url'];
 $this->getPage($url);
+$this->checkPageSize($url);
 
 if ($this->stmt6->bind_param('sss', $this->size, $this->httpCode, $url) !== true) {  
 $this->writeLog('Execution has been stopped because of MySQL stmt6 bind_param error: '.lcfirst($this->stmt6->error));    
@@ -1011,12 +1002,21 @@ if ($this->stmt6->execute() !== true) {
 $this->writeLog('Execution has been stopped because of MySQL stmt6 execute error: '.lcfirst($this->stmt6->error)); 
 $this->stopExec();
 }
+
+$this->showWarnings();
+}
+
+if ($this->stmt6->close() !== true) {  
+$this->writeLog('Execution has been stopped because of MySQL stmt6 close error: '.lcfirst($this->mysqli->error));   
+$this->stopExec();
 }
 }
 
+$this->writeLog('Checked skipped URLs');
+
 }
-################################################################################
-################################################################################
+//################################################################################
+//################################################################################
 private function insNewUrl($url){
 
 $this->resetVars();
@@ -1031,8 +1031,8 @@ $this->insUpdNewUrlQuery($url);
 }
 
 }
-################################################################################
-################################################################################
+//################################################################################
+//################################################################################
 private function insUpdNewUrlQuery($url){
 
 $this->checkUrlLength($url);
@@ -1050,8 +1050,8 @@ $this->stopExec();
 $this->showWarnings();
 
 }
-################################################################################
-################################################################################
+//################################################################################
+//################################################################################
 private function linksScan(){
 
 foreach ($this->pageLinks as $url) {
@@ -1059,8 +1059,8 @@ $this->insNewUrl($url);
 }
 
 }
-################################################################################
-################################################################################
+//################################################################################
+//################################################################################
 private function scan($url){
 
 $this->resetVars2();
@@ -1075,6 +1075,7 @@ if ($this->insUrl === true) {
 $this->changefreq = 'daily';
 
 $this->update();
+$this->checkPageSize($url);
 
 if (
 $this->stmt3->bind_param('ssssss', $this->size, $this->md5, $this->lastmod, $this->changefreq, $this->httpCode, $url) !== true) {  
@@ -1086,11 +1087,13 @@ if ($this->stmt3->execute() !== true) {
 $this->writeLog('Execution has been stopped because of MySQL stmt3 execute error: '.lcfirst($this->stmt3->error)); 
 $this->stopExec();
 }
+
+$this->showWarnings();
 }
 
 }
-################################################################################
-################################################################################
+//################################################################################
+//################################################################################
 private function getChangefreqList(){
 
 foreach ($this->changefreqArr as $value) {
@@ -1113,8 +1116,8 @@ $this->writeLog('##########'.PHP_EOL);
 }
 
 }
-################################################################################
-################################################################################
+//################################################################################
+//################################################################################
 private function getPriorityList(){
 
 foreach ($this->priorityArr as $value) {
@@ -1139,18 +1142,18 @@ $this->writeLog('##########'.PHP_EOL);
 }
 
 }
-################################################################################
-################################################################################
+//################################################################################
+//################################################################################
 private function getSizeList(){
 
-$kbBingMaxSize = $this->getKb($this->pageMaxSize);
+$kbBingMaxSize = $this->getKb($this->seoMaxPageSize);
 
-$this->query = "SELECT url, size FROM getSeoSitemap WHERE size > '".$this->pageMaxSize
+$this->query = "SELECT url, size FROM getSeoSitemap WHERE size > '".$this->seoMaxPageSize
 . "' AND state NOT IN ('skip', 'rSkip', 'niSkip', 'noSkip') AND httpCode = '200'";
 $this->execQuery();
 
-$this->writeLog('##### URLs with size > '.$kbBingMaxSize.' Kb into sitemap (SEO: page size should be lower than '
-.$kbBingMaxSize.' Kb)');
+$this->writeLog('##### URLs with size > '.$kbBingMaxSize.' Kb into sitemap | SEO: page size should be lower than '
+.$kbBingMaxSize.' Kb');
 
 $i = 0;
 
@@ -1168,16 +1171,16 @@ $this->writeLog('##########');
 $this->writeLog($i.' URLs with size > '.$kbBingMaxSize.' Kb into sitemap'.PHP_EOL);
 
 }
-################################################################################
-################################################################################
+//################################################################################
+//################################################################################
 // get Kb from byte rounded 2 decimals and formatted 2 decimals
 private function getKb($byte){
 
 return sprintf('%0.2f', round($byte / 1024, 2));
 
 }
-################################################################################
-################################################################################
+//################################################################################
+//################################################################################
 private function getMinTitleLengthList(){
 
 $this->query = "SELECT url, CHAR_LENGTH(title) AS titleLength FROM getSeoSitemap WHERE CHAR_LENGTH(title) < "
@@ -1188,7 +1191,7 @@ $i = 0;
 
 if ($this->rowNum > 0){
 $this->writeLog('##### URLs with title length < '.$this->titleLength[0]
-. ' characters into sitemap (SEO: page title length should be higher than '.$this->titleLength[0].' characters)');
+. ' characters into sitemap | SEO: page title length should be higher than '.$this->titleLength[0].' characters');
 
 asort($this->row);
 
@@ -1204,8 +1207,8 @@ $this->writeLog('##########');
 $this->writeLog($i.' URLs with title length < '.$this->titleLength[0].' characters into sitemap');
 
 }
-################################################################################
-################################################################################
+//################################################################################
+//################################################################################
 private function getMaxTitleLengthList(){
 
 $this->query = "SELECT url, CHAR_LENGTH(title) AS titleLength FROM getSeoSitemap WHERE CHAR_LENGTH(title) > "
@@ -1216,7 +1219,7 @@ $i = 0;
 
 if ($this->rowNum > 0){
 $this->writeLog('##### URLs with title length > '.$this->titleLength[1]
-. ' characters into sitemap (SEO: page title length should be lower than '.$this->titleLength[1].' characters)');
+. ' characters into sitemap | SEO: page title length should be lower than '.$this->titleLength[1].' characters');
 
 asort($this->row);
 
@@ -1232,8 +1235,8 @@ $this->writeLog('##########');
 $this->writeLog($i.' URLs with title length > '.$this->titleLength[1].' characters into sitemap'.PHP_EOL);
 
 }
-################################################################################
-################################################################################
+//################################################################################
+//################################################################################
 private function getDuplicateTitle(){
 
 $this->query = "SELECT title FROM getSeoSitemap WHERE state NOT IN ('skip', 'rSkip', 'niSkip', 'noSkip') AND httpCode = '200' AND"
@@ -1266,8 +1269,8 @@ $this->writeLog('##########');
 $this->writeLog($i.' URLs with duplicate title into sitemap');
 
 }
-################################################################################
-################################################################################
+//################################################################################
+//################################################################################
 private function getMinDescriptionLengthList(){
 
 $this->query = "SELECT url, CHAR_LENGTH(description) AS descriptionLength FROM getSeoSitemap WHERE CHAR_LENGTH(description) < "
@@ -1278,7 +1281,7 @@ $i = 0;
 
 if ($this->rowNum > 0){
 $this->writeLog('##### URLs with description length < '.$this->descriptionLength[0]
-. ' characters into sitemap (SEO: page description length should be higher than '.$this->descriptionLength[0].' characters)');
+. ' characters into sitemap | SEO: page description length should be higher than '.$this->descriptionLength[0].' characters');
 
 asort($this->row);
 
@@ -1294,8 +1297,8 @@ $this->writeLog('##########');
 $this->writeLog($i.' URLs with description length < '.$this->descriptionLength[0].' characters into sitemap');
 
 }
-################################################################################
-################################################################################
+//################################################################################
+//################################################################################
 private function getMaxDescriptionLengthList(){
 
 $this->query = "SELECT url, CHAR_LENGTH(description) AS descriptionLength FROM getSeoSitemap WHERE CHAR_LENGTH(description) > "
@@ -1322,8 +1325,8 @@ $this->writeLog('##########');
 $this->writeLog($i.' URLs with description length > '.$this->descriptionLength[1].' characters into sitemap');
 
 }
-################################################################################
-################################################################################
+//################################################################################
+//################################################################################
 private function getDuplicateDescription(){
 
 $this->query = "SELECT description FROM getSeoSitemap WHERE state NOT IN ('skip', 'rSkip', 'niSkip', 'noSkip') AND httpCode = '200' AND"
@@ -1356,8 +1359,8 @@ $this->writeLog('##########');
 $this->writeLog($i.' URLs with duplicate description into sitemap');
 
 }
-################################################################################
-################################################################################
+//################################################################################
+//################################################################################
 // print all URLs into sitemap in an alphaberic order
 private function getTypeList(){
 
@@ -1377,8 +1380,8 @@ $this->writeLog($v['url']);
 $this->writeLog('##########'.PHP_EOL);
 
 }
-################################################################################
-################################################################################
+//################################################################################
+//################################################################################
 // open curl connection
 private function openCurlConn(){
 
@@ -1398,25 +1401,25 @@ $this->stopExec();
 }
 
 }
-################################################################################
-################################################################################
+//################################################################################
+//################################################################################
 // close curl connection
 private function closeCurlConn(){
 
 curl_close($this->ch);
 
 }
-################################################################################
-################################################################################
+//################################################################################
+//################################################################################
 // update execution value
 private function updateExec(){
 
-$this->query = "UPDATE getSeoSitemapExec SET exec = '$this->exec' WHERE func = 'getSeoSitemap' LIMIT 1";
+$this->query = "UPDATE getSeoSitemapExec SET exec = '$this->exec' WHERE func = 'getSeoSitemap'";
 $this->execQuery();
 
 }
-################################################################################
-################################################################################
+//################################################################################
+//################################################################################
 // update error counter
 private function getErrCounter(){
 
@@ -1428,8 +1431,8 @@ $this->stopExec();
 }
 
 }
-################################################################################
-################################################################################
+//################################################################################
+//################################################################################
 // delete a file
 private function delete($fileName){
 
@@ -1439,8 +1442,8 @@ $this->stopExec();
 }
 
 }
-################################################################################
-################################################################################
+//################################################################################
+//################################################################################
 // get URL entity escaping
 private function entityEscaping($url){
 
@@ -1451,8 +1454,8 @@ $url = str_replace($key, $value, $url);
 return $url;
 
 }
-################################################################################
-################################################################################
+//################################################################################
+//################################################################################
 private function save(){
 
 // set total URLs into sitemap of previous scan
@@ -1604,8 +1607,8 @@ $this->stopExec();
 return true;
 
 }
-################################################################################
-################################################################################
+//################################################################################
+//################################################################################
 private function gzip($fileName){
 
 $gzFile = $fileName.'.gz';
@@ -1631,16 +1634,16 @@ $this->stopExec();
 } 
 
 }
-################################################################################
-################################################################################
+//################################################################################
+//################################################################################
 // get file name without the rest of path
 private function getFileName($filePath){
 
 return str_replace(SITEMAPPATH, '', $filePath);
 
 }
-################################################################################
-################################################################################
+//################################################################################
+//################################################################################
 // detect if enconding is UTF-8
 private function detectUtf8Enc($str){
 
@@ -1652,18 +1655,17 @@ return false;
 }
 
 }
-################################################################################
-################################################################################
+//################################################################################
+//################################################################################
 private function stopExec(){
 
 $this->exec = 'n';
 $this->updateExec();
-
 exit();
 
 }
-################################################################################
-################################################################################
+//################################################################################
+//################################################################################
 // check if URL length is > $maxUrlLength
 private function checkUrlLength($url){
 
@@ -1675,8 +1677,19 @@ $this->stopExec();
 }
 
 }
-################################################################################
-################################################################################
+//################################################################################
+//################################################################################
+// check if page size is > $maxPageSize
+private function checkPageSize($url){
+
+if ($this->size > $this->maxPageSize) {
+$this->writeLog('Execution has been stopped because of size is > '.$this->maxPageSize.' bytes for URL: '.$url); 
+$this->stopExec();
+}
+
+}
+//################################################################################
+//################################################################################
 // check all sitemap sizes. they must be non larger than $sitemapMaxSize
 private function checkSitemapSize(){
 
@@ -1709,8 +1722,8 @@ $this->writeLog('##########'.PHP_EOL);
 return true;
 
 }
-################################################################################
-################################################################################
+//################################################################################
+//################################################################################
 // rewrite robots.txt with new sitemap infos
 private function getRewriteRobots(){
 
@@ -1746,8 +1759,8 @@ $this->stopExec();
 $this->writeLog('Wrote robots.txt'.PHP_EOL);
 
 }
-################################################################################
-################################################################################
+//################################################################################
+//################################################################################
 // check tables
 private function checkTables(){
 
@@ -1757,78 +1770,104 @@ $this->execQuery();
 if ($this->rowNum === 0) {
 
 $this->query = "CREATE TABLE `getSeoSitemapExec` (
- `id` int(1) NOT NULL AUTO_INCREMENT,
+ `id` tinyint(1) NOT NULL AUTO_INCREMENT,
  `func` varchar(20) NOT NULL COLLATE utf8mb4_unicode_ci,
  `version` varchar(10) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'v0.0.0',
  `mDate` int(10) NOT NULL DEFAULT '0' COMMENT 'timestamp of last mod',
  `exec` varchar(1) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'n',
- `totUrls` int(13) NOT NULL DEFAULT '0' COMMENT 'total URLs into sitemap of the last successfull exec',
+ `totUrls` bigint(10) NOT NULL DEFAULT '0' COMMENT 'total URLs into sitemap of the last successfull exec',
  `newData` varchar(1) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'n' COMMENT 'set to y when new data are avaialble',
  UNIQUE KEY `id` (`id`),
  UNIQUE KEY `func` (`func`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='execution of getSeoSitemap functions'";
 $this->execQuery();
 
+$this->showWarnings();
+
 $this->query = "INSERT INTO getSeoSitemapExec SET func = 'getSeoSitemap'";
 $this->execQuery();
+
+$this->showWarnings();
 }
 
 $this->query = "SHOW TABLES LIKE 'getSeoSitemap'";
 $this->execQuery();
 
 if ($this->rowNum === 0) {
-
 $this->query = "CREATE TABLE `getSeoSitemap` (
- `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
  `url` varbinary(767) NOT NULL,
  `callerUrl` varbinary(767) DEFAULT NULL,
- `size` int(10) unsigned NOT NULL DEFAULT 0 COMMENT 'byte',
- `title` text COLLATE utf8mb4_unicode_ci,
- `description` text COLLATE utf8mb4_unicode_ci,
+ `size` mediumint(8) unsigned NOT NULL DEFAULT 0 COMMENT 'byte',
+ `title` varchar(250) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+ `description` varchar(250) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
  `md5` char(32) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
  `lastmod` int(10) unsigned NOT NULL DEFAULT 0,
  `changefreq` enum('daily','weekly','monthly','yearly') COLLATE utf8mb4_unicode_ci NOT NULL,
  `priority` enum('0.1','0.2','0.3','0.4','0.5','0.6','0.7','0.8','0.9','1.0') COLLATE utf8mb4_unicode_ci DEFAULT NULL,
  `state` enum('new','scan','skip','mSkip','rSkip','old','niSkip','nfSkip','noSkip') COLLATE utf8mb4_unicode_ci NOT NULL,
  `httpCode` char(3) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
- PRIMARY KEY (`id`),
- UNIQUE KEY `url` (`url`),
+ PRIMARY KEY (`url`),
  KEY `state` (`state`),
  KEY `httpCode` (`httpCode`),
  KEY `size` (`size`),
  KEY `changefreq` (`changefreq`),
  KEY `priority` (`priority`),
  KEY `lastmod` (`lastmod`),
- KEY `title` (`title`(768)),
- KEY `description` (`description`(768))
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
+ KEY `title` (`title`),
+ KEY `description` (`description`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
 $this->execQuery();
+
+$this->showWarnings();
 }
 
 }
-################################################################################
-################################################################################
+//################################################################################
+//################################################################################
 // optimize tables
 private function optimTables(){
 
-// remove gaps in id primary key of getSeoSitemap
-$this->query = "SET @count = 0; "
-. "UPDATE getSeoSitemap SET id = @count := @count + 1";
-$this->execMultiQuery();
-
-// optimize getSeoSitemap
-$this->query = "OPTIMIZE TABLE getSeoSitemap";
+foreach (['getSeoSitemap', 'getSeoSitemapExec'] as $v) {
+$this->query = "ANALYZE TABLE $v";
 $this->execQuery();
-$this->writeLog('Optimized getSeoSitemap table'); 
 
-// defrag getSeoSitemap
-$this->query = "ALTER TABLE getSeoSitemap ENGINE=InnoDB";
+$this->query = "CHECK TABLE $v";
 $this->execQuery();
-$this->writeLog('Defragged getSeoSitemap table'); 
+
+$this->query = "CHECKSUM TABLE $v";
+$this->execQuery();
+
+// defrag
+$this->query = "ALTER TABLE $v ENGINE = InnoDB";
+$this->execQuery();
+
+$this->showWarnings();
+
+$this->writeLog("Defragged $v table".PHP_EOL); 
+
+// optimize
+$this->optim($v);
+}
 
 }
-################################################################################
-################################################################################
+//################################################################################
+//################################################################################
+// optimize table
+private function optim($table){
+
+$query = "OPTIMIZE TABLE ".$table;
+
+if (($result = $this->mysqli->query($query)) === false) {
+$this->writeLog('Execution has been stopped because of MySQL error. Error ('.$this->mysqli->errno.'): '
+.$this->mysqli->error.' - query: "'.$query.'"'.$this->txtToAddOnMysqliErr);   
+exit();
+}
+
+$this->writeLog('Optimized '.$table.' table'); 
+
+}
+//################################################################################
+//################################################################################
 private function getMalfList(){
 
 $i = 0;
@@ -1858,43 +1897,8 @@ $this->writeLog($i.' URLs with malformed characters into domain out of sitemap'.
 }
 
 }
-################################################################################
-################################################################################
-// get number from version (examples: v12.2 => 1220, v11.2.2 => 1122, v3.1.1 => 311, v3.1 => 310)
-private function getVerNum($ver){
-
-// return digits only
-$verNum = filter_var($ver, FILTER_SANITIZE_NUMBER_INT);
-
-if ($verNum === false) {
-$this->writeLog("Execution has been stopped because of filter_var cannot filter value '".$ver."'"); 
-
-$this->stopExec();
-}
-
-if (ctype_digit(substr($ver, 1, 2)) === true) {
-$digits = 4;
-}
-else {
-$digits = 3;
-}
-
-return str_pad($verNum, $digits, '0');
-
-}
-################################################################################
-################################################################################
-// get version number of database
-private function getDbaseVerNum(){
-
-$this->query = "SELECT version FROM getSeoSitemapExec WHERE func = 'getSeoSitemap' LIMIT 1";
-$this->execQuery();
-
-$this->dBaseVerNum = $this->getVerNum($this->row[0]['version']);
-
-}
-################################################################################
-################################################################################
+//################################################################################
+//################################################################################
 private function fullScan(){
 
 do {
@@ -1920,13 +1924,15 @@ if ($this->stmt->execute() !== true) {
 $this->writeLog('Execution has been stopped because of MySQL stmt execute error: '.$this->stmt->error); 
 $this->stopExec();
 }
+
+$this->showWarnings();
 }
 }
 while ($rowNum === 1);
 
 }
-################################################################################
-################################################################################
+//################################################################################
+//################################################################################
 private function prep(){
 
 $time = time();
@@ -1958,12 +1964,12 @@ $this->readRobots();
 // set $skipUrl
 $this->getRobotsData();
 
-$this->query = "SELECT exec FROM getSeoSitemapExec WHERE func = 'getSeoSitemap' LIMIT 1";
+$this->query = "SELECT exec FROM getSeoSitemapExec WHERE func = 'getSeoSitemap'";
 $this->execQuery();
 
 // check if getSeoSitemap is already running and stop it to prevent double execution
 if ($this->row[0]['exec'] === 'y') {
-$this->writeLog('An error has occoured: execution has been stopped; '
+$this->writeLog('An error has occurred: execution has been stopped; '
 . 'maybe the previous scan was not ended correctly. Double-check log to fix it.'.$this->txtToAddOnMysqliErr);
 
 exit();
@@ -1971,7 +1977,7 @@ exit();
 // check if prevous full scan was ended to start a new full scan
 elseif ($this->row[0]['exec'] === 'n') {
 $this->writeLog('## getSeoSitemap '.$this->version);
-$this->writeLog('## Execution start');
+$this->writeLog('Execution start');
 }
 else {
 $this->writeLog('Value of state in getSeoSitemapExec table is not correct: '
@@ -1984,11 +1990,16 @@ exit();
 $this->exec = 'y';
 $this->updateExec();
 
+// backup of previous sitemap
+$this->bak();
+
 // update all states to old to be ready for the new full scan
 $this->query = "UPDATE getSeoSitemap SET state = 'old'";
 $this->execQuery();
 
-$this->writeLog('## Scan start');
+$this->showWarnings();
+
+$this->writeLog('Scan start');
 
 // prepare mysqli statements
 $this->prepMysqliStmt();
@@ -1996,18 +2007,16 @@ $this->prepMysqliStmt();
 // insert or update DOMAINURL
 $this->insUpdNewUrlQuery(DOMAINURL);
 
-// backup of previous sitemap
-$this->bak();
-
 $this->openCurlConn();
 
 }
-################################################################################
-################################################################################
+//################################################################################
+//################################################################################
 // prepare mysqli statements
 private function prepMysqliStmt(){
 
-$this->stmt = $this->mysqli->prepare("UPDATE getSeoSitemap SET state = IF(state = 'new', 'scan', state) WHERE url = ? LIMIT 1");
+$this->stmt = $this->mysqli->prepare("UPDATE getSeoSitemap SET state = IF(state = 'new', 'scan', state) WHERE url = ?");
+
 if ($this->stmt === false) {  
 $this->writeLog('Execution has been stopped because of MySQL stmt prepare error: '.lcfirst($this->mysqli->error));  
 $this->stopExec();
@@ -2027,7 +2036,7 @@ $this->stmt3 = $this->mysqli->prepare("UPDATE getSeoSitemap SET "
 . "lastmod = ?, "
 . "changefreq = ?, "
 . "httpCode = ? "
-. "WHERE url = ? LIMIT 1");
+. "WHERE url = ?");
 
 if ($this->stmt3 === false) {  
 $this->writeLog('Execution has been stopped because of MySQL stmt3 prepare error: '.lcfirst($this->mysqli->error));
@@ -2060,7 +2069,7 @@ $this->stopExec();
 $this->stmt5 = $this->mysqli->prepare("UPDATE getSeoSitemap SET "
 . "title = ?, "
 . "description = ? "
-. "WHERE url = ? LIMIT 1");
+. "WHERE url = ?");
 
 if ($this->stmt5 === false) {  
 $this->writeLog('Execution has been stopped because of MySQL stmt5 prepare error: '.lcfirst($this->mysqli->error));
@@ -2068,8 +2077,8 @@ $this->stopExec();
 }
 
 }
-################################################################################
-################################################################################
+//################################################################################
+//################################################################################
 // get absolute url from relative url
 private function getAbsoluteUrl($relativeUrl, $baseUrl, $ref){
 
@@ -2142,8 +2151,8 @@ for ($n = 1; $n > 0; $abs = preg_replace(['#(/\.?/)#', '#/(?!\.\.)[^/]+/\.\./#']
 return $scheme.'://'.$abs;
 
 }
-################################################################################
-################################################################################
+//################################################################################
+//################################################################################
 private function readRobots(){
 
 // if robots.txt exists...
@@ -2164,8 +2173,8 @@ $this->stopExec();
 }
 
 }
-################################################################################
-################################################################################
+//################################################################################
+//################################################################################
 // get data from robots.txt to set $skipUrl and allowUrl
 private function getRobotsData(){
 
@@ -2191,8 +2200,8 @@ $this->allowUrl[] = DOMAINURL.substr($value, 7);
 }
 
 }
-################################################################################
-################################################################################
+//################################################################################
+//################################################################################
 // print mysqli warnings
 private function showWarnings(){
 
@@ -2212,8 +2221,8 @@ $this->getWarnCounter();
 }
 
 }
-################################################################################
-################################################################################
+//################################################################################
+//################################################################################
 // update warning counter
 private function getWarnCounter(){
 
@@ -2225,23 +2234,13 @@ $this->getWarn = false;
 }
 
 }
-################################################################################
-################################################################################
-// write multiquery error into log
-private function writeLogMultiQueryErr(){
-
-$this->writeLog('Execution has been stopped because of MySQL multi_query error. Error ('
-.$this->mysqli->errno.'): '.lcfirst($this->mysqli->error).' - query: '.$this->query.$this->txtToAddOnMysqliErr); 
-
-exit();
-
-}
-################################################################################
-################################################################################
+//################################################################################
+//################################################################################
 // insert all kinds of skipped URLs into dbase
 private function insSkipUrl($url, $state){
 
 $this->checkUrlLength($url);
+$this->checkPageSize($url);
 
 if ($this->stmt4->bind_param('sssssssss', $url, $this->skipCallerUrl, $this->size, $state, $this->httpCode, $this->skipCallerUrl, 
 $this->size, $state, $this->httpCode) !== true) { 
@@ -2255,9 +2254,11 @@ $this->writeLog('Execution has been stopped because of MySQL stmt4 execute error
 $this->stopExec();
 }
 
+$this->showWarnings();
+
 }
-################################################################################
-################################################################################
+//################################################################################
+//################################################################################
 // test URL to robots skip: return true to robots skip, false otherwise
 private function robotsSkipTest($url){
 
@@ -2292,8 +2293,8 @@ return true;
 return false;
 
 }
-################################################################################
-################################################################################
+//################################################################################
+//################################################################################
 // get exclusion
 private function getExclusion($contentType, $exclusion){
 
@@ -2309,19 +2310,19 @@ break;
 return $include;
 
 }
-################################################################################
-################################################################################
+//################################################################################
+//################################################################################
 // get total urls of the previous successfull exec
 private function getPrevTotUrls(){
 
-$this->query = "SELECT totUrls FROM getSeoSitemapExec WHERE func = 'getSeoSitemap' LIMIT 1";
+$this->query = "SELECT totUrls FROM getSeoSitemapExec WHERE func = 'getSeoSitemap'";
 $this->execQuery();
 
 return $this->row[0]['totUrls'];
 
 }
-################################################################################
-################################################################################
+//################################################################################
+//################################################################################
 // backup old sitemaps
 private function bak(){
 
@@ -2361,8 +2362,8 @@ $this->delete($v.'.bak');
 $this->writeLog('Deleted previous backup sitemap');
 
 }
-################################################################################
-################################################################################
+//################################################################################
+//################################################################################
 // get all sitemap paths included into $path
 private function getSitemapPaths($path){
 
@@ -2377,8 +2378,8 @@ $this->stopExec();
 }
 
 }
-################################################################################
-################################################################################
+//################################################################################
+//################################################################################
 }
 
 $gS = new getSeoSitemap();
