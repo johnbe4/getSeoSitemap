@@ -1,11 +1,11 @@
 <?php
 
 /*
-getSeoSitemap v4.1.0 LICENSE | 2020-11-29
+getSeoSitemap v4.1.1 LICENSE | 2021-08-08
 
-getSeoSitemap v4.1.0 is distributed under the following BSD-style license: 
+getSeoSitemap v4.1.1 is distributed under the following BSD-style license: 
 
-Copyright (c) 2017-2020
+Copyright (c) 2017-2021
 Giovanni Bertone | RED Racing Parts
 https://www.redracingparts.com
 red@redracingparts.com
@@ -37,13 +37,13 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-###################################################################################################
-# Please support this project by making a donation via PayPal to https://www.paypal.me/johnbe4 or #
-# with BTC bitcoin to the address 19928gKpqdyN6CHUh4Tae1GW9NAMT6SfQH                              #
-###################################################################################################
+//###################################################################################################
+//# Please support this project by making a donation via PayPal to https://www.paypal.me/johnbe4 or #
+//# with BTC bitcoin to the address 19928gKpqdyN6CHUh4Tae1GW9NAMT6SfQH                              #
+//###################################################################################################
 
 /*
-config v1.0.1 | 2020-11-29
+config v1.0.2 | 2021-08-08
 */
 
 const DOMAINURL = 'https://www.example.com'; // domain (or subdomain) URL: every URL must include it at the beginning
@@ -52,12 +52,12 @@ DOMAINURL value must be absolute and cannot end with /
 value could be https://www.example.com for a domain or https://www.example1.example.com for a subdomain
 */
 const DEFAULTPRIORITY = '0.5'; // default priority for URLs not included in $fullUrlPriority and $partialUrlPriority
-const DBHOST = '*****'; // database host
-const DBUSER = '*****'; // database user (warning: user must have permissions to create / alter table)
-const DBPASS = '*****'; // database password
-const DBNAME = '*****'; // database name
-const GETSEOSITEMAPPATH = '/example10/getSeoSitemap/'; // getSeoSitemap path into server
-const SITEMAPPATH = '/example11/'; // sitemap path into server (must be the same path of robots.txt)
+const DBHOST = 'example'; // database host
+const DBUSER = 'example'; // database user (warning: user must have permissions to create / alter table)
+const DBPASS = 'example'; // database password
+const DBNAME = 'example'; // database name
+const GETSEOSITEMAPPATH = '/example/example/example/getSeoSitemap/'; // getSeoSitemap path into server
+const SITEMAPPATH = '/example/example/example/'; // sitemap path into server (must be the same path of robots.txt)
 const PRINTSKIPURLS = false; // set to true to print the list of URLs out of sitemap into log file
 const PRINTCHANGEFREQLIST = false; // set to true to print URLs list following changefreq
 const PRINTPRIORITYLIST = false; // set to true to print URLs list following priority
@@ -74,21 +74,21 @@ const FULLURLPRIORITY = [ // set priority of particular URLs that are equal thes
 ],
 '0.9' => [
 'https://www.example.com/example.php',
-'https://www.example.com/example1.php'
+'https://www.example.com/example.php'
 ],
 '0.7' => [
-'https://www.example.com/example3.php',
-'https://www.example.com/example4.php'
+'https://www.example.com/example.php',
+'https://www.example.com/example.php'
 ]
 ];
 const PARTIALURLPRIORITY = [ // set priority of particular URLs that start with these values (values must be absolute)
 '0.8' => [
-'https://www.example.com/example5/',
-'https://www.example.com/example6/',
+'https://www.example.com/example/',
+'https://www.example.com/example/',
 ],
 '0.7' => [
-'https://www.example.com/example7/',
-'https://www.example.com/example8/'
+'https://www.example.com/example/',
+'https://www.example.com/example/'
 ]
 ];
-const LOGPATH = GETSEOSITEMAPPATH.'log/'; // getSeoSitemap log path into server
+const LOGPATH = '/example/log/getSeoSitemap/'; // getSeoSitemap log path into server
