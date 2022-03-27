@@ -1,4 +1,4 @@
-# getSeoSitemap v4.1.1 | 2021-08-08
+# getSeoSitemap v4.1.2 | 2022-03-28
 PHP library to get sitemap.<br>
 It crawls a whole domain checking all URLs.<br>
 It makes Search Engine Optimization of URLs into sitemap only.<br>
@@ -9,7 +9,7 @@ It makes Search Engine Optimization of URLs into sitemap only.<br>
 
 * **category**    Library
 * **author**      Giovanni Bertone <red@redracingparts.com>
-* **copyright**   2017-2021 Giovanni Bertone | RED Racing Parts
+* **copyright**   2017-2022 Giovanni Bertone | RED Racing Parts
 * **link**        https://www.redracingparts.com
 * **source**      https://github.com/johnbe4/getSeoSitemap
 
@@ -26,7 +26,16 @@ URLs with http response code different from 200 or with size = 0 will not be inc
 It checks all internal and external links inside html pages and js sources (href URLs into 'a' tag plus form action URLs if method is get).<br>
 It checks all internal and external sources.<br>
 Mailto URLs will not be included into sitemap.<br>
-URLs inside pdf files will not be scanned and will not be included into sitemap.<br>
+URLs inside pdf files will not be scanned and will not be included into sitemap.<br><br>
+getSeoSitemapBot is a crawler like Googlebot and it does not exec javascript.<br>
+That means it does not follow URLs created by javascript.<br>
+On https://support.google.com/webmasters/answer/2409684?hl=en Google says:<br>
+*".....<br>
+Some features such as JavaScript, cookies, session IDs, frames, DHTML, or Flash can make it difficult for search engines to crawl your site.<br>
+Check the following:<br>
+Use a text browser such as Lynx to examine your site, since many search engines see your site much as Lynx would.<br>
+If features such as JavaScript, cookies, session IDs, frames, DHTML, or Flash keep you from seeing all of your site in a text browser, then search engine spiders may have trouble crawling your site.<br>
+....."*<br>
 
 To improve SEO following robots.txt rules of "User-agent: *", it checks:<br>
 - http response code of all internal and external sources into domain (images, scripts, links, iframes, videos, audios)<br>
@@ -54,7 +63,7 @@ exec is more than a preset value.<br>
 Using getSeoSitemap, you will be able to give a better surfing experience to your clients.<br>
 
 **Requirements<br>**
-- PHP 7.3.<br>
+- PHP 7.4.<br>
 - MariaDB 10.4.<br>
 
 **Instructions<br>**
