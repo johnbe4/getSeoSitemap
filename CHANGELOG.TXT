@@ -1,5 +1,11 @@
 getSeoSitemap CHANGELOG
 
+v4.1.2 | 2022-03-28
+- It requires PHP 7.4.
+- Added SQL_NO_CACHE on select queries.
+- Removed showWarnings requests when not needed.
+- Improved performance.
+
 v4.1.1 | 2021-08-08
 - Fixed stmt6->close bug.
 - Fixed page max size to 16777215 bytes.
