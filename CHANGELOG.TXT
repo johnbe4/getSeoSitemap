@@ -1,5 +1,16 @@
 getSeoSitemap CHANGELOG
 
+v5.0.0 | 2023-02-27
+- It requires PHP 8.0.
+- Added __contruct removing start function.
+- Updated $titleLength and $seoMaxPageSizeAdded variable to respect new search engines rules.
+- Fixed time bug on writeLog function.
+- Fixed bugs on DOMDocument charset.
+- Fixed bugs on getDuplicateTitle function.
+- Fixed bugs on getDuplicateDescription function.
+- Improved the script using Exception.
+- Improved performance.
+
 v4.1.2 | 2022-03-28
 - It requires PHP 7.4.
 - Added SQL_NO_CACHE on select queries.
