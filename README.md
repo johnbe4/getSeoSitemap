@@ -1,4 +1,4 @@
-# getSeoSitemap v4.1.2 | 2022-03-28
+# getSeoSitemap v5.0.0 | 2023-02-27
 PHP library to get sitemap.<br>
 It crawls a whole domain checking all URLs.<br>
 It makes Search Engine Optimization of URLs into sitemap only.<br>
@@ -9,7 +9,7 @@ It makes Search Engine Optimization of URLs into sitemap only.<br>
 
 * **category**    Library
 * **author**      Giovanni Bertone <red@redracingparts.com>
-* **copyright**   2017-2022 Giovanni Bertone | RED Racing Parts
+* **copyright**   2017-2023 Giovanni Bertone | RED Racing Parts
 * **link**        https://www.redracingparts.com
 * **source**      https://github.com/johnbe4/getSeoSitemap
 
@@ -63,7 +63,7 @@ exec is more than a preset value.<br>
 Using getSeoSitemap, you will be able to give a better surfing experience to your clients.<br>
 
 **Requirements<br>**
-- PHP 7.4.<br>
+- PHP 8.0.<br>
 - MariaDB 10.4.<br>
 
 **Instructions<br>**
