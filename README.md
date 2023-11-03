@@ -8,7 +8,7 @@ It makes Search Engine Optimization of URLs into sitemap only.<br>
 **Please support this project by making a donation via [PayPal](https://www.paypal.me/johnbe4) or via BTC bitcoin to the address 19928gKpqdyN6CHUh4Tae1GW9NAMT6SfQH**<br>
 
 * **category**    Library
-* **author**      Giovanni Bertone <red@redracingparts.com>
+* **author**      Giovanni Bertone <info@redracingparts.com>
 * **copyright**   2017-2023 Giovanni Bertone | RED Racing Parts
 * **link**        https://www.redracingparts.com
 * **source**      https://github.com/johnbe4/getSeoSitemap
